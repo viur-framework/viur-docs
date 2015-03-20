@@ -11,7 +11,7 @@ Just deploy your application and directly log in using the admin and your google
 The other module provides a custom, google independent authentication.
 This is useful if you don't want to require your users having/creating an google account or
 you need to import an existing user database. Both modules share the same API and can substitute each other.
-All components in ViUR adapt automatically to the choosed usermodule. However, once the application is deployed and used,
+All components in ViUR adapt automatically to the chosen usermodule. However, once the application is deployed and used,
 you should not change the underlying usermodule - you would lose all relations to existing users.
 Both modules support extending the userSkel to store additional data along with the user.
 Also both modules support editing an user, as well as logging in and out.
@@ -20,60 +20,39 @@ then its entry will be created. Deleting an user is also possible on both module
 the users-api depended module, as a new entry *with the same key* will be created the next time he logs in.
 Only the additional data stored along with this user will not be restored.
 
-\tablefirsthead{ Action & Description & Google User & Custom User \\ \hline}
-\tablehead{ Action & Description & Google User & Custom User \\}
-\tablecaption{Datatypes provided by ViUR}
-\begin{supertabular}{p{3cm}|p{3cm}|p{3cm}|p{3cm}}
-
- login &
-    Starts the login-process for the current session. &
-	Fully supported. If the user has allready given permission to this app, this falls directly thorugh to login\_succeeded &
-	    Fully supported \\
-
-\hline
- logout &
-    Ends the current session. (Needs an SecurtyKey) &
-	Fully supported. &
-	    Fully supported \\
-
-\hline
-  add &
-      Creates a new user &
-	  Not supported. A new user must login once first. &
-	      Fully supported. \\
-
-\hline
-  edit &
-      Edits an user &
-	  Fully supported &
-	      Fully supported \\
-
-\hline
-  delete &
-      Deletes an user from the system. &
-	  Supported, but limited consequences, as the entry will be recreated if the user loggsin again. &
-	      Fully supported \\
-
-\hline
-  view &
-      Displayes informations about an user. If the user-id is omitted,
-      it displayes informations about the currently active user of that session. &
-	  Fully supported &
-	      Fully supported \\
-
-\hline
-  pwrecover &
-    Starts the password-reset for a given user &
-	Not supported &
-	  Fully supported \\
-
-\hline
-  verify &
-    Verifies the users email if requested to do so &
-	Not supported &
-	  Fully supported \\
-
-\end{supertabular}
++----------+-----------------------------------+-----------------------------------+-----------------------------------+
+| Action   | Description                       | Google User                       | Custom User                       |
+|          |                                   |                                   |                                   |
++==========+===================================+===================================+===================================+
+| login    | Starts the login-process for      | Fully supported. If the user has  | Fully supported.                  |
+|          | the current session.              | already given permission to this  |                                   |
+|          |                                   | app, this falls directly thorough |                                   |
+|          |                                   | to login\_succeeded.              |                                   |
++----------+-----------------------------------+-----------------------------------+-----------------------------------+
+| logout   | Ends the current session.         | Fully supported.                  | Fully supported.                  |
+|          | (Needs an SecurityKey)            |                                   |                                   |
++----------+-----------------------------------+-----------------------------------+-----------------------------------+
+| add      | Creates a new user                | Not supported. A new user         | Fully supported.                  |
+|          |                                   | must login once first.            |                                   |
++----------+-----------------------------------+-----------------------------------+-----------------------------------+
+| edit     | Edits an user                     | Fully supported.                  | Fully supported.                  |
++----------+-----------------------------------+-----------------------------------+-----------------------------------+
+| delete   | Removes an user from the system.  | Supported, but limited            | Fully supported.                  |
+|          |                                   | consequences, as the entry        |                                   |
+|          |                                   | will be recreated if the user     |                                   |
+|          |                                   | logs in again.                    |                                   |
++----------+-----------------------------------+-----------------------------------+-----------------------------------+
+| view     | Displays information's about an   | Fully supported.                  | Fully supported.                  |
+|          | user. If the user-id is omitted,  |                                   |                                   |
+|          | it displays the current user.     |                                   |                                   |
++----------+-----------------------------------+-----------------------------------+-----------------------------------+
+| pwrecover| Starts the password-reset for the | Not supported. The user must use  | Fully supported.                  |
+|          | given user                        | the Google account recovery       |                                   |
+|          |                                   | instead.                          |                                   |
++----------+-----------------------------------+-----------------------------------+-----------------------------------+
+| verify   | Verifies the users email.         | Not supported.                    | Fully supported.                  |
+|          | (If verification has been enabled)|                                   |                                   |
++----------+-----------------------------------+-----------------------------------+-----------------------------------+
 
 
 The custom user-module allows specifying if guests are allowed to register an account on this application and if,

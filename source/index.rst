@@ -13,6 +13,7 @@ Contents:
 
    welcome
    quickstart
+   consistency
    server_api
    bones/bones_api
    cache
