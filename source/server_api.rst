@@ -6,21 +6,27 @@ server.db
 
 .. autofunction:: server.db.Get
 
+.. autofunction:: server.db.GetAsync
+
 .. autofunction:: server.db.GetOrInsert
+
+.. autofunction:: server.db.Put
+
+.. autofunction:: server.db.PutAsync
+
+.. autofunction:: server.db.Delete
+
+.. autofunction:: server.db.DeleteAsync
 
 .. autoclass:: server.db.Entity
    :show-inheritance:
    :members:
-   :undoc-members:
-   :private-members:
    :special-members:
 
 
 .. autoclass:: server.db.Query
    :show-inheritance:
    :members:
-   :undoc-members:
-   :private-members:
    :special-members:
 
 
@@ -30,32 +36,23 @@ server.skeleton
 .. autoclass:: server.skeleton.Skeleton
    :show-inheritance:
    :members:
-   :undoc-members:
-   :private-members:
    :special-members:
 
 .. autoclass:: server.skeleton.SkelList
    :show-inheritance:
    :members:
-   :undoc-members:
-   :private-members:
    :special-members:
-   :inherited-members:
 
 
 .. autoclass:: server.skeleton.RelSkel
    :show-inheritance:
    :members:
-   :undoc-members:
-   :private-members:
    :special-members:
 
 .. autoclass:: server.skeleton.TaskUpdateSeachIndex
+   :show-inheritance:
    :members:
-   :undoc-members:
-   :private-members:
    :special-members:
-   :inherited-members:
 
 server.utils
 ^^^^^^^^^^^^
