@@ -4,246 +4,155 @@ server.bones
 Datatypes
 ---------
 
-The following datatypes are provided by ViUR (in lexical order).
+The following data-types are provided by ViUR (in lexical order).
 
- \tablefirsthead{ Name & Usecase & Parameters \\ \hline}
- \tablehead{ Name & Usecase & Parameters \\}
- \tablecaption{Datatypes provided by ViUR}
- \begin{supertabular}{p{3cm}|p{5cm}|p{6cm}}
 
- baseBone & 	Baseclass for all bones.
-		Every custom-bone must subclass this.
-		Its not used by the system directly,
-		but it can be used to store additional
-		data computed by the system. &
-						      \begin{itemize}
-						       \item defaultValue (None): Preinitialize this bone with the given value if not set by the user
-						       \item required (False): Enforce a <em>valid</em> value for this bone. Whats <em>valid</em> depends on the specific subclass
-						       \item params (None): Optional dictionary which will be passed along with the bone to the admin and templates.
-							      Put project-specifiy data here
-						       \item multiple (False): Allow this bone to have more than one value. Not supported by all subclasses (eg. password)
-						       \item indexed (False): Include its value in the searchindex. Whats exactly included is determined by the subclass.
-						       \item vfunc (None): Function, which checks if a given value is valid. Subclasses can override the \emph{canUse} function insted.
-							      If multiple values are allowed, this is called once for each value.
-						       \item readOnly (False): If true, prevents the user from changing its value.
-							      Its still possible to set its value from within the application by assigning to bone.value
-						       \item visible (True): If false, this bone wont show up in add/edit formulars. Nevertheless its possible for
-							      the template to expose its value in list/view
-						      \end{itemize} \\
++------------------+-----------------------------------------+---------------------------------------------------------+
+| Name             | Usecase                                 | Parameters                                              |
++==================+=========================================+=========================================================+
+| baseBone         | Baseclass for all bones.                | - defaultValue (None): Preinitialize this bone with the |
+|                  | Every custom-bone must subclass this.   |       given value.                                      |
+|                  | Its not used by the system directly,    | - required (False): Require the user to supply a *valid*|
+|                  | but it can be used to store additional  |      value for this bone (i.e. this field. cannot be    |
+|                  | data computed by the system.            |      left blank). Whats *valid* for this bone depends   |
+|                  |                                         |      on the specific subclass.                          |
+|                  |                                         | - params (None): Optional dictionary which will be      |
+|                  |                                         |      passed along with the bone to the admin and        |
+|                  |                                         |      templates. Put project-specific data here.         |
+|                  |                                         | - multiple (False): Allow this bone to have more than   |
+|                  |                                         |      one value. Not supported by all subclasses         |
+|                  |                                         |      (eg. password).                                    |
+|                  |                                         | - indexed (False): Include its value in the searchindex.|
+|                  |                                         |      Whats exactly included is determined by the        |
+|                  |                                         |        subclass.                                        |
+|                  |                                         | - vfunc (None): Function, which checks if a given       |
+|                  |                                         |      value is valid. Subclasses can override the canUse |
+|                  |                                         |      instead. If multiple values are allowed, this is   |
+|                  |                                         |      called once for each value.                        |
+|                  |                                         | - readOnly (False): If true, prevents the user from     |
+|                  |                                         |      modifying the value. Its still possible to set     |
+|                  |                                         |      its value from within the application by assigning |
+|                  |                                         |      to bone.value.                                     |
+|                  |                                         | - visible (True): If false, this bone wont show up in   |
+|                  |                                         |      add/edit forms. Nevertheless its possible for the  |
+|                  |                                         |      template to expose its value in list/view.         |
+|                  |                                         |                                                         |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| booleanBone      | Stores a Yes/No choice.                 | *(no additional parameters)*                            |
+|                  | Derives from selectOne.                 |                                                         |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| captchaBone      | Renders a captcha. It's value is not    | - required: Parameter ignored and always True           |
+|                  | stored inside the datastore. This bone  | - publicKey (None): Google's ReCaptcha - PublicKey.     |
+|                  | is always required (except on the local |       If None, its tried to read from                   |
+|                  | development server where its displayed  |       conf['viur.captcha.publicKey']                    |
+|                  | but not validated).                     | - privateKey (None): Google's ReCaptcha - privateKey.   |
+|                  | Don't include this into entities        |       If None, its tried to read from                   |
+|                  | editable by the admin (or remove the    |       conf['viur.captcha.privateKey']                   |
+|                  |  Captcha from the skeleton if its build |                                                         |
+|                  | for an admin),as the admin is not       |                                                         |
+|                  | capable of displaying captchas.         |                                                         |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| colorBone        | Allows selecting a color. Its stored in | - mode (enum): Color-mode to use.                       |
+|                  | HTML-Hex notation. Dynamically supports |       Either 'rgb' or 'rgba'.                           |
+|                  | 4/8 Bits/Pixel (e.g. \#00FFCC or \#0FC) |                                                         |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| dateBone         | Stores a date, a time, or both.         | - creationMagic (False): If True, this bone will store  |
+|                  |                                         |       the current date/time if a new entity is saved.   |
+|                  |                                         | - updateMagic (False): If True, always store the current|
+|                  |                                         |       date/time if the entity is saved.                 |
+|                  |                                         | - date (True): Store the Date-Part. If False, only the  |
+|                  |                                         |       time will be saved.                               |
+|                  |                                         | - time (True): Store the Time-Part. If False, only the  |
+|                  |                                         |       date will be saved, the time will always be 00:00.|
+|                  |                                         | - localize (False): Automatically convert into the      |
+|                  |                                         |       users native timezone.                            |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| fileBone         | Stores a reference to an uploaded file. | - format (str): Hint for the admin how to name          |
+|                  | Extends treeItemBone. This reference is |       elements of this type.                            |
+|                  | **strong** (the only strong reference   |                                                         |
+|                  | you will find inside ViUR).             |                                                         |
+|                  | If a user deletes a file from his       |                                                         |
+|                  | file-repository it vanishes there, but  |                                                         |
+|                  | the file is kept as ong as an entity    |                                                         |
+|                  | references that file.                   |                                                         |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| hierarchyBone    | Stores a reference to an entity inside  | *(no additional parameters)*                            |
+|                  | an hierarchy-applicati                  |                                                         |
+|                  | Extends relationalBone.                 |                                                         |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| numericBone      | Holds numeric values (ints or floats)   | - precision (0): If 0, values will be rounded to Int,   |
+|                  | For floats, the precision can be        |       otherwise specify the precision (amount of        |
+|                  | specified in decimal-places.            |       decimal-digits) of floats.                        |
+|                  |                                         | - min (-2^30): Minimum accepted value (including).      |
+|                  |                                         | - max (2^30): Maximum accepted value (including).       |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| passwordBone     | Stores a Password. Its always empty if  | *(no additional parameters)*                            |
+|                  | read from DB. If saved with an empty    |                                                         |
+|                  | value, the password is left unchanged,  |                                                         |
+|                  | otherwise its stored as a salted        |                                                         |
+|                  | sha512-hash.                            |                                                         |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| relationalBone   | Implements relations to other entities. | - type (None): Name of the entities to link to.         |
+|                  | (Usually in Lists, see treeItemBone,    |        Must match their kind-name.                      |
+|                  | treeDirBone and hierarchyBone) for other| - modul (None): Name of the module to link to.          |
+|                  | use cases.                              |        Must match their module-name. If left blank, the |
+|                  |                                         |        type argument is also used as the module-name.   |
+|                  |                                         | - refKeys (None): List of properties of the linked      |
+|                  |                                         |        Entity which will be included in the relation.   |
+|                  |                                         | - parentKeys (None): List of properties of the Entity   |
+|                  |                                         |        which holds this relation which will be included.|
+|                  |                                         | - format (''\$(name)``): Hint for the admin how to name |
+|                  |                                         |        elements of this type. See                       |
+|                  |                                         |        admin/utils.py:formatString for more information.|
++------------------+-----------------------------------------+---------------------------------------------------------+
+| selectCountryBone| Allows selecting a country. Stores it's | - codes (selectCountryBone.ISO2): Which code to use.    |
+|                  | values as ISO2 or ISO3 - Country-codes. |        Either selectCountryBone.ISO2 or                 |
+|                  | Converts the value if its mode is       |        selectCountryBone.ISO3.                          |
+|                  | switched between these codes afterwards |                                                         |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| selectMultiBone  | Allows selecting multiple values from   | - defaultValue ( None ): A list of elements, which will |
+|                  | a predefined set.                       |        be selected by default.                          |
+|                  |                                         | - values (None): Dictionary of Key=>Names. Names will   |
+|                  |                                         |        form the visible List of items to choose from,   |
+|                  |                                         |        Keys are the ones which are saved to DB.         |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| selectOneBone    | Allows choosing one value from a list.  | - defaultValue( None ): Element (Its key) which will    |
+|                  |                                         |        be selected by default.                          |
+|                  |                                         | - values (None): Dictionary of Key=>Names. Names will   |
+|                  |                                         |        form the visible List of items to choose from,   |
+|                  |                                         |        Keys are the ones which are saved to DB.         |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| stringBone       | Stores a short String (up to 254 Chars).| - caseSensitive( False ): If True, keep an              |
+|                  |                                         |        case-Insensitive index for searching.            |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| textBone         | Stores a longer String or RichText.     | - validHtml( *undefined* ): Set of html-tags valid for  |
+|                  |                                         |        this bone. If None, all tags are removed. See    |
+|                  |                                         |        server/bones.textBone.py for more information.   |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| treeDirBone      | References a Folder inside an           | - type( None ): Name of the application of which        |
+|                  | Tree-application.                       |        directories should referenced                    |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| treeItemBone     | References a Entity inside an           | - type( None ): Name of the application of which        |
+|                  | Tree-application.                       |        directories should referenced                    |
++------------------+-----------------------------------------+---------------------------------------------------------+
+| userBone         | References an User. Works with          | - creationMagic (False): If True, save the current user |
+|                  | GoogleUser aswell as CustomUser         |        on creating an entity. Saves None if the entity  |
+|                  | (adapts automatically)                  |        is created by a guest.                           |
+|                  |                                         | - updateMagic (False): If True, save the current User   |
+|                  |                                         |        every time the entity is modified. Saves None    |
+|                  |                                         |        if the entity is created by a guest.             |
+|                  |                                         |                                                         |
+|                  |                                         |                                                         |
+|                  |                                         |                                                         |
+|                  |                                         |                                                         |
+|                  |                                         |                                                         |
+|                  |                                         |                                                         |
+|                  |                                         |                                                         |
+|                  |                                         |                                                         |
++------------------+-----------------------------------------+---------------------------------------------------------+
 
-\hline
 
-booleanBone &	Stores a Yes/No choice.
-		Derives from selectOne. & \\
 
-\hline
-
-captchaBone &	Renders a captcha\footnote{http://wikipedia.org/wiki/CAPTCHA}.
-		Its value is not stored inside the datastore.
-		This bone is allways required (except on the local development
-		server where its displayed but not validated).
-		Dont include this into entities editable by the admin
-		(or remove the Captcha from the skeleton if its build for an admin),
-		as the admin is not capable of displaying captchas. &
-							 \begin{itemize}
-							  \item required: Parameter ignored and allways True
-							  \item publicKey (None): Google's ReCaptcha - PublicKey. If None, its tried to read from conf[``viur.captcha.publicKey'']
-							  \item privateKey (None): Google's ReCaptcha - privateKey. If None, its tried to read from conf[''viur.captcha.privateKey``]
-							 \end{itemize}\\
-
-\hline
-
-colorBone & 	Allows selecting a color. Its stored in HTML-Hex notation.
-		Dynamically supports 4/8 Bits/Pixel (e.g. \#00FFCC or \#0FC). &
-							  \begin{itemize}
-							   \item mode (''rgb``): Color-mode to use. Either ''rgb`` or ''rgba``.
-							  \end{itemize}\\
-
-\hline
-
-dateBone &	Stores a date, a time, or both. &
-							  \begin{itemize}
-							   \item creationMagic (False): If True, this bone will save the current date/time if a new entity is saved.
-							   \item updateMagic (False): If True, allways save the current date/time if the entity is saved.
-							   \item date (True): Store the Date-Part. If False, only the time will be saved
-							   \item time (True): Store the Time-Part. If False, only the date will be saved, the time will allways be 00:00
-							   \item localize (False): Automatically convert into the users native timezone.
-							  \end{itemize}\\
-\hline
-
-documentBone &	Stores an Textdocument (i.e. a large, structured Text). &
-							  \begin{itemize}
-							   \item extensions (None): A list of textextensions for this bone. (See server/plugins/youtube.py for an example)
-							  \end{itemize}\\
-
-\hline
-
-fileBone &	Stores a reference to an uploaded file.
-		Extends treeItemBone.
-		\emph{Note:} This reference is ''strong``
-		(the only strong reference you will find inside ViUR).
-		If a user deletes a file from his file-repository
-		it vanishes there, but the file itself is kept as
-		long as an entity references that file. &
-							  \begin{itemize}
-							   \item format (''\$(name)``): Hint for the admin how to name elements of this type.
-							  \end{itemize}\\
-
-\hline
-
-hierarchyBone &	Stores a reference to an entity inside an
-		hierarchy-application. Extends relationalBone.& \\
-
-\hline
-
-numericBone &	Holds numeric values (ints or floats)
-		For floats, the precision can be specified in decimal-places. &
-							  \begin{itemize}
-							   \item precision (0): If 0, values will be rounded to Int, otherwise specify the precision (amount of decimal-digits) of floats.
-							   \item min (-100000000000): Minimum accepted value (including).
-							   \item max (100000000000): Maximum accepted value (including).
-							  \end{itemize}\\
-
-\hline
-
-passwordBone &	Stores a Password. Its allways empty if read
-		from DB. If saved with an empty value, the
-		password is left unchanged, otherwise its
-		stored as sha512-hash. & \\
-
-\hline
-
-relationalBone & Implements relations to other entities.
-		(Usually in Lists, see treeItemBone, treeDirBone and hierarchyBone) &
-							  \begin{itemize}
-							   \item type (None): Name of the entities to link to. Must match their modul-name.
-							   \item refKeys (None): List of properties of the linked Entity which will be included in the relation.
-							   \item parentKeys (None): List of properties of the Entity which holds this relation which will be included
-							   \item format (''\$(name)``): Hint for the admin how to name elements of this type. See admin/utils.py:formatString for more information.
-							  \end{itemize}\\
-
-\hline
-
-selectCountryBone & Allows for selecting a country.
-		Stores its values as ISO2 or ISO3 - Country-codes.
-		Converts the value if its mode is switched between these codes afterwards. &
-							  \begin{itemize}
-							   \item codes (selectCountryBone.ISO2): Which code to use. Either selectCountryBone.ISO2 or selectCountryBone.ISO3.
-							  \end{itemize}\\
-
-\hline
-
-selectMultiBone & Allows selecting multiple values from a list. &
-							  \begin{itemize}
-							   \item defaultValue( None ): A list of elemts, which will be selected by default.
-							   \item values (None): Dictionary of Key=>Names. Names will form the visible List of items to choose from,
-								  Keys are the ones which are saved to DB.
-							  \end{itemize}\\
-
-\hline
-
-selectOneBone & Allows choosing one value from a list. &
-							  \begin{itemize}
-							   \item defaultValue( None ): Element (Its key) which will be selected by default.
-							   \item values (None): Dictionary of Key=>Names. Names will form the visible List of items to choose from,
-								  Keys are the ones which are saved to DB.
-							  \end{itemize}\\
-\hline
-
-stringBone &	Stores a short String (up to 254 Chars). &
-							\begin{itemize}
-							 \item caseSensitive( False ): If True, keep an case-Insensitive index for searching.
-							\end{itemize}\\
-
-\hline
-
-textBone &	Stores a longer String or RichText. &
-							\begin{itemize}
-							 \item validHtml( \emph{undefined} ): Set of html-tags valid for this bone. If None, all tags are removed.
-								See server/bones.textBone.py for more information.
-							\end{itemize}\\
-
-\hline
-
-treeDirBone &	References a Folder inside an Treeapplication. &
-							\begin{itemize}
-							 \item type( None ): Name of the application of which directories should referenced
-							\end{itemize}\\
-
-\hline
-
-treeItemBone &	References a Entity inside an Treeapplication.
-		Extends relationalBone. &
-							 \begin{itemize}
-							  \item type( None ): Name of the application of which directories should referenced
-							 \end{itemize}\\
-
-\hline
-
-userBone &	References an User. Works with GoogleUser
-		aswell as CustomUser (adapts automatically). &
-							  \begin{itemize}
-							   \item creationMagic (False): If True, save the current User on creating an entity.
-								  Saves None if the entity is created by a guest.
-							    \item updateMagic (False): If True, save the current User everytime the entity is modified.
-								  Saves None if the entity is created by a guest.
-							  \end{itemize} \\
-
-\hline
-\end{supertabular}
-
-\subsection{Dataconsitency}
-
-Unlike traditional LAMP systems, consitency is handled differently on the gae. There are three differnt causes
-for inconsitency if using ViUR on the gae.
-
-Datastore
-The datastore offers 2 kinds of queries, providing different consitency constrains. The ''normal`` and fast queries
-provide only eventual consitency. This means that changes made to one entity might not be visible instantly.
-To ensure that changes made are visible instantly, ancestor queries are needed.
-However, theire slower and have other constrains, so they are not used in ViUR.
-
-Consequences/Example:
-Imagine you have a list of objects, and provide a list filtered by color of these objects.
-Now you change the color of one of these objects from ''red`` to ''blue``.
-Due to the inconsitency, its possible for that object to still appear in the list of ''red`` objects
-(instead of the ''blue`` ones) for a (usually very short as in a fraction of second) period of time after the change
-has been comitted to the datastore.
-
-ViURs DB cache
-ViUR tries to optimize speed and ressource usage by utilizing the memcache to cache database queries.
-Unfortanly, this introduces another type of inconsitency. In rare cases its possible that the entry in
-the memcache is updated before the indexes in the datastore can catch up. Given the example introduced before,
-its possible for the recently changed entry to still show up in the list of ''red`` ones, but will
-list itself as ''blue`` allready. In fact, its possible that a db query for red ones return results with entries
-of a different color, if that entrys color has recently been changed from red to another color.
-As the datastore usually applies these changes in less than a second, this is very unliekely to happen,
-but its possible. You can configure ViURs db-caching by setting \emph{viur.db.caching}.
-A value of ''2`` (the default) means cache as much as possible, where its possible for this inconsitency to appear
-under rare circumstances.
-''1`` means cache less aggresive, where queries aren't served from Memcache, sothat this inconsitency cannot happen .
-Seting this value to ''0`` means absolutely no caching (not recomment)
-
-Relations
-Relations are a core feature offered by ViUR. But as the datastore is non-relational,
-offering relations ontop a non-relational datastore is a fairly complex task. To mainain quick response times,
-ViUR dosnt search and update relations when an entry is updated. Instead, a special timestamp is updated,
-so that a task in the backend can catch such updated entries and process thier relations (if any) accordingly.
-This background task runs every 4 hour by default.
-Asume that you have a relation from user to the colored objects from the first example (i.e. a user liked that object).
-If that relation is part of the user skeleton, this problem arises.
-So if the color of an object is changed, the query ''all users who like a red object`` will return that object
-for up to four as a red object (i.e. until the background task finished updateing the relations).
-Note that this does not happen if the relation is a part of that objects (i.e if the objects reference the user who liked it).
-Rule of thumb: Relations part of the kind which got updated are updated aswell instantly.
-Relations referencing that kind from another kind are updated later.
-
-ViURs request cache.
-ViUR offers an request cache, to speed up serving complex pages. This cache is not enabled by default,
-as it has to be thightly integrated into the individual application. As flushing that cache happens asyncronly
-in the background, its possible to have inconsitency between two sequential requests.
-Given our example this means that our recently changed object might appear in both (red and blue) lists
-(or in no list at all)  for a short timeframe (again, usually less than a few seconds).
 
 
 base bone
