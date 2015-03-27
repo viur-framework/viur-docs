@@ -1,17 +1,20 @@
 Storing Data
 ==============
 
-ViUR comes with its own, unique Datamodel.
-The concept behind these models is similar to the one used in the GAE in general.
-However, this one is much more powerful:
+ViUR comes with its own, unique data model access API.
 
- - It also stores meta data (descriptions for each field, help and error texts, visible and editable to/by the use etc.)
- - More fine-grained. E.g. Numeric Bones allows specification of min and max values and its precision
- - Complex types: relations, captchas, text documents
- - Allows multiple models per kind
+The concept behind these models is similar to the one used within the Google AppEngine™ in general.
 
-And best of all: Its extensible! If you need a complex type that is not part of the system, its easy to add it on your own.
+However, ViURs implementation of the data model layer is much more powerful:
+
+- It also stores meta data (descriptions for each field, help and error texts, visible and editable to/by the use etc.)
+- More fine-grained. E.g. Numeric Bones allows specification of min and max values and its precision
+- Complex types: relations, captchas, text documents
+- Allows multiple models per kind
+
+And best of all: Its entirely extensible! If you need a complex type that is not part of the system, its easy to add it on your own.
 The application developer has two ways accessing the database: Low and highlevel.
+
 The lowlevel approach is provided by server.db. This allows querying and storing data without the need to define models
 first. Its a thin proxy to the object-storage provided by the datastore. If low-level access is needed, the application
 *must* use this modul. Its not valid to use the ext.db or ext.ndb modules supplied by the appengine directly. To

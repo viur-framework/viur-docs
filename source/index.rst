@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to viur-server's documentation!
-=======================================
+ViUR Server and API documentation
+=================================
 
 Contents:
 
@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 4
 
    welcome
+   terminology
    quickstart
    consistency
    server_api

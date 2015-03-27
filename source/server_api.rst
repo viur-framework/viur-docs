@@ -1,6 +1,20 @@
 server
 ------
 
+server
+^^^^^^
+
+.. autofunction:: server.setup
+
+lang support
+^^^^^^^^^^^^
+
+.. autofunction:: server.translate
+
+.. autofunction:: server.setDefaultLanguage
+
+.. autofunction:: server.setDefaultDomainLanguage
+
 server.db
 ^^^^^^^^^
 

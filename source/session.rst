@@ -1,15 +1,15 @@
 Sessions
 ========
 
-ViUR has a built-in session management system provided by server.session.
+ViUR has a built-in session management system provided by :class:`server.session`.
+
 This allows storing information between different http-requests.
 Sessions are automatically created as needed, if the first information is stored
 a cookie is placed on the client used to identify that session.
 
-
 Storing and retrieving data is easy:
 
-::
+.. code-block:: python
 
     from server import session
 
