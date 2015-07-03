@@ -139,11 +139,11 @@ html_theme_options = {
     # "rightsidebar": "true",
     "sidebartextcolor": "white",
     "sidebarlinkcolor": "white",
-    "relbarbgcolor": "red",
-    "sidebarbgcolor" : "red",
-    "linkcolor": "red",
-    "footerbgcolor": "red",
-    "headbgcolor": "red",
+    "relbarbgcolor": "#DF011B",
+    "sidebarbgcolor" : "#DF011B",
+    "linkcolor": "#DF011B",
+    "footerbgcolor": "#DF011B",
+    "headbgcolor": "#DF011B",
     "headtextcolor": "white"
 }
 
@@ -159,7 +159,7 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "../../resources/icons/viur_logo.png"
+html_logo = "../doc-project/server/resources/icons/viur_logo.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
