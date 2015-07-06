@@ -16,7 +16,9 @@ Contents:
    quickstart
    consistency
    server_api
+   skeletons
    bones/bones_api
+   applications
    cache
    config
    db

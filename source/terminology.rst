@@ -6,14 +6,7 @@ ViUR introduces some special terminology also used in this documentation.
 - **Application**
 
   A core set of functionality of the server, defining semantic relations between different entries of a
-  module.
-
-  - The *list* application stores entities in a flat list,
-  - the *hierarchy* application stores entities in a tree,
-  - the *tree* application store entities in a tree of folders,
-  - and the *singleton* application ensures that only one entity per module exists.
-
-  An application is always the base class used for a *module*.
+  module. An application is always the base class used for a *module*.
 
 - **Module**
 
