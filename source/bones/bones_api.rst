@@ -1,16 +1,17 @@
-server.bones
-------------
+Bones
+-----
+
+The bones define the atomic data field parts of a :class:`server.skeleton.Skeleton`.
 
 Datatypes
----------
+^^^^^^^^^
 
 The following data-types are provided by ViUR (in lexical order).
-
 
 +------------------+-----------------------------------------+---------------------------------------------------------+
 | Name             | Usecase                                 | Parameters                                              |
 +==================+=========================================+=========================================================+
-| baseBone         | Baseclass for all bones.                | - defaultValue (None): Preinitialize this bone with the |
+| baseBone         | Base class for all bones.               | - defaultValue (None): Preinitialize this bone with the |
 |                  | Every custom-bone must subclass this.   |       given value.                                      |
 |                  | Its not used by the system directly,    | - required (False): Require the user to supply a *valid*|
 |                  | but it can be used to store additional  |      value for this bone (i.e. this field. cannot be    |
@@ -152,10 +153,7 @@ The following data-types are provided by ViUR (in lexical order).
 +------------------+-----------------------------------------+---------------------------------------------------------+
 
 
-
-
-
-base bone
+Base bone
 ^^^^^^^^^
 
 .. automodule:: server.bones.bone
@@ -166,8 +164,8 @@ base bone
    :special-members:
 
 
-numericBones
-^^^^^^^^^^^^
+numericBone
+^^^^^^^^^^^
 
 .. automodule:: server.bones.numericBone
     :show-inheritance:
@@ -176,53 +174,8 @@ numericBones
     :private-members:
     :special-members:
 
-
-string based bones
-^^^^^^^^^^^^^^^^^^
-
-
-.. automodule:: server.bones.stringBone
-    :show-inheritance:
-    :members:
-    :undoc-members:
-    :private-members:
-    :special-members:
-
-
-.. automodule:: server.bones.documentBone
-   :show-inheritance:
-   :members:
-   :undoc-members:
-   :private-members:
-   :special-members:
-
-
-.. automodule:: server.bones.textBone
-   :show-inheritance:
-   :members:
-   :undoc-members:
-   :private-members:
-   :special-members:
-
-
-.. automodule:: server.bones.emailBone
-   :show-inheritance:
-   :members:
-   :undoc-members:
-   :private-members:
-   :special-members:
-
-
-.. automodule:: server.bones.passwordBone
-   :show-inheritance:
-   :members:
-   :undoc-members:
-   :private-members:
-   :special-members:
-
-
-boolean bone
-^^^^^^^^^^^^
+booleanBone
+^^^^^^^^^^^
 
 .. automodule:: server.bones.booleanBone
    :show-inheritance:
@@ -232,8 +185,62 @@ boolean bone
    :special-members:
 
 
-choice bones
-^^^^^^^^^^^^
+String-based bones
+^^^^^^^^^^^^^^^^^^
+
+stringBone
+~~~~~~~~~~
+.. automodule:: server.bones.stringBone
+    :show-inheritance:
+    :members:
+    :undoc-members:
+    :private-members:
+    :special-members:
+
+textBone
+~~~~~~~~
+.. automodule:: server.bones.textBone
+   :show-inheritance:
+   :members:
+   :undoc-members:
+   :private-members:
+   :special-members:
+
+emailBone
+~~~~~~~~~
+.. automodule:: server.bones.emailBone
+   :show-inheritance:
+   :members:
+   :undoc-members:
+   :private-members:
+   :special-members:
+
+passwordBone
+~~~~~~~~~~~~
+.. automodule:: server.bones.passwordBone
+   :show-inheritance:
+   :members:
+   :undoc-members:
+   :private-members:
+   :special-members:
+
+documentBone
+~~~~~~~~~~~~
+.. automodule:: server.bones.documentBone
+   :show-inheritance:
+   :members:
+   :undoc-members:
+   :private-members:
+   :special-members:
+
+
+Selectional bones
+^^^^^^^^^^^^^^^^^
+
+selectOneBone
+~~~~~~~~~~~~~
+
+Allow for selection one entry from a pre-defined list of values.
 
 .. automodule:: server.bones.selectOneBone
     :show-inheritance:
@@ -242,6 +249,10 @@ choice bones
     :private-members:
     :special-members:
 
+selectMultiBone
+~~~~~~~~~~~~~~~
+
+Allow for selection one several entries from a pre-defined list of values.
 
 .. automodule:: server.bones.selectMultiBone
     :show-inheritance:
@@ -250,6 +261,9 @@ choice bones
     :private-members:
     :special-members:
 
+selectMultiBone
+~~~~~~~~~~~~~~~
+Selection for a country from a standardized country list.
 
 .. automodule:: server.bones.selectCountryBone
     :show-inheritance:
@@ -259,8 +273,8 @@ choice bones
     :special-members:
 
 
-hierarchical bone
-^^^^^^^^^^^^^^^^^
+Hierarchical bones
+^^^^^^^^^^^^^^^^^^
 
 .. automodule:: server.bones.hierarchyBone
     :show-inheritance:
@@ -268,7 +282,6 @@ hierarchical bone
     :undoc-members:
     :private-members:
     :special-members:
-
 
 .. automodule:: server.bones.treeItemBone
     :show-inheritance:
@@ -284,7 +297,6 @@ hierarchical bone
     :private-members:
     :special-members:
 
-
 .. automodule:: server.bones.fileBone
     :show-inheritance:
     :members:
@@ -293,7 +305,7 @@ hierarchical bone
     :special-members:
 
 
-relational bones
+Relational bones
 ^^^^^^^^^^^^^^^^
 
 .. automodule:: server.bones.relationalBone
@@ -303,7 +315,6 @@ relational bones
     :private-members:
     :special-members:
 
-
 .. automodule:: server.bones.extendedRelationalBone
     :show-inheritance:
     :members:
@@ -312,8 +323,8 @@ relational bones
     :special-members:
 
 
-misc bones
-^^^^^^^^^^
+Miscellaneous bones
+^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: server.bones.captchaBone
    :show-inheritance:
@@ -322,7 +333,6 @@ misc bones
    :private-members:
    :special-members:
 
-
 .. automodule:: server.bones.colorBone
    :show-inheritance:
    :members:
@@ -330,14 +340,12 @@ misc bones
    :private-members:
    :special-members:
 
-
 .. automodule:: server.bones.dateBone
    :show-inheritance:
    :members:
    :undoc-members:
    :private-members:
    :special-members:
-
 
 .. automodule:: server.bones.userBone
    :show-inheritance:

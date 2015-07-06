@@ -34,8 +34,8 @@ server.csp - Content Security Policy
    :special-members:
    :inherited-members:
 
-server.db
-^^^^^^^^^
+server.db - Database access tools
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: server.db.Get
 
@@ -131,34 +131,10 @@ server.request - Access the BrowseHandler-Instance for the current request
 .. autoclass:: server.request.RequestWrapper
 
 
-server.securitykey - Onetime Tokens
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+server.securitykey - One-time Tokens
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: server.securitykey
     :members:
-
-server.skeleton
-^^^^^^^^^^^^^^^
-
-.. autoclass:: server.skeleton.Skeleton
-   :show-inheritance:
-   :members:
-   :special-members:
-
-.. autoclass:: server.skeleton.SkelList
-   :show-inheritance:
-   :members:
-   :special-members:
-
-
-.. autoclass:: server.skeleton.RelSkel
-   :show-inheritance:
-   :members:
-   :special-members:
-
-.. autoclass:: server.skeleton.TaskUpdateSeachIndex
-   :show-inheritance:
-   :members:
-   :special-members:
 
 server.utils
 ^^^^^^^^^^^^

@@ -12,7 +12,8 @@ ViURs design goals are:
 - Simplicity
 - High-scalability
 - Universal targets
-- Reusability
+- Re-usability
+- entirely based on an agile software development flow.
 
 This manual should provide a detailed on-line documentation about how ViURs internals
 work and how to deal with the several modules and libraries.
