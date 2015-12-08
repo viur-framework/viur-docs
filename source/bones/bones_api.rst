@@ -353,3 +353,18 @@ Miscellaneous bones
    :undoc-members:
    :private-members:
    :special-members:
+
+.. automodule:: server.bones.randomSliceBone
+   :show-inheritance:
+   :members:
+   :undoc-members:
+   :private-members:
+   :special-members:
+
+.. automodule:: server.bones.spatialBone
+   :show-inheritance:
+   :members:
+   :undoc-members:
+   :private-members:
+   :special-members:
+

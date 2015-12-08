@@ -30,6 +30,7 @@ Contents:
    renders
    session
    tasks
+   implementationdetails
 
 Indices and tables
 ==================
@@ -40,6 +41,7 @@ Indices and tables
 
 Python API REFERENCE
 ====================
+
 
 
 
