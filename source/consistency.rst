@@ -35,20 +35,16 @@ inconsistency cannot happen. Setting this value to '0' means absolutely no cachi
 Relations
 -----------
 
-.. Warning::
-
-    This is partly out of date. Relations are now updated by a deferred task that usually catch up within a few seconds.
-
-
 Relations are a core feature offered by ViUR. But as the datastore is non-relational,
 offering relations on top a non-relational datastore is a fairly complex task. To maintain quick response times,
-ViUR doesn't search and update relations when an entry is updated. Instead, a special timestamp is updated,
-so that a task in the backend can catch such updated entries and process their relations (if any) accordingly.
-This background task runs every 4 hour by default.
+ViUR doesn't search and update relations when an entry is updated. Instead, a deferred task is kicked off
+which will update these releations in the background. Through depending on the current load of your application, these
+tasks usually catches up within a few seconds. Within this time, a search by such a relation might return stale results.
 Assume that you have a relation from user to the colored objects from the first example (i.e. a user liked that object).
 If that relation is part of the user skeleton, this problem arises.
-So if the color of an object is changed, the query ''all users who like a red object`` will return that object
-for up to four as a red object (i.e. until the background task finished updating the relations).
+So if the color of an object is changed, the query ''all users who like a red object`` will still include that object
+until the background task finished updating the relations - though the object returned will already have blue as value
+for the color property.
 Note that this does not happen if the relation is a part of that objects (i.e if the objects reference the user who liked it).
 Rule of thumb: Relations part of the kind which got updated are updated instantly.
 Relations referencing that kind from another kind are updated later.
