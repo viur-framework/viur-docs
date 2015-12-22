@@ -43,6 +43,8 @@ import server.errors
 import server.indexes
 import server.request
 import server.securitykey
+import server.render
+
 
 # -- General configuration ------------------------------------------------
 
