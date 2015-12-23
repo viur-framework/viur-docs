@@ -13,23 +13,23 @@
 # serve to show the default.
 
 import sys
-import os
-from mock import MagicMock
+import mock
 
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-        return Mock()
+MOCK_MODULES = ['google', 'google.appengine', 'google.appengine.ext',
+                'google.appengine.db', 'google.appengine.datastore',
+                'google.appengine.api', 'google.appengine.runtime',
+                'google.appengine.ext.webapp', 'google.appengine.ext.webapp.util',
+                'google.appengine.ext.deferred', 'google.appengine.ext.blobstore',
+                'google.appengine.runtime.apiproxy_errors', 'google.appengine.api.images']
 
-MOCK_MODULES = ['google']
-# sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = mock.Mock()
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, './../doc-project')
-print sys.path
+#print sys.path
 sys.viur_doc_build = True 
 
 import server.skeleton
@@ -77,7 +77,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Viur Server'
+project = u'ViUR Server'
 copyright = u'2015, Mausbrand Informationssysteme GmbH'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -132,21 +132,24 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'classic'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
+
+"""
 html_theme_options = {
-    # "rightsidebar": "true",
-    "sidebartextcolor": "white",
-    "sidebarlinkcolor": "white",
-    "relbarbgcolor": "#DF011B",
-    "sidebarbgcolor" : "#DF011B",
-    "linkcolor": "#DF011B",
-    "footerbgcolor": "#DF011B",
-    "headbgcolor": "#DF011B",
-    "headtextcolor": "white"
+    "page_width": "80%",
+}
+"""
+
+html_theme_options = {
+    "sidebarbgcolor": "#CD1A1B",
+    #"relbarbgcolor": "#CD1A1B",
+    #"headbgcolor":  "#CD1A1B",
+    #"footerbgcolor":  "#CD1A1B",
+    "sidebarlinkcolor": "#CDCDCD"
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -161,7 +164,7 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "../doc-project/server/resources/icons/viur_logo.png"
+html_logo = "viur.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
