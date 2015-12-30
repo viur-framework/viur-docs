@@ -19,9 +19,9 @@ ViUR currently exists of three parts:
 - The **admin** is the client-based, cross-platform administration backend to manage
   a ViUR application. It focuses on power-users that want to manage their applications
   with the full power of a desktop client computer.
-- The **vi** is the web-based administration backend written in pure HTML5, to provide an
-  easy-to-access management tool that directly runs system-independently in the web-browser
-  of any desktop or even mobile devices.
+- The **visual interface**, shortly called **vi**, is the web-based administration backend
+  for ViUR written in pure HTML5, to provide an easy-to-access management tool that directly
+  runs system-independently in the web-browser of any desktop or even mobile devices.
 
 Both administration tools support the integration of application-specific plug-ins and can
 be used independently, depending on what is wanted and required.
