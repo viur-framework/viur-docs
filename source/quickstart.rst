@@ -51,6 +51,7 @@ Name is a short String (< 255 Chars); Description a longer, optional Text. This 
 *must* be in your models folder
 
 ::
+
     # -*- coding: utf-8 -*-
     from server.skeleton import Skeleton
     from server.bones import *
@@ -58,7 +59,7 @@ Name is a short String (< 255 Chars); Description a longer, optional Text. This 
     class NewsSkel( Skeleton ): #Datamodel for this modul:
         kindName = "news" #Save entities to the collection news
         name = stringBone(  descr="Name", required=True )
-        descr = textBone(  descr="Descr", required=False )
+        descr = textBone(  descr="Description", required=False )
 
 
 
@@ -80,14 +81,14 @@ If a module should be hidden from the admin, set this information to None.
 
 ::
 
-class Test( List ):
-    adminInfo = {
-            "name": "News", #Name of this modul, as shown in Admin
-            "handler": "list",  #Which handler to invoke
-            "icon": "icons/modules/news.png", #Icon for this modul
-            "filter":{"orderby":"creationdate"}, #Default filter for the admin (i.e. dont filter; just sort )
-            "columns":["name"] # Default set of columns visible in the admin
-    }
+    class News( List ):
+        adminInfo = {
+                "name": "News", #Name of this modul, as shown in Admin
+                "handler": "list",  #Which handler to invoke
+                "icon": "icons/modules/news.png", #Icon for this modul
+                "filter":{"orderby":"creationdate"}, #Default filter for the admin (i.e. dont filter; just sort )
+                "columns":["name"] # Default set of columns visible in the admin
+        }
 
 
 Fourth step: Define the accessrights. In this example, we'll make the list public;
@@ -180,8 +181,13 @@ Possible layout for html/news_list.html:
   </table>
 
 
-Example two: Add a more finegraned access model
------------------------------------------------
+Got it? Then dive deeper into ViUR, depending whereever your are an designer or an developer!
+
+Examples for developers
+-----------------------
+
+Add a more finegraned access model
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 So what if we need to distinguish between registered users and guests?
 Step one: We add a new property to our newsmodel.
@@ -208,11 +214,12 @@ Step two: make the listFilter function aware of this
                 rawfilter.filter("access <=", "1")
            return rawfilter
 
+Please note that this doesn't need any changes inside the template. The template would now automatically receive only
+the entries the current user is allowed to see.
 
 
-
-Example three: Switching to hierarchical Data
----------------------------------------------
+Switching to hierarchical Data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If a flat datastructure doesn't fit your needs anymore, its easy to switch to a hierarchical structure.
 The following code shows the modified module, which utilizes the hierarchy application to store its data.
@@ -266,4 +273,149 @@ canAccess methods:
     def canList( self, parent ):
         #Anybody can browse a node
         return( True )
+
+
+Writing your own code
+^^^^^^^^^^^^^^^^^^^^^
+
+Adding your own code to an application is easy in ViUR.
+You could simply extend your News-Class (add a function) and mark it with *@exposed*. All functions marked with @exposed
+are directly accessible from outside. So if you have something like
+
+::
+
+    # -*- coding: utf-8 -*-
+    from server.applications.list import List
+    from server import exposed
+
+    class News(List):
+        viewTemplate = "news_view" #Name of the template which displayes *one* entry
+        listTemplate = "news_list" #Name of the template which displayes several entries
+
+        @exposed
+        def test(self, *args, **kwargs):
+            return u"Hello world!"
+
+        ....
+
+your function test would be accessible unter the url "/news/test".
+Want to have your code run in the root ("/")?
+Create a *module* "index.py" and put the following code in there:
+
+::
+
+    # -*- coding: utf-8 -*-
+    from server import exposed
+
+    class Index(object):
+        def __init__(self, *args, **kwargs):
+            super( index, self ).__init__()
+
+        @exposed
+        def index( self, *args,  **kwargs ):
+            return u"Hello world!"
+
+    Index.jinja2 = True
+
+
+.. Hint::
+    All modules (like models) need to be included in the __init__.py of that folder. So for your Index modul you'll need
+    to put the following in there.
+        ::
+
+            from modules.index import Index as index
+
+
+
+Need to access the database?
+For purely custom code you can use the lightweight dictionary-based api:
+
+::
+
+    from server import db
+
+    # Create a new entry
+    entry = db.Entry("news")
+    entry["name"] = u"Hello world!"
+    newKey = db.Put(entry)
+
+    # Fetch entries from the database
+    entry = db.Get(newKey) # Get the entry stored under key *newKey*
+    entries = db.Query("news").run(99) # Fetch up to 99 entries from the datastore
+
+
+
+If you want to access data for which a skeleton is defined, it's highly recommended to use *only* that skeleton-api while
+working with those data. Corruptions might occur otherwise.
+
+::
+
+    from models.news import NewsSkel
+
+    # Create a new entry
+    skel = NewsSkel()
+    skel["name"].value = u"Hello world!"
+    key = skel.toDB()
+
+    # Fetch entries from the database
+    skel = NewsSkel()
+    skel.fromDB(newKey)
+    skellist =  NewsSkel().all().fetch(99) # Fetch up to 99 entries from the datastore
+
+
+
+Examples for designers / frontend developers
+----------------------
+
+As a template designer, you can focus on providing a good user experience and don't have to bother about thinks like
+access control. Need to render a list? You'll receive the global variable *skellist*:
+
+::
+
+    <ol>
+        {% for skel in skellist %}
+            <li>{{ skel.name }}</li>
+        {% endfor %}
+    </ol>
+
+
+If you're inside a view (displaying only one item), you'll rececive *skel* instad:
+
+::
+
+    Name: {{skel.name}}
+
+Have static content like css or images? Drop these in the *static* directory of your application. It will be available
+unter the url /static/.
+
+You need two or more templates for the same thing? Use the *style* parameter. If you access
+/news/list?style=teststyle, ViUR will first try to load the template news_list_teststyle.html. If it does exist, this file
+will be used, otherwise ViUR loads the default template news_list.html and pass the global variable style set to "teststyle".
+
+Want to embed data from a different module into the current template? You can either embed a fully rendered template by
+calling *execRequest* or you can fetch the data by yourself and prepare output accordingly.
+
+::
+
+    {{ execRequest("news/list", style="embed") }} {# Will call /news/list?style=embed and insert the result here #}
+    {% set newsList = getList("news") %} {# Fetch a list of news and assign the resulting skellist to newsList #}
+    {% for news in newsList %}
+        {{ news.name }}
+    {% endfor %}
+
+Need the next page of list? Just append/update the cursor send along with the request.
+
+::
+
+    {% for skel in skellist %}
+        {{ skel.name }}
+    {% endfor %}
+
+    <a href="{{ updateUrl(cursor=skellist.cursor) }}">Next page</a>
+
+More SEO-Friedly URLs? Instead of pointing views to */news/view/{{skel.id}}*, you can use something like
+*/news/view/{{skel.id|shortKey}}/{{skel.name|urlencode}}*
+
+Translate a predefined key? Use {{ _("this are {{count}} unread news", count=skellist|length) }}. Please note that if you
+get translated string/textBones, these will adapt automatically to the current language. Just print them to your template with {{ skel.name }}.
 
