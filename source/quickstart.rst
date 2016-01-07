@@ -36,6 +36,8 @@ So whats happening here?
     to None will hide this module from your admin interfaces.
 
 
+Your first ViUR application
+---------------------------
 
 In this short step by step guide we create your first custom module.
 
@@ -117,7 +119,7 @@ However, there are no templates for displaying the data inside a webbrowser defi
 
 
 Create a template
-----------------
+^^^^^^^^^^^^^^^^^
 
 Before you create the template for this module, its required to register this template first in the module.
 Add the following lines to the module-class.

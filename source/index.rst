@@ -3,27 +3,31 @@ Table of Contents
 =================
 
 .. toctree::
-   :maxdepth: 2
+	:maxdepth: 2
 
-   intro
-   quickstart
-   consistency
-   server_api
-   skeletons
-   bones/bones_api
-   applications
-   cache
-   config
-   db
-   indexes
-   modules/index
-   modules/order
-   modules/user
-   common-used
-   renders
-   session
-   tasks
-   implementationdetails
+	intro
+	consistency
+	quickstart
+
+	bones/bones_api
+	skeletons
+	applications
+	server_api
+
+
+
+	cache
+	config
+	db
+	indexes
+	modules/index
+	modules/order
+	modules/user
+	common-used
+	renders
+	session
+	tasks
+	implementationdetails
 
 Indices and tables
 ==================
