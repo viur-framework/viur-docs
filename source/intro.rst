@@ -1,40 +1,46 @@
 Introduction
 ============
-**ViUR** is an application development framework that mainly focuses to
-implement cloud-based information systems on top of the `Google AppEngine™`_.
+**ViUR** is an application development framework that focuses on
+cloud-based information systems implemented on top of the `Google AppEngine™`_.
 
-By design, ViUR-based applications are build upon simple, clear, flexible,
-extendible, versatile, high-scalable and easy-to-use concepts. To fit the
+ViUR is designed to enable applications which are simple, clear, flexible,
+extendible, versatile, high-scalable and easy-to-use. To fit the
 requirements of modern agile software development workflows, ViUR is entirely
 written in the `Python programming language`_.
 
-Applications implemented in ViUR are not only limited to websites or any other
-kind of specialized web-application. Therefore, we call ViUR an information
+Applications implemented in ViUR are not limited to websites or any other
+kind of specialized web-application. Therefore we call ViUR an information
 system, because it goes beyond the limitations of a content-management-system
 or other kinds of specialized web-application software.
 
 ViUR helps to manage any kind of information. It comes with a set of four
-pre-defined application kinds which can be used to build modules for any
-desired tasks. The system comes with a variety of pre-defined modules, which
-can easily be adapted for particular goals. New modules are simply created or
+pre-defined application types which can be used to build modules for any
+desired tasks. Pre-defined modules can easily be adapted for particular goals.
+New modules are simply created or
 extended from other ones. Data structures can be defined, extended and changed
 during the development workflow. Input masks and data management interfaces
-for all informations hold in the information system are dynamically created
-within the administration tools.
+are dynamically created within the administration tools.
 
 ViUR currently exists of three parts:
 
-- The **server** is the core of a ViUR application. It provides the server-parts
+- The **server** is the core of a ViUR application.
+
+  It provides the server-parts
   of the web-application, a library of pre-defined data-models, modules, tools
-  and libraries for data management and much more, and several renders to
-  support different output kinds.
-- The **admin** is the client-based, cross-platform administration backend to
-  manage a ViUR application. It focuses on power-users that want to manage
+  and libraries for data management, and several renderers for different types of output.
+
+- The **admin** is the client-based administration backend used to
+  manage a ViUR application.
+
+  It is cross-platform capable and focuses on
+  power-users that want to manage
   their applications with the full power of a desktop client computer.
-- The **vi** (visual interface), is the web-based administration backend for
-  ViUR written in pure HTML5, to provide an easy-to-access management tool
-  that directly runs system-independently in the web-browser of any desktop or
-  even mobile devices.
+
+- The **vi** (visual interface) is the web-based administration backend.
+
+  It is an easy-to-access management tool.
+  Written in pure HTML5, it runs system-independently in the web-browser and can be
+  used on any desktop or mobile device.
 
 Both administration tools support the integration of application-specific
 plug-ins and can be used independently, depending on what is wanted and
@@ -51,8 +57,8 @@ based on the Google App Engine SDK. The `Google App Engine SDK
 <https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python>`_
 is required for testing and deployment in the latest version.
 
-As client system, Windows, OS X and Linux are supported, but Linux will give
-you the best platform for development tasks with ViUR.
+As client system, Windows, OS X and Linux are supported. We recommend Linux for
+ViUR development tasks.
 
 
 Terminology
@@ -61,21 +67,24 @@ Terminology
 ViUR introduces some special terminology also used in this documentation.
 
 - **Application**
+
   A core set of functionality of the server, defining semantic relations between different entries of a
   module. An application is always the base class used for a *module*.
 
 - **Module**
+
   A set of functionality usually built on top of an application.
 
-  ViUR ships some predefined modules (like an user-module) and developers are encouraged to build
+  ViUR ships some predefined modules (like a user-module) and developers are encouraged to build
   custom modules for their particular projects.
 
 - **Renderer**
 
   The final element in the output pipe. The renderer receives the data which should be rendered in
-  the current request and wraps it into the desired output format (like HTML, JSON, XML and other.)
+  the current request and wraps it into the desired output format (HTML, JSON, XML and other).
 
 - **Kind**
+
   A *kind* roughly equals to the term of a table in SQL, or a collection in mongoDB.
 
   A kind is the name of an information group the AppEngine stores data in.
@@ -83,16 +92,15 @@ ViUR introduces some special terminology also used in this documentation.
   have multiple models utilizing one kind, even with different attributes or conflicting types.
 
 - **Skeleton**
+
   A skeleton describes the data that is written into the data store.
 
   In a more generic terminology, skeletons can be seen as models.
   Skeletons consist of several *bones*, defining the attributes of that model.
 
 - **Bone**
-  A bone stores the type, meta data and the value of one attribute in a skeleton.
 
-  In ViUR, an attribute isn't just defined by its name, value and type, but also additional
-  information used to automatically create input masks used to interact with the user.
+  A bone stores the type, value and meta data of one attribute in a skeleton.
 
-  That's why we declare additional information (like descriptions, help text, etc.)
-  along with the data model.
+  The meta data is additional information (descriptions, help text, etc.)
+  used to automatically create input masks for user interaction.
