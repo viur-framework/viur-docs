@@ -1,9 +1,8 @@
-ViUR BasicApplications
-----------------------
+ViUR Applications
+------------------
 
-ViUR provides a well-rehearsed dream-team of pure power that makes ViUR to the system that it is:
-
-These glory four are called the *ViUR BasicAppliations*:
+Applications are what makes most of ViUR tick. An application takes a model defined by a skeleton and provides the logic
+to interact with its data. There are four applications that ship with ViUR:
 
 - The :class:`server.applications.list.List` application stores entities in a flat list,
 - the :class:`server.applications.hierarchy.Hierarchy` application stores entities in a tree,
