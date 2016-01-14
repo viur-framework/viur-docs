@@ -1,7 +1,7 @@
 Introduction
 ============
 **ViUR** is an application development framework that focuses on
-cloud-based information systems implemented on top of the `Google AppEngine™`_.
+cloud-based information systems implemented on top of the `Google AppEngine™`_ (GAE).
 
 ViUR is designed to enable applications which are simple, clear, flexible,
 extendible, versatile, high-scalable and easy-to-use. To fit the

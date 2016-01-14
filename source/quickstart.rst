@@ -2,11 +2,11 @@ Getting started
 ===============
 
 Before getting started with ViUR, there are some pitfalls we should clarify up front.
-First, ViUR is **not** a content mannagement system. It offers you the *building blocks to build one* in no time.
+First, ViUR is **not** a content management system. It offers you the *building blocks to build one* in no time.
 But again, it's not a ready to use cms. Second, you'll need to understand the basic principle of building applications
 with ViUR. With ViUR, you'll merge a model (a *skeleton* in ViURs language) and an application
 (like list/tree/hierarchy/singleton) into a module. On this level access-rights and module-specific code are added and
-one (or usually more) output render are attached.
+at least one output renderer is attached.
 
  .. figure:: images/quickstart/gettingstarted1.jpeg
     :align: center
@@ -17,38 +17,45 @@ one (or usually more) output render are attached.
 
 
 So whats happening here?
- 1) We define a model named "news". Each entry will have a (required) *name* and an optional *descr* (description).
-    - This model *must* be defined in your models folder and *should* be in a file called news.py
- 2) We'll use the list application to handle our data. So our news will be stored in a flat list, with lots filtering
-    / sorting possibilities.
- 3/8) We (explicitly) attach the jinja2 render to our module. As the jinja2 render is currently the default, there
-    is no need to do this explicitly (ViUR will enable the admin and the jinja2 render by default. All other renders
-    have to be named here!).
- 4) Define the actual module. It *must* be in your *modules* folder and *should* be in a file called *news.py*.
-    We define a single class called *News*. That name is used to determine which skeleton (model) should be attached to
-    this module, so it must be named excatly as the kindName used in the skeleton (Override the function *_resolveSkel*
+  1\) We define a model named 'news'.
+  Each entry will have a required *name* and an optional *descr* (description).
+    This model *must* be defined in your 'models' folder and *should* be in a file called 'news.py'.
+
+  2\) We use the 'List' application to handle our data. So our news will be stored in a flat list with built-in filtering
+  and sorting possibilities.
+
+  3\)/8\) We (explicitly) attach the jinja2 renderer to our module. As the jinja2 renderer is currently the default,
+  there is no need to do this explicitly (ViUR will enable the admin and the jinja2 renderer by default. All other
+  renderers have to be named here!).
+
+  4\) We define the actual module. It *must* be in your 'modules' folder and *should* be in a file called 'news.py'.
+    We define a single class called 'News'. That name is used to determine which skeleton (model) should be attached to
+    this module, so it must be named exactly as the kindName used in the skeleton (Override the function '_resolveSkel'
     if you need to change this behaviour).
- 5) Within this module, we declare which templates to use. This module would use "news_list.tpl" inside your *html* folder
-    for rendering /news/list and "news_view.html" for /news/view/some_news_id.
- 6) We override the default access restriction for view (default: deny everything except for admins). We allow everyone
-    to view all news present in the system.
- 7) Add an adminInfo. If this dictionary is present, this module will show up in your admin/vi interface. Setting this
-    to None will hide this module from your admin interfaces.
+
+  5\) Within this module, we declare which templates to use. This module would use 'news_list.tpl' inside your 'html' folder
+  for rendering /news/list and 'news_view.html' for /news/view/some_news_id.
+
+  6\) We override the default access restriction for view (default: deny everything except for admins). We allow everyone
+  to view all news present in the system.
+
+  7\) Add an adminInfo. If this dictionary is present, this module will show up in your admin/vi interface. Setting this
+  to None will hide this module from your admin interfaces.
 
 
 
-In this short step by step guide we create your first custom module.
+In the following short step-by-step guide we create our first custom module.
 
- - Modulname: News
+ - Module name: News
  - Application: List (Flat Data)
  - Entities consist of Name and Description (Optional)
  - List is public (everyone can see entries)
  - Only admins can add or edit entries (ViURs default)
 
 
-First step: Define the data-model. We define an Entity *news*, which contains two properties: name and description.
-Name is a short String (< 255 Chars); Description a longer, optional Text. This file should be named *news.py* and
-*must* be in your models folder
+First step: Define the data-model. We define an Entity 'news', which contains two properties: name and description.
+Name is a short String (< 255 Chars); Description a longer, optional Text. This file should be named 'news.py' and
+*must* be in your 'models' folder.
 
 ::
 
@@ -63,7 +70,7 @@ Name is a short String (< 255 Chars); Description a longer, optional Text. This 
 
 
 
-Second step: Create the file "news.py" inside the *modules* folder of the application and  import the required application.
+Second step: Create the file 'news.py' inside the 'modules' folder of the application and  import the required application.
 
 ::
 
@@ -74,26 +81,25 @@ Second step: Create the file "news.py" inside the *modules* folder of the applic
 
 
 
-Third step: Create a subclass from the list application and specify the required information for the admintool.
-These information provide the necessary information for the admin-tool for the just created module.
-If a module should be hidden from the admin, set this information to None.
+Third step: Create a subclass from the 'List' application and specify the required information for the admin tool.
+If a module should be hidden from the admin, set adminInfo to None.
 
 
 ::
 
     class News( List ):
         adminInfo = {
-                "name": "News", #Name of this modul, as shown in Admin
+                "name": "News", #Name of this module, as shown in Admin
                 "handler": "list",  #Which handler to invoke
-                "icon": "icons/modules/news.png", #Icon for this modul
+                "icon": "icons/modules/news.png", #Icon for this module
                 "filter":{"orderby":"creationdate"}, #Default filter for the admin (i.e. dont filter; just sort )
                 "columns":["name"] # Default set of columns visible in the admin
         }
 
 
-Fourth step: Define the accessrights. In this example, we'll make the list public;
+Fourth step: Define the access rights. In this example, we make the list publicly readable,
 but changes are still restricted to administrators of the application.
-If we don't override this function, read-access would be also restricted to administrators only.
+If we don't override this function, read access would be also restricted to administrators only.
 
 ::
 
@@ -102,8 +108,8 @@ If we don't override this function, read-access would be also restricted to admi
         return( rawfilter )
 
 
-Fifths step: Registering the module. This enables the application.
-The module must be named inside the __init__.py in the modules-Folder.
+Fifth step: Register the module. This enables the application.
+Simply list the module inside __init__.py in the 'modules' folder.
 
 ::
 
@@ -111,7 +117,7 @@ The module must be named inside the __init__.py in the modules-Folder.
 
 
 The application is now active and can be administrated using your favorite admin interface.
-However, there are no templates for displaying the data inside a webbrowser defined yet.
+However, there are no templates defined yet for data presentation in a webbrowser .
 
 
 
@@ -119,8 +125,8 @@ However, there are no templates for displaying the data inside a webbrowser defi
 Create a template
 ----------------
 
-Before you create the template for this module, its required to register this template first in the module.
-Add the following lines to the module-class.
+The templates to use have to be registered in the module.
+Add the following lines to the module class.
 
 ::
 
@@ -181,16 +187,16 @@ Possible layout for html/news_list.html:
   </table>
 
 
-Got it? Then dive deeper into ViUR, depending whereever your are an designer or an developer!
+Got it? Then dive deeper into ViUR, depending on whether you are a designer or a developer!
 
 Examples for developers
 -----------------------
 
-Add a more finegraned access model
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Add a more fine grained access model
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-So what if we need to distinguish between registered users and guests?
-Step one: We add a new property to our newsmodel.
+Often we need to distinguish between registered users and guests.
+Step one: Add a new property to the 'news' model.
 
 ::
 
@@ -275,10 +281,10 @@ canAccess methods:
         return( True )
 
 
-Writing your own code
-^^^^^^^^^^^^^^^^^^^^^
+Adding custom functions
+^^^^^^^^^^^^^^^^^^^^^^^
 
-Adding your own code to an application is easy in ViUR.
+Adding custom functions to an application is easy in ViUR.
 You could simply extend your News-Class (add a function) and mark it with *@exposed*. All functions marked with @exposed
 are directly accessible from outside. So if you have something like
 
@@ -298,9 +304,10 @@ are directly accessible from outside. So if you have something like
 
         ....
 
-your function test would be accessible unter the url "/news/test".
-Want to have your code run in the root ("/")?
-Create a *module* "index.py" and put the following code in there:
+your function 'test' would be accessible under the url "/news/test".
+
+It is possible to define one function as the default entry point (accessible under "/"). For this,
+create a *module* "index.py" and put the following code:
 
 ::
 
@@ -319,16 +326,16 @@ Create a *module* "index.py" and put the following code in there:
 
 
 .. Hint::
-    All modules (like models) need to be included in the __init__.py of that folder. So for your Index modul you'll need
-    to put the following in there.
+    All modules (as well as models) need to be included in the __init__.py of that folder. So for your Index module you'll need
+    to include the following:
         ::
 
             from modules.index import Index as index
 
 
 
-Need to access the database?
-For purely custom code you can use the lightweight dictionary-based api:
+There are two ways to access the database.
+For pure custom code you can use the lightweight dictionary-based API:
 
 ::
 
@@ -345,7 +352,7 @@ For purely custom code you can use the lightweight dictionary-based api:
 
 
 
-If you want to access data for which a skeleton is defined, it's highly recommended to use *only* that skeleton-api while
+If you want to access data for which a skeleton is defined, it is highly recommended to use *only* the skeleton-API while
 working with those data. Corruptions might occur otherwise.
 
 ::
@@ -367,8 +374,8 @@ working with those data. Corruptions might occur otherwise.
 Examples for designers / frontend developers
 ----------------------
 
-As a template designer, you can focus on providing a good user experience and don't have to bother about thinks like
-access control. Need to render a list? You'll receive the global variable *skellist*:
+As a template designer, you can focus on providing a good user experience and don't have to bother about things like
+access control. Do you need to render a list? You'll receive the global variable *skellist*:
 
 ::
 
@@ -379,20 +386,20 @@ access control. Need to render a list? You'll receive the global variable *skell
     </ol>
 
 
-If you're inside a view (displaying only one item), you'll rececive *skel* instad:
+If you're inside a view (displaying only one item), you'll receive *skel* instad:
 
 ::
 
     Name: {{skel.name}}
 
-Have static content like css or images? Drop these in the *static* directory of your application. It will be available
-unter the url /static/.
+Static content like css or images can be included by dropping it into the *static* directory of your application. It will be available
+under the url /static/.
 
-You need two or more templates for the same thing? Use the *style* parameter. If you access
+Do you need two or more templates for the same thing? Use the *style* parameter. If you access
 /news/list?style=teststyle, ViUR will first try to load the template news_list_teststyle.html. If it does exist, this file
 will be used, otherwise ViUR loads the default template news_list.html and pass the global variable style set to "teststyle".
 
-Want to embed data from a different module into the current template? You can either embed a fully rendered template by
+Do you want to embed data from a different module into the current template? You can either embed a fully rendered template by
 calling *execRequest* or you can fetch the data by yourself and prepare output accordingly.
 
 ::
@@ -403,7 +410,7 @@ calling *execRequest* or you can fetch the data by yourself and prepare output a
         {{ news.name }}
     {% endfor %}
 
-Need the next page of list? Just append/update the cursor send along with the request.
+Do you need the next page of list? Just append/update the cursor sent along with the request.
 
 ::
 
@@ -413,9 +420,9 @@ Need the next page of list? Just append/update the cursor send along with the re
 
     <a href="{{ updateUrl(cursor=skellist.cursor) }}">Next page</a>
 
-More SEO-Friedly URLs? Instead of pointing views to */news/view/{{skel.id}}*, you can use something like
+SEO friendly URLs? Instead of pointing views to */news/view/{{skel.id}}*, you can use something like
 */news/view/{{skel.id|shortKey}}/{{skel.name|urlencode}}*
 
-Translate a predefined key? Use {{ _("this are {{count}} unread news", count=skellist|length) }}. Please note that if you
+Translate a predefined key? Use {{ _("there are {{count}} unread news", count=skellist|length) }}. Please note that if you
 get translated string/textBones, these will adapt automatically to the current language. Just print them to your template with {{ skel.name }}.
 

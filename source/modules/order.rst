@@ -7,7 +7,7 @@ the user keeping track of the state of individual orders.
 
 [Bild Statemachine]
 
-The modul is mostly usable out of the box, but it needs some information's about what it should process.
+The module is mostly usable out of the box, but it needs some information's about what it should process.
 First, it assumes that you use the cart module. If you don’t, you probably need to override the checkout function,
 catch the case when step and id are None, and store the information what the user is about to order yourself.
 Second, you must override the method :py:func:`server.modules.order.Order.getBillItems`, which returns a list on items to put on the bill for
@@ -19,7 +19,7 @@ which can be used to trigger custom actions if an order reaches the correspondin
 If the default functionality isn't enough, it can be customized in several ways.
 
 
-The Modul-level property :py:attribute:`server.modules.order.Order.steps` describes the steps the user has to go through in order to complete the checkout process.
+The module-level property :py:attribute:`server.modules.order.Order.steps` describes the steps the user has to go through in order to complete the checkout process.
 Each step usually consist of one skeleton presented to the user (fe. the bill or shipping address).
 If you need to query more or less data from the user during the checkout process, just add or remove
 skeletons from that steps property. The property *mainHander* always references a skeleton.
@@ -36,7 +36,7 @@ If the default state-machine doesnt fit your needs, it can be extended by regist
 (by overriding the states-property) and hooking the predefined set*State* methods.
 
 .. Note::
-    Its not recommend to remove existing states from the module.
+    It is not recommend to remove existing states from the module.
     If you need distinct groups of invoice numbers for different sets of items you are selling, override the assignBillSequence.
 
 
