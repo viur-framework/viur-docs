@@ -36,7 +36,7 @@ import server.skeleton
 import server.bones
 import models.docskel
 import server.cache
-import server.csp
+import server.securityheaders
 import server.db
 import server.dbtransfer
 import server.errors

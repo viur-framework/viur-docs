@@ -25,9 +25,9 @@ server.cache - A Request Cache
 
 
 
-server.csp - Content Security Policy
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: server.csp
+server.securityheaders - Set CSP, HSTS and HPKP Headers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: server.securityheaders
    :members:
    :undoc-members:
    :private-members:
