@@ -259,8 +259,8 @@ Allow for selection one several entries from a pre-defined list of values.
     :private-members:
     :special-members:
 
-selectMultiBone
-~~~~~~~~~~~~~~~
+selectCountryBone
+~~~~~~~~~~~~~~~~~
 Selection for a country from a standardized country list.
 
 .. automodule:: server.bones.selectCountryBone

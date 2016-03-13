@@ -126,6 +126,9 @@ server.errors - Map Python Exceptions to HTTP Error-Codes
 .. autoclass:: server.errors.RequestTooLarge
     :members: = __init__
 
+.. autoclass:: server.errors.Censored
+    :members: = __init__
+
 .. autoclass:: server.errors.InternalServerError
     :members: = __init__
 
@@ -172,3 +175,8 @@ server.utils
 .. autofunction:: server.utils.markFileForDeletion
 
 .. autofunction:: server.utils.escapeString
+
+.. autofunction:: server.utils.safeStringComparison
+
+.. autofunction:: server.utils.normalizeKey
+
