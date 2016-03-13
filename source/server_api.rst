@@ -25,8 +25,30 @@ server.cache - A Request Cache
 
 
 
-server.securityheaders - Set CSP, HSTS and HPKP Headers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+server.securityheaders - Set varius security releated http-headers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This module allows configuring security related http-headers. The use is highly recommended.
+
+ - Content Security Policy: This header tells the clients browser, in which way and from which sources resources
+   like images, css and javascript may be supplied. You should at *least* deny inline javascript.
+   See https://developer.mozilla.org/docs/Web/Security/CSP for more informations.
+ - Http strict transport security: Force the use of https:// for the current domain even if the user enters an http://
+   link in the future. Currently only supported on *.appspot.com.
+   See https://developer.mozilla.org/docs/Web/Security/HTTP_strict_transport_security and https://cloud.google.com/appengine/docs/python/requests#Python_Request_headers .
+ - Public key pinning: Explicitly white-list specifiy certificates / certificate authorities for this domain. The client
+   will reject any other (possibly even valid) certificates not matching these criteria. Currently not supported on
+   the appengine. See https://code.google.com/p/googleappengine/issues/detail?id=12694 and
+   https://developer.mozilla.org/docs/Web/Security/Public_Key_Pinning .
+ - X-Frame-Options: Prevents loading your site inside an <iframe>. Prevents certain types of click-jacking attacks if
+   supported by the browser. See https://developer.mozilla.org/docs/Web/HTTP/X-Frame-Options .
+ - X-Xss-Protection: Configure reflected XSS-Protection found in IE and Chrome. Use with care, as certain versions of IE
+   contain a bug that actually *opens* an XSS-vulnerability if enabled!
+   See https://hackademix.net/2009/11/21/ies-xss-filter-creates-xss-vulnerabilities/ and
+   https://blogs.msdn.microsoft.com/ie/2008/07/02/ie8-security-part-iv-the-xss-filter/ .
+ - X-Content-Type-Options: Disables Mimetype-sniffing performed by IE and Chrome.
+   See https://blogs.msdn.microsoft.com/ie/2008/09/02/ie8-security-part-vi-beta-2-update/ .
+
+
 .. automodule:: server.securityheaders
    :members:
    :undoc-members:
