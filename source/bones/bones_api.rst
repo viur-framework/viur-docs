@@ -72,16 +72,6 @@ The following data-types are provided by ViUR (in lexical order).
 | emailBone              | Like stringBone, but requires a valid   | *(no additional parameters)*                            |
 |                        | email-address to be provided            |                                                         |
 +------------------------+-----------------------------------------+---------------------------------------------------------+
-| extendedRelationalBone | Like relationalBone, but allows storing | - using: a RelSkel-Class determining what properties    |
-|                        | additional data on each relation.       |       should be stored with each referenced entry       |
-|                        | Example:                                |                                                         |
-|                        | You have a relation from shop -> user   |                                                         |
-|                        | With this bone, it's possible to store  |                                                         |
-|                        | the information, wherever the           |                                                         |
-|                        | user is a customer, an employee or the  |                                                         |
-|                        | owner along with each referenced user   |                                                         |
-|                        |                                         |                                                         |
-+------------------------+-----------------------------------------+---------------------------------------------------------+
 | fileBone               | Stores a reference to an uploaded file. | - format (str): Hint for the admin how to name          |
 |                        | Extends treeItemBone. This reference is |       elements of this type.                            |
 |                        | **strong** (the only strong reference   |                                                         |
@@ -113,7 +103,7 @@ The following data-types are provided by ViUR (in lexical order).
 +------------------------+-----------------------------------------+---------------------------------------------------------+
 | relationalBone         | Implements relations to other entities. | - type (None): Name of the entities to link to.         |
 |                        | (Usually in Lists, see treeItemBone,    |        Must match their kind-name.                      |
-|                        | treeDirBone and hierarchyBone) for other| - modul (None): Name of the module to link to.          |
+|                        | treeDirBone and hierarchyBone) for other| - module (None): Name of the module to link to.         |
 |                        | use cases.                              |        Must match their module-name. If left blank, the |
 |                        |                                         |        type argument is also used as the module-name.   |
 |                        |                                         | - refKeys (None): List of properties of the linked      |
@@ -123,6 +113,8 @@ The following data-types are provided by ViUR (in lexical order).
 |                        |                                         | - format (''\$(name)``): Hint for the admin how to name |
 |                        |                                         |        elements of this type. See                       |
 |                        |                                         |        admin/utils.py:formatString for more information.|
+|                        |                                         | - using: a RelSkel-Class determining what properties    |
+|                        |                                         |       should be stored with each referenced entry       |
 +------------------------+-----------------------------------------+---------------------------------------------------------+
 | selectCountryBone      | Allows selecting a country. Stores it's | - codes (selectCountryBone.ISO2): Which code to use.    |
 |                        | values as ISO2 or ISO3 - Country-codes. |        Either selectCountryBone.ISO2 or                 |
@@ -321,12 +313,6 @@ Relational bones
     :private-members:
     :special-members:
 
-.. automodule:: server.bones.extendedRelationalBone
-    :show-inheritance:
-    :members:
-    :undoc-members:
-    :private-members:
-    :special-members:
 
 
 Miscellaneous bones
