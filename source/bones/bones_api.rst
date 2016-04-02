@@ -306,6 +306,37 @@ Hierarchical bones
 Relational bones
 ^^^^^^^^^^^^^^^^
 
+One of ViURs core features is providing relations ontop of the non-relational datastore.
+This Bone wraps this functionality into a standard property for your datamodel.
+There are just 2 Properties to set to use this bone. *Descrition* (as with any bone), and *type*.
+The *type* parameter determines what kinds are being referenced. It *must* match a kindName defined by a skeleton.
+If your module for that kind has a different name, you must also set the *module* parameter. I.E. if you referencing
+a kind *news*, but your news-module is available at /my_news_module/ instead of /news/, you must set it. Otherwise
+you won't be able to select any values in your admin tool. *refKeys* and *parentKeys* determine what properties are
+available in a relational query.
+
+Example:
+Your news-skeleton has a property *ispublic* and references a skeleton product, which has a property *color*.
+If you need to filter your news by associated products in a specific color, you need to include *color* in the
+*refKeys* of that relationalBone.
+If you need to update your filter to also only return public news, you have to include *public* in the *parentKeys* list.
+
+Sometimes it's needed to store additional data along with such a relation (i.E. on a relation student->exam you might
+want to store the note received in that exam). In such a case create a new Skeleton (use RelSkel as base-class - *not*
+Skeleton!) and pass this class in the *using*-parameter. You can also use filtering on such a relSkel (i.E. find students
+which archived at least x points for a given exam).
+
+
+ .. Tip::
+     If you ever encounter an query, that includes a relational filter and doesn't return any results despite it should,
+     check your server-log. Usually you miss a property in parent/ref-Keys and ViUR will warn you about that. Otherwise
+     try to rebuild the search-index of the kind that relationalBone is in.
+
+ .. Note::
+     *refKeys* must be always set. However, *parentKeys* are only used if you also specify multiple=True. Otherwise
+     that property is ignored.
+
+
 .. automodule:: server.bones.relationalBone
     :show-inheritance:
     :members:
