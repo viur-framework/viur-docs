@@ -9,14 +9,14 @@ Time based
 ----------
 
 A common problem on the GAE is having certain functionality executed in a regular interval.
-ViUR simplifies this down to a decorator. Just wrap a function with :py:decorator:'server.tasks.PeriodicTask` and
-ViUR will call it in a regular interval. These calls are guaranteed to be made on a backend,
-so there's no time-limit for your task. The decorator takes one argument - the interval.
+ViUR simplifies this down to a decorator. Just wrap a function with :py:decorator:'server.tasks.PeriodicTask' and
+ViUR will call it in a regular interval.
+The decorator takes one argument - the interval.
 ViUR will not call your function faster than once in each interval-minutes.
 
 .. Note::
     This is the *lower* bound. There is no guarantee that it will be called
-    each intervall minutes. The upper bound is defined in cron.yaml and currently defaults
+    each 'interval' minutes. The upper bound is defined in cron.yaml and currently defaults
     to each 4 hours.
 
 .. Note::
@@ -25,6 +25,11 @@ ViUR will not call your function faster than once in each interval-minutes.
    of its class, it won't be called. If its unbound (defined at module-level) it will be called,
    regardless if any Class in its module is used or not.
 
+.. Warning::
+    There's currently only a main loop which calls all function scheduled for execution. It has a time-limit of 10 minutes.
+    If your task takes more than a few minutes to execute, you should defer that code. Otherwise your tasks (all tasks in total)
+    might exceed these 10 minutes, which causes the request to be aborted despite not all tasks had been called yet.
+
 Deferred
 --------
 
@@ -32,6 +37,12 @@ Sometimes its necessary to delay the execution of some specific code, so it won'
 response of the current request. ViUR provides the :py:decorator:`server.tasks.callDefered` Decorator for such cases.
 A function decorated this way will never execute in the context of the current request. All calls to
 such a function are catched, its parameters serialized, and a task is created to call this function later.
+These calls are executed in a deferred task which can run up to 10 minutes. As these tasks run deferred, they run outside
+of the current context where they had been created. ViUR however will preserve the following two values:
+ - The currently logged in user (if any). If the task was created in the context of a known user, calls to utils.getCurrentUser()
+   will return the same values as it would have returned when the task had been created.
+ - The language used for the request. Within the deferred task any calls to i18N functions provided by ViUR will yield
+   results in the language of the original request.
 
 .. Note::
     A deferred function cannot return a value! The return-value for the code calling such a function
@@ -45,7 +56,7 @@ On Demand
 ---------
 
 The third use-case for tasks is on demand: A task that's run infrequently by the user.
-One example is our rebuild searchindex task: If changes are made to a datamodel (ie. include
+One example is our rebuild searchindex task: If changes are made to a data-model (ie. include
 the contents of a Bone in the fulltext search), and there is already data in the datastore
 created by the old model, its necessary to update the searchindex, as it doesn't contain
 the contents of that bone yet.
@@ -55,35 +66,42 @@ he calls that task once for the affected index.
 Creating such a task is also easy, its a Class derived from :py:class:`server.tasks.CallableTaskBase` and decorated with
 :py:decorator:`server.tasks.CallableTask`. The derived subclass must override the following properties and functions.
 
-\begin{tabular}{|c|c|c|}
-\hline
- Name & Type & Description \\
-\hline
-\hline
- id & Property (String) & An unique identifier for this task. \\
-\hline
- name & Property (String) & A short human-readable description \\
-\hline
- descr & Property (String) & A longer explanation \\
-\hline
- direct & Property (Bool) & If True, this task will execute directly after beeing\\
- & &			    called if False it will be deferred to the backend. \\
-\hline
-canCall & Function & Must return True if the current user (if any) is allowed\\
- & &		     to execute that task. Return False otherwise. \\
-\hline
-dataSkel & Function or Skeleton-class & If your tasks need additional Input\\
-& &					(ie: which searchindex?) \\
-& &					from the user, query him by returning an skeleton.\\
-& & 					Return None if you don't need any informations. \\
-\hline
++-------------+----------------------------+----------------------------------------------------------------------+
+| Name        | Type                       | Description                                                          |
++=============+============================+======================================================================+
+| id          | Property (String)          | An unique identifier for this task.                                  |
++-------------+----------------------------+----------------------------------------------------------------------+
+| name        | Property (String)          | A short human-readable description                                   |
++-------------+----------------------------+----------------------------------------------------------------------+
+| descr       | Property (String)          | A longer explanation                                                 |
++-------------+----------------------------+----------------------------------------------------------------------+
+| canCall     | Function                   | Must return True if the current user (if any) is allowed             |
+|             |                            | to execute that task. Return False otherwise.                        |
++-------------+----------------------------+----------------------------------------------------------------------+
+| dataSkel    | Function or Skeleton-class | If your tasks need additional Input (ie: which searchindex?)         |
+|             |                            | from the user, query him by returning an skeleton.                   |
+|             |                            | Return None if you don't need any information.                       |
++-------------+----------------------------+----------------------------------------------------------------------+
+| execute     | Function                   | Does the actual work. If you returned a skeleton in *dataSkel*,      |
+|             |                            | the values of that Skeleton are passed as keyword arguments.         |
++-------------+----------------------------+----------------------------------------------------------------------+
 
-execute & Function & Does the actual work. If you returned a skeleton in\\
-& &			dataSkel, the values of that Skeleton are passed \\
-& &			as keyword arguments. If you set direct to False,\\
-& & 			this is executed on your backend, otherwise \\
-& &			directly in the context of the request to\\
-& & 			execute that task (timelimit!). \\
-\hline
 
-\end{tabular}
+
+
+.. autoclass:: server.tasks.CallableTaskBase
+   :show-inheritance:
+   :members:
+   :special-members:
+
+
+.. autofunction:: server.tasks.noRetry
+
+.. autofunction:: server.tasks.callDeferred
+
+.. autofunction:: server.tasks.PeriodicTask
+
+.. autofunction:: server.tasks.CallableTask
+
+.. autofunction:: server.tasks.StartupTask
+
