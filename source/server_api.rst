@@ -14,16 +14,6 @@ lang support
 .. autofunction:: server.setDefaultDomainLanguage
 
 
-server.cache - A Request Cache
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: server.cache
-   :members:
-   :undoc-members:
-   :private-members:
-   :special-members:
-   :inherited-members:
-
-
 
 server.securityheaders - Set varius security releated http-headers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -45,9 +45,20 @@ This decorator takes several arguments, specifying how caching should happen.
 
 
 With this cache implementation, its possible to cache the result of arbitrary functions. They can be just called internally
-(through note the must return a string) or exposed on the http-layer. But they *must not* depend or modify global variables.
+(through note they must return a string) or exposed on the http-layer. But they *must not* depend or modify global variables.
 If they depend on reading external / global variables, the cache is not able to detect changes in these variables, and will continue
 to serve content generated from a request with a different global variables set. Also, its not able to detect changes made on the environment
 by its wrapped function. If your application relies on changes made to these global variables by the wrapped function, don't use the cache; it won't
 reply such changes. The only exception is setting the content-type header. If your function sets that header to indicate it will serve a non-html
 content, the cache will indicate that content-type if it serves a cached result.
+
+
+server.cache - A Request Cache
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: server.cache
+   :members:
+   :undoc-members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+
