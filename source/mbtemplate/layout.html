@@ -5,6 +5,7 @@
   {% if theme_touch_icon %}
     <link rel="apple-touch-icon" href="{{ pathto('_static/' ~ theme_touch_icon, 1) }}" />
   {% endif %}
+  <link rel="icon" href="_static/favicon.png" type="image/png"/>
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 {% endblock %}
 
@@ -38,14 +39,96 @@
                 $("#fcside").fadeOut(100);
             });
         });
+        
+            
+        var thescroll=0;
+        var scrolling =false;
+
+    function scrolleventhandler (e) {
+
+        if( thescroll > $(window).scrollTop()){
+            scrolldir=-1;
+        }else{
+            scrolldir=1;
+        }
+        thescroll=$(window).scrollTop();
+        wh=parseInt($("body").css("height").replace("px", ""))
+
+        if (scrolldir>0) {
+            $('.logo').addClass("is-scrolled");
+            $('.is2').addClass("is-scrolled2");
+            $('.is3').addClass("is-scrolled3");
+            $('.is4').addClass("is-scrolled4");
+            $('.is5').addClass("is-scrolled5");
+            $('.viur').addClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').addClass("is-scrolled7");
+            
+        } else {
+            $('.logo').removeClass("is-scrolled");
+            $('.is2').removeClass("is-scrolled2");
+            $('.is3').removeClass("is-scrolled3");
+            $('.is4').removeClass("is-scrolled4");
+            $('.is5').removeClass("is-scrolled5");
+            $('.viur').removeClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').removeClass("is-scrolled7");
+            
+        }
+
+    }
+    
+	$(window).scroll(scrolleventhandler);
+	$(window).resize(scrolleventhandler);
     </script>
     
-    <div id="hamburger"><div id="hamburgericon"></div><a href="index.html"><img id="logo-mobil" src="_static/viur.png" alt="Logo"></div></a>
+    
+<header class="is2">
+	<div class="binding">
+
+		<div class="logo">
+			<a href="#">
+				<img class="is7" src="_static/viur.png" title="ViUR - Information System">
+			</a>
+			<h3 class="is3">Information System</h3>
+		</div>
+
+		<div class="topnav  no-mobil">
+			<ul class="topnavlist is2">
+				<li>
+					<a class="viur is2 is4" href="#">
+						<h2 class="is5">Download</h2>
+						<span class="is3">Win | Mac | Linux</span>
+					</a>
+				</li>
+				<li>
+					<a class="community is2 is4" href="#">
+						<h2 class="is5">Community</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+				<li>
+					<a class="develop is2 is4" href="#">
+						<h2 class="is5">Development</h2>
+						<span class="is3">Source Code | GIT</span>
+					</a>
+				</li>
+				<li>
+					<a class="docu is2 is4" href="#">
+						<h2 class="not-mobile is5">Documentation</h2>
+						<h2 class="not-desktop is5">Docs</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+	</div>
+</header>
+    
     <div id="fcside"></div>
     <div class="footer">
       {% if show_copyright %}&copy;{{ copyright }}.{% endif %}
       {% if theme_show_powered_by|lower == 'true' %}
-      {% if show_copyright %}|{% endif %}
+      {% if show_copyright %}|{% endif %} <a href="/impressum">Impressum</a> |
       Powered by <a href="http://sphinx-doc.org/">Sphinx {{ sphinx_version }}</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster {{ alabaster_version }}</a>
       {% endif %}

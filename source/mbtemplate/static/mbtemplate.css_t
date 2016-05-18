@@ -65,11 +65,10 @@ div.body > .section {
 }
 
 div.footer {
-    background-color: #111;
-    border-top: 2px solid #cc0000;
+    background-color: #fff;
     margin: 20px auto auto auto;
     font-size: 14px;
-    color: #fff;
+    color: #666;
     text-align: right;
     padding-right: 100px;
     padding-top: 20px;
@@ -77,7 +76,7 @@ div.footer {
 }
 
 div.footer a {
-    color: #fff;
+    color: #666;
 }
 
 {% if theme_show_related|lower == 'false' %}
@@ -101,6 +100,9 @@ div.sphinxsidebar {
 }
 
 div.sphinxsidebarwrapper {
+    padding: 0;
+    margin-top: 100px;
+    padding-bottom:-50px;
     display: block;
     z-index: 100;
     background-color: #fff;
@@ -112,10 +114,14 @@ div.sphinxsidebarwrapper {
     top: 0;
     left: 0;
     bottom: 0;
-    -webkit-box-shadow: 0 0 5px 2px rgba(50, 50, 50, .4);
-    box-shadow: 0 0 5px 2px rgba(50, 50, 50, .4);
-    -moz-box-shadow: 0 0 5px 2px rgba(50, 50, 50, .4);
-    padding: 0;
+    -webkit-box-shadow: 0 0 5px 2px rgba(50, 50, 50, .2);
+    box-shadow: 0 0 5px 2px rgba(50, 50, 50, .2);
+    -moz-box-shadow: 0 0 5px 2px rgba(50, 50, 50, .2);
+    transition: all .5s ease;
+}
+
+div.section {
+    margin-top: 130px;
 }
 
 div.sphinxsidebarwrapper p.logo {
@@ -252,6 +258,18 @@ div.body h6 {
     margin: 40px 25px 10px 25px;
     padding: 0;
     color: #000;
+}
+
+.sphinxsidebarwrapper img.logo {
+    display: none;
+}
+
+div.sphinxsidebarwrapper p.logo {
+    display: none;
+}
+
+div.sphinxsidebar ul {
+    margin-top: 0px;
 }
 
 div.body h1 { margin-top: 0; padding-top: 0; font-size: 240%; }
@@ -632,9 +650,363 @@ form.search, p.searchtip, div ul.this-page-menu {
     display: none;   
 }
 
+::-moz-selection {
+    background-color: #cc0000;
+    text-shadow: none;
+    color: #fff;
+}
+
+::selection {
+    background-color: #cc0000;
+    text-shadow: none;
+    color: #fff;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+header a,
+header a:link,
+header a:visited {
+    color: #fff;
+    text-decoration: none;
+    outline: 0;
+    transition: all .5s ease;
+}
+
+header a:hover,
+header a:focus,
+header a:active {
+    color: #cc0000;
+}
+
+header {
+    line-height: 1.5;
+    background-color: #fff;
+    -webkit-box-shadow: 0 0 5px 2px rgba(50, 50, 50, .2);
+    box-shadow: 0 0 5px 2px rgba(50, 50, 50, .2);
+    -moz-box-shadow: 0 0 5px 2px rgba(50, 50, 50, .2);
+    z-index: 3000;
+    position: fixed;
+    width: 100%;
+    height: 140px;
+    transition: all .5s ease;
+    top: 0;
+    transition: all .5s ease;
+}
+
+.binding {
+    max-width: 1400px;
+    width: 86.1%;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    padding: 0 4%;
+    padding-bottom: 2%;
+}
+
+header .binding {
+    overflow: visible;
+}
+
+.logo {
+    position: relative;
+    float: left;
+    width: 175px;
+    margin: 18px 0;
+    transition: all .5s ease;
+}
+
+.logo img {
+    width: 100%;
+    transition: all .5s ease;
+}
+
+.logo h3 {
+    line-height: 1.8;
+    margin-top: -5px;
+    font-size: 1.2em;
+    font-weight: 300;
+    margin-left: 18px;
+    transition: all .5s ease;
+}
+
+.topnav {
+    position: relative;
+
+}
+
+ul.borderlist li a {
+    display: block;
+    border-bottom: 1px solid #ccc;
+    padding: 6px 0;
+    text-decoration: none;
+    color: #333;
+    transition: all .5s ease;
+}
+
+ul.borderlist li a span {
+
+    color: #cc0000;
+}
+
+ul.borderlist li:last-child a {
+
+    border-bottom: none;
+}
+
+ul.borderlist li a:hover {
+
+    background-color: #eee;
+    padding-left: 20px;
+}
+
+.topnav ul.topnavlist {
+    position: absolute;
+    right: 0px;
+    height: 140px;
+    background-color: transparent;
+    -webkit-box-shadow: 0 0 5px 2px rgba(50, 50, 50, .2);
+    box-shadow: 0 0 5px 2px rgba(50, 50, 50, .2);
+    -moz-box-shadow: 0 0 5px 2px rgba(50, 50, 50, .2);
+    transition: all .5s ease;
+}
+
+.topnav ul.topnavlist li {
+    float: right;
+}
+
+.topnav ul.topnavlist li a {
+    display: inline-block;
+    height: 140px;
+    width: 140px;
+    border-right: 1px solid #ccc;
+    color: #333;
+    text-align: center;
+    background-image: url(viur-menu.svg);
+    background-repeat: no-repeat;
+    background-size: 400%;
+    background-color: #f7f7f7;
+    transition: all .5s ease;
+}
+
+.topnav ul.topnavlist li a.docu {
+    background-position: 0 0;
+}
+
+.topnav ul.topnavlist li a.develop {
+    background-position: 33.333% 0;
+}
+
+.topnav ul.topnavlist li a.community {
+    background-position: 66.666% 0;
+}
+
+.topnav ul.topnavlist li a.viur {
+
+    background-color: #be1a22; /* Fallback */
+    background: url('viur-menu.svg'); /* Fallback */
+    background: url('viur-menu.svg'), -moz-linear-gradient(top, #be1a22, #e12013); /* FF 3.6+ */
+    background: url('viur-menu.svg'), -webkit-gradient(linear, 0 0, 0 100%, from(#be1a22), to(#e12013)); /* Safari 4+, Chrome 2+ */
+    background: url('viur-menu.svg'), -webkit-linear-gradient(top, #be1a22, #e12013); /* Safari 5.1+, Chrome 10+ */
+    background: url('viur-menu.svg'), -o-linear-gradient(top, #be1a22, #e12013); /* Opera 11.10 */
+    background: url('viur-menu.svg'), linear-gradient(to bottom, #be1a22, #e12013);
+    background-position: 100% 0;
+    background-repeat: none;
+
+}
+
+.topnav ul.topnavlist li a:hover {
+
+    background-color: #ffffff;
+
+}
+
+.topnav ul.topnavlist li a h2 {
+    margin-top: 90px;
+    font-size: 1em;
+    margin-bottom: -4px;
+    font-weight: 600;
+    transition: all .5s ease;
+
+}
+
+.topnav ul.topnavlist li:first-child a h2 {
+    color: #fff;
+    transition: all .5s ease;
+
+}
+
+.topnav ul.topnavlist li:first-child a {
+    -webkit-box-shadow: 0 0 3px 1px rgba(50, 50, 50, .2);
+    box-shadow: 0 0 3px 1px rgba(50, 50, 50, .2);
+    -moz-box-shadow: 0 0 3px 1px rgba(50, 50, 50, .2);
+    height: 150px;
+    border-right: none;
+    color: #fff;
+    border: 1px solid #cc0000;
+    position: relative;
+    z-index: 8;
+
+}
+
+.topnav ul.topnavlist li a:hover {
+
+    -webkit-box-shadow: 0 0 3px 1px rgba(50, 50, 50, .2);
+    box-shadow: 0 0 3px 1px rgba(50, 50, 50, .2);
+    -moz-box-shadow: 0 0 3px 1px rgba(50, 50, 50, .2);
+    z-index: 9;
+    position: relative;
+}
+
+.topnav ul.topnavlist li:first-child a:hover {
+    height: 160px;
+}
+
+.blocker {
+    background-color: #ccc;
+    height: 180px;
+    transition: all .5s ease;
+}
+
+header ul {
+    margin-top: 0;
+    list-style: none;
+}
+
+header li {
+    list-style: none;
+}
+
+.topnav ul.topnavlist li a span {
+    font-size: 0.75em;
+}
+
+    .topnav ul.topnavlist li a.viur {
+        background-size: 400%;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    .not-desktop {
+        display: none;
+    }
+
+    .not-mobile {
+        display: block;
+    }
 
 
 @media screen and (max-width: 830px) {
+    
+    
+
+    div.sphinxsidebarwrapper {
+        margin-top: 10px;
+        padding-bottom: -50px;
+    }
+
+    div.section {
+        margin-top: 0px;
+    }
+    
+    
+    
+    .not-desktop {
+        display: block;
+    }
+
+    .not-mobile {
+        display: none;
+    }
+    
+    .logo {
+        width: 65px;
+        margin: 10px 0;
+        margin-left: 32px;
+    }
+
+    .logo h3 {
+        display: none;
+    }
+
+    header {
+        height: 50px;
+    }
+
+    .topnav ul.topnavlist {
+        height: 50px;
+
+    }
+
+    .topnav ul.topnavlist li a {
+        height: 50px;
+        width: 50px;
+    }
+
+    .topnav ul.topnavlist li a h2 {
+        margin-top: 36px;
+        font-size: 0.45em;
+
+    }
+
+    .topnav ul.topnavlist li a span {
+        display: none;
+
+    }
+
+    .topnav ul.topnavlist li:first-child a {
+
+        height: 55px;
+
+    }
+
+    .topnav ul.topnavlist li:first-child a:hover {
+    height: 55px;
+}
+
+
+
+    .blocker {
+    background-color: #ccc;
+    height: 50px;
+}
+
+    .topnav ul.topnavlist li a.viur {
+
+        background-size: 400%;
+
+}
+
+
+    
+    
+    
 
     div.sphinxsidebarwrapper {
     	display: none;
@@ -656,9 +1028,9 @@ form.search, p.searchtip, div ul.this-page-menu {
         top: 0px;
         left: 0px;
         z-index: 99;
-        -webkit-box-shadow: 0 0 5px 2px rgba(50, 50, 50, .4);
-        box-shadow: 0 0 5px 2px rgba(50, 50, 50, .4);
-        -moz-box-shadow: 0 0 5px 2px rgba(50, 50, 50, .4);
+    -webkit-box-shadow: 0 0 5px 2px rgba(50, 50, 50, .2);
+    box-shadow: 0 0 5px 2px rgba(50, 50, 50, .2);
+    -moz-box-shadow: 0 0 5px 2px rgba(50, 50, 50, .2);
     }
     #hamburgericon {
         position: absolute;
@@ -667,10 +1039,9 @@ form.search, p.searchtip, div ul.this-page-menu {
         cursor: pointer;
         background-position: 0px 11px;
         background-repeat:  no-repeat;
-        height: 38px;
-        width: 38px;
-        top: 15px;
-        left: 8%;
+        height: 30px;
+        width: 30px;
+        top: 10px;
     }
     #logo-mobil {
         position: absolute;
@@ -713,4 +1084,69 @@ table.docutils.citation, table.docutils.citation td, table.docutils.citation th 
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
   box-shadow: none;
+}
+
+
+
+
+
+
+
+
+@media only screen and (min-width: 900px) {
+    .is-scrolled img {
+        width: 70px;
+        margin-top: -9px;
+    }
+
+    .topnav ul.topnavlist li a.is-scrolled2, header.is2.is-scrolled2, .topnav ul.topnavlist.is-scrolled2 {
+        height: 50px;
+    }
+
+    .topnav ul.topnavlist li a span.is-scrolled3  {
+        visibility: hidden;
+        opacity: 0;
+    }
+
+    header h3.is-scrolled3 {
+        font-size: 0.6em;
+        visibility: hidden;
+        opacity: 0;
+    }
+
+    .topnav ul.topnavlist li a.docu.is-scrolled4 {
+            background-repeat: no-repeat;
+            width: 140px;
+            background-position: 0 -100px;
+    }
+
+    .topnav ul.topnavlist li a.develop.is-scrolled4 {
+            background-repeat: no-repeat;
+            width: 140px;
+            background-position: 33.333% -100px;
+    }
+
+    .topnav ul.topnavlist li a.community.is-scrolled4 {
+            background-repeat: no-repeat;
+            width: 140px;
+            background-position: 66.666% -100px;
+    }
+
+    .topnav ul.topnavlist li a.viur.is-scrolled4 {
+            background-repeat: no-repeat;
+            width: 140px;
+            background-position: 100% -100px;
+    }
+
+    .topnav ul.topnavlist li a.viur.is-scrolled4:hover {
+            height: 50px;
+    }
+
+    .topnav ul.topnavlist li a h2.is-scrolled5 {
+            margin-top: 12px;
+            font-size: 1.0em;
+    }
+    .sphinxsidebarwrapper.is-scrolled7 {
+        margin-top: 10px;
+    }
 }
