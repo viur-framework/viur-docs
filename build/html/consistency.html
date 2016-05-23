@@ -1,0 +1,278 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Data Consistency &mdash; ViUR Server 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/mbtemplate.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ViUR Server 1.1.0 documentation" href="index.html" />
+    <link rel="next" title="Getting started" href="quickstart.html" />
+    <link rel="prev" title="Introduction" href="intro.html" />
+   
+  
+  <link rel="icon" href="_static/favicon.png" type="image/png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="data-consistency">
+<h1>Data Consistency<a class="headerlink" href="#data-consistency" title="Permalink to this headline">¶</a></h1>
+<p>Unlike traditional <a class="reference external" href="https://en.wikipedia.org/wiki/LAMP_(software_bundle)">LAMP systems</a>, consistency is handled differently on the <a class="reference external" href="http://appengine.google.com">GAE</a>. There are three different causes
+for inconsistency when using ViUR on the <a class="reference external" href="http://appengine.google.com">GAE</a>.</p>
+<div class="section" id="datastore">
+<h2>Datastore<a class="headerlink" href="#datastore" title="Permalink to this headline">¶</a></h2>
+<p>The datastore offers 2 kinds of queries, providing different consistency constrains. The &#8216;&#8217;normal`` and fast queries
+provide only eventual consistency. This means that changes made to one entity might not be visible instantly.
+To ensure that changes made are visible instantly, ancestor queries are needed.
+However, they&#8217;re slower and have other constrains, so they are not used in ViUR.</p>
+<p>Consequences/Example:
+Imagine you have a list of objects, and provide a list filtered by the object&#8217;s color.
+Now you change the color of one of these objects from &#8216;&#8217;red`` to &#8216;&#8217;blue``.
+Due to the inconsistency, it&#8217;s possible for that object to still appear in the list of &#8216;&#8217;red`` objects
+(instead of the &#8216;&#8217;blue`` ones) for a (usually very short as in a fraction of second) period of time after the change
+has been committed to the datastore.</p>
+</div>
+<div class="section" id="viurs-db-cache">
+<h2>ViURs DB cache<a class="headerlink" href="#viurs-db-cache" title="Permalink to this headline">¶</a></h2>
+<p>ViUR tries to optimize speed and resource usage by utilizing the Memcache to cache database queries.
+Unfortunately, this introduces another type of inconsistency. In rare cases it&#8217;s possible that the entry in
+the Memcache is updated before the indexes in the datastore can catch up. Given the example introduced before,
+it&#8217;s possible for the recently changed entry to still show up in the list of &#8216;&#8217;red`` ones, but will
+list itself as &#8216;&#8217;blue`` already. In fact, it&#8217;s possible that a db query for red ones returns results with entries
+of a different color, if that entries&#8217; color has recently been changed from red to another color.
+As the datastore usually applies these changes in less than a second, this is very unlikely to happen,
+but it&#8217;s possible. You can configure ViURs db-caching by setting <code class="xref py py-data docutils literal"><span class="pre">server.config.conf['viur.db.caching']</span></code>.
+A value of &#8216;2&#8217; (the default) means cache as much as possible, where it&#8217;s possible for this inconsistency to appear
+under rare circumstances. &#8216;1&#8217; means less aggressive cache, where queries aren&#8217;t served from Memcache, so that this
+inconsistency cannot happen. Setting this value to &#8216;0&#8217; means no caching at all (not recommend).</p>
+</div>
+<div class="section" id="relations">
+<h2>Relations<a class="headerlink" href="#relations" title="Permalink to this headline">¶</a></h2>
+<p>Relations are a core feature offered by ViUR. But as the datastore is non-relational,
+offering relations on top of a non-relational datastore is a fairly complex task. To maintain quick response times,
+ViUR doesn&#8217;t search and update relations when an entry is updated. Instead, a deferred task is kicked off
+which will update these releations in the background. Through depending on the current load of your application, these
+tasks usually catch up within a few seconds. Within this time, a search by such a relation might return stale results.
+Assume that you have a relation from user to the colored objects from the first example (e.g. a user liked that object).
+If that relation is part of the user skeleton, this problem arises.
+So if the color of an object is changed, the query &#8216;&#8217;all users who like a red object`` will still include that object
+until the background task finished updating the relations - though the object returned will already have blue as value
+for the color property.
+Note that this does not happen if the relation is part of that objects (i.e if the objects reference the user who liked it).
+Rule of thumb: Relations which are part of the kind which got updated are updated instantly.
+Relations referencing that kind from another kind are updated later.</p>
+</div>
+<div class="section" id="viurs-request-cache">
+<h2>ViURs request cache.<a class="headerlink" href="#viurs-request-cache" title="Permalink to this headline">¶</a></h2>
+<p>ViUR offers a request cache, to speed up serving complex pages. This cache is not enabled by default,
+as it has to be tightly integrated into the individual application. As flushing that cache happens asynchronous
+in the background, it&#8217;s possible to have inconsistency between two sequential requests.
+Given our example this means that our recently changed object might appear in both (red and blue) lists
+(or in no list at all)  for a short time-frame (again, usually less than a few seconds).</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/viur.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Data Consistency</a><ul>
+<li><a class="reference internal" href="#datastore">Datastore</a></li>
+<li><a class="reference internal" href="#viurs-db-cache">ViURs DB cache</a></li>
+<li><a class="reference internal" href="#relations">Relations</a></li>
+<li><a class="reference internal" href="#viurs-request-cache">ViURs request cache.</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="intro.html" title="previous chapter">Introduction</a></li>
+      <li>Next: <a href="quickstart.html" title="next chapter">Getting started</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/consistency.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <script>
+        
+    $(document).ready(function() {
+        $('#popuplogin').click(function(e) {
+               e.stopPropagation();
+        });
+    });
+    
+    
+        $(document).ready(function () {
+            $('#hamburgericon').click(function () {
+                $(".sphinxsidebarwrapper").fadeIn(100);
+                $("#fcside").fadeIn(100);
+                $("body").css({ overflow: 'hidden' });
+            });
+        });
+    
+        $(document).ready(function () {
+            $('#fcside').click(function () {
+                $("body").css({ overflow: 'inherit' });
+                $(".sphinxsidebarwrapper").fadeOut(100);
+                $("#fcside").fadeOut(100);
+            });
+        });
+        
+            
+        var thescroll=0;
+        var scrolling =false;
+
+    function scrolleventhandler (e) {
+
+        if( thescroll > $(window).scrollTop()){
+            scrolldir=-1;
+        }else{
+            scrolldir=1;
+        }
+        thescroll=$(window).scrollTop();
+        wh=parseInt($("body").css("height").replace("px", ""))
+
+        if (scrolldir>0) {
+            $('.logo').addClass("is-scrolled");
+            $('.is2').addClass("is-scrolled2");
+            $('.is3').addClass("is-scrolled3");
+            $('.is4').addClass("is-scrolled4");
+            $('.is5').addClass("is-scrolled5");
+            $('.viur').addClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').addClass("is-scrolled7");
+            
+        } else {
+            $('.logo').removeClass("is-scrolled");
+            $('.is2').removeClass("is-scrolled2");
+            $('.is3').removeClass("is-scrolled3");
+            $('.is4').removeClass("is-scrolled4");
+            $('.is5').removeClass("is-scrolled5");
+            $('.viur').removeClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').removeClass("is-scrolled7");
+            
+        }
+
+    }
+    
+	$(window).scroll(scrolleventhandler);
+	$(window).resize(scrolleventhandler);
+    </script>
+    
+    
+<header class="is2">
+	<div class="binding">
+
+		<div class="logo">
+			<a href="#">
+				<img class="is7" src="_static/viur.png" title="ViUR - Information System">
+			</a>
+			<h3 class="is3">Information System</h3>
+		</div>
+
+		<div class="topnav  no-mobil">
+			<ul class="topnavlist is2">
+				<li>
+					<a class="viur is2 is4" href="#">
+						<h2 class="is5">Download</h2>
+						<span class="is3">Win | Mac | Linux</span>
+					</a>
+				</li>
+				<li>
+					<a class="community is2 is4" href="#">
+						<h2 class="is5">Community</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+				<li>
+					<a class="develop is2 is4" href="#">
+						<h2 class="is5">Development</h2>
+						<span class="is3">Source Code | GIT</span>
+					</a>
+				</li>
+				<li>
+					<a class="docu is2 is4" href="#">
+						<h2 class="not-mobile is5">Documentation</h2>
+						<h2 class="not-desktop is5">Docs</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+	</div>
+</header>
+    
+    <div id="fcside"></div>
+    <div class="footer">
+      &copy;2015, Mausbrand Informationssysteme GmbH.
+      
+      | <a href="/impressum">Impressum</a> |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4a0+</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/consistency.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

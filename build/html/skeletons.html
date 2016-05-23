@@ -1,0 +1,625 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Skeletons &mdash; ViUR Server 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/mbtemplate.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ViUR Server 1.1.0 documentation" href="index.html" />
+    <link rel="next" title="ViUR Applications" href="applications.html" />
+    <link rel="prev" title="Bones" href="bones/bones_api.html" />
+   
+  
+  <link rel="icon" href="_static/favicon.png" type="image/png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="skeletons">
+<h1>Skeletons<a class="headerlink" href="#skeletons" title="Permalink to this headline">¶</a></h1>
+<p>Skeletons are classes which describe data structures that are handled by the ViUR system.</p>
+<p>Every Skeleton is contains several Bones, which define the properties stored on that model.</p>
+<dl class="class">
+<dt id="server.skeleton.Skeleton">
+<em class="property">class </em><code class="descclassname">server.skeleton.</code><code class="descname">Skeleton</code><span class="sig-paren">(</span><em>kindName=None</em>, <em>_cloneFrom=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>This is a container-object holding information about one database entity.</p>
+<p>It has to be sub-classed with individual information about the kindName of the entities
+and its specific data attributes, the so called bones.
+The Skeleton stores its bones in an <code class="xref py py-class docutils literal"><span class="pre">OrderedDict</span></code>-Instance, so the definition order of the
+contained bones remains constant.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="http://docs.python.org/library/functions.html#id" title="(in Python v2.7)"><strong>id</strong></a> (<em>server.bones.baseBone</em>) &#8211; This bone stores the current database key of this entity.             Assigning to this bones value is dangerous and does <em>not</em> affect the actual key its stored in.</li>
+<li><strong>creationdate</strong> (<a class="reference internal" href="bones/bones_api.html#module-server.bones.dateBone" title="server.bones.dateBone"><em>server.bones.dateBone</em></a>) &#8211; The date and time where this entity has been created.</li>
+<li><strong>changedate</strong> (<a class="reference internal" href="bones/bones_api.html#module-server.bones.dateBone" title="server.bones.dateBone"><em>server.bones.dateBone</em></a>) &#8211; The date and time of the last change to this entity.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="server.skeleton.Skeleton.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>kindName=None</em>, <em>_cloneFrom=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a Skeleton.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kindName</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; If set, it overrides the kindName of the current class.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.skeleton.Skeleton.__metaclass__">
+<code class="descname">__metaclass__</code><a class="headerlink" href="#server.skeleton.Skeleton.__metaclass__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">MetaSkel</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.skeleton.Skeleton.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#server.skeleton.Skeleton.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.all">
+<code class="descname">all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a query with the current Skeletons kindName.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A db.Query object which allows for entity filtering and sorting.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.clone">
+<code class="descname">clone</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a stand-alone copy of the current Skeleton object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The stand-alone copy of the object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#server.skeleton.Skeleton" title="server.skeleton.Skeleton">Skeleton</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes the entity associated with the current Skeleton from the data store.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.fromClient">
+<code class="descname">fromClient</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.fromClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load supplied <em>data</em> into Skeleton.</p>
+<p>This function works similar to <a class="reference internal" href="#server.skeleton.Skeleton.setValues" title="server.skeleton.Skeleton.setValues"><code class="xref py py-func docutils literal"><span class="pre">setValues()</span></code></a>, except that
+the values retrieved from <em>data</em> are checked against the bones and their validity checks.</p>
+<p>Even if this function returns False, all bones are guaranteed to be in a valid state.
+The ones which have been read correctly are set to their valid values;
+Bones with invalid values are set back to a safe default (None in most cases).
+So its possible to call <a class="reference internal" href="#server.skeleton.Skeleton.toDB" title="server.skeleton.Skeleton.toDB"><code class="xref py py-func docutils literal"><span class="pre">toDB()</span></code></a> afterwards even if reading
+data with this function failed (through this might violates the assumed consistency-model).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; Dictionary from which the data is read.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if all data was successfully read and taken by the Skeleton&#8217;s bones.                     False otherwise (eg. some required fields where missing or invalid).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#bool" title="(in Python v2.7)">bool</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.fromDB">
+<code class="descname">fromDB</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.fromDB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load entity with <em>key</em> from the data store into the Skeleton.</p>
+<p>Reads all available data of entity kind <em>kindName</em> and the key <em>key</em>
+from the data store into the Skeleton structure&#8217;s bones. Any previous
+data of the bones will discard.</p>
+<p>To store a Skeleton object to the data store, see <a class="reference internal" href="#server.skeleton.Skeleton.toDB" title="server.skeleton.Skeleton.toDB"><code class="xref py py-func docutils literal"><span class="pre">toDB()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> (<em>server.DB.Key | DB.Query | str</em>) &#8211; A <code class="xref py py-class docutils literal"><span class="pre">server.DB.Key</span></code>, <code class="xref py py-class docutils literal"><span class="pre">server.DB.Query</span></code>, or string,                      from which the data shall be fetched.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on success; False if the given key could not be found.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#bool" title="(in Python v2.7)">bool</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.getSearchDocumentFields">
+<code class="descname">getSearchDocumentFields</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.getSearchDocumentFields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be overridden to modify the list of search document fields before they are
+added to the index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.getValues">
+<code class="descname">getValues</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.getValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the current bones of the Skeleton as a dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dictionary, where the keys are the bones and the values the current values.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.postDeletedHandler">
+<code class="descname">postDeletedHandler</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.postDeletedHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be overridden to perform further actions after the entity has been deleted
+from the data store.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.postSavedHandler">
+<code class="descname">postSavedHandler</code><span class="sig-paren">(</span><em>key</em>, <em>dbObj</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.postSavedHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be overridden to perform further actions after the entity has been written
+to the data store.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.preProcessBlobLocks">
+<code class="descname">preProcessBlobLocks</code><span class="sig-paren">(</span><em>locks</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.preProcessBlobLocks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be overridden to modify the list of blobs referenced by this skeleton</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.preProcessSerializedData">
+<code class="descname">preProcessSerializedData</code><span class="sig-paren">(</span><em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.preProcessSerializedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be overridden to modify the <a class="reference internal" href="server_api.html#server.db.Entity" title="server.db.Entity"><code class="xref py py-class docutils literal"><span class="pre">server.db.Entity</span></code></a> before its actually
+written to the data store.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.refresh">
+<code class="descname">refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refresh the bones current content.</p>
+<p>This function causes a refresh of all relational bones and their associated
+information.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.setValues">
+<code class="descname">setValues</code><span class="sig-paren">(</span><em>values</em>, <em>key=False</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.setValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load <em>values</em> into Skeleton, without validity checks.</p>
+<p>This function is usually used to merge values fetched from the database into the
+current skeleton instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Warning:</th><td class="field-body">Performs no error-checking for invalid values! Its possible to set invalid values</td>
+</tr>
+</tbody>
+</table>
+<p>which may break the serialize/deserialize function of the related bone!</p>
+<p>If no bone could be found for a given key, this key is ignored. Any values of other bones
+not mentioned in <em>values</em> remain unchanged.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>values</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; A dictionary with values.</li>
+<li><strong>key</strong> (<em>server.db.Key | None</em>) &#8211; If given, this allows to set the current database unique key.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="server.skeleton.Skeleton.subSkel">
+<em class="property">classmethod </em><code class="descname">subSkel</code><span class="sig-paren">(</span><em>name</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.subSkel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new sub-skeleton as part of the current skeleton.</p>
+<p>A sub-skeleton is a copy of the original skeleton, containing only a subset of its bones.
+To define sub-skeletons, use the subSkels property of the Skeleton object.</p>
+<p>By passing multiple sub-skeleton names to this function, a sub-skeleton with the union of
+all bones of the specified sub-skeletons is returned.</p>
+<p>If an entry called &#8220;*&#8221; exists in the subSkels-dictionary, the bones listed in this entry
+will always be part of the generated sub-skeleton.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of the sub-skeleton (that&#8217;s the key of the subSkels dictionary);                                              Multiple names can be specified.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The sub-skeleton of the specified type.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#server.skeleton.Skeleton" title="server.skeleton.Skeleton">server.skeleton.Skeleton</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.Skeleton.toDB">
+<code class="descname">toDB</code><span class="sig-paren">(</span><em>clearUpdateTag=False</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.Skeleton.toDB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store current Skeleton entity to data store.</p>
+<p>Stores the current data of this instance into the database.
+If an <em>key</em> value is set to the object, this entity will ne updated;
+Otherwise an new entity will be created.</p>
+<p>To read a Skeleton object from the data store, see <a class="reference internal" href="#server.skeleton.Skeleton.fromDB" title="server.skeleton.Skeleton.fromDB"><code class="xref py py-func docutils literal"><span class="pre">fromDB()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>clearUpdateTag</strong> &#8211; If True, this entity won&#8217;t be marked dirty;</td>
+</tr>
+</tbody>
+</table>
+<p>This avoids from being fetched by the background task updating relations.
+:type clearUpdateTag: bool</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The data store key of the entity.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="relskel">
+<h2>RelSkel<a class="headerlink" href="#relskel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="server.skeleton.RelSkel">
+<em class="property">class </em><code class="descclassname">server.skeleton.</code><code class="descname">RelSkel</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.RelSkel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>This is a Skeleton-like class that acts as a container for Skeletons used as a
+additional information data skeleton for
+<code class="xref py py-class docutils literal"><span class="pre">extendedRelationalBone</span></code>.</p>
+<p>It needs to be sub-classed where information about the kindName and its attributes
+(bones) are specified.</p>
+<p>The Skeleton stores its bones in an <code class="xref py py-class docutils literal"><span class="pre">OrderedDict</span></code>-Instance, so the definition order of the
+contained bones remains constant.</p>
+<dl class="method">
+<dt id="server.skeleton.RelSkel.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.RelSkel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a local copy from the global Skel-class.</p>
+<p>&#64;param kindName: If set, override the entity kind were operating on.
+&#64;type kindName: String or None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.skeleton.RelSkel.__metaclass__">
+<code class="descname">__metaclass__</code><a class="headerlink" href="#server.skeleton.RelSkel.__metaclass__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">MetaRelSkel</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.skeleton.RelSkel.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#server.skeleton.RelSkel.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.RelSkel.fromClient">
+<code class="descname">fromClient</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.RelSkel.fromClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the data supplied by data.
+Unlike setValues, error-checking is performed.
+The values might be in a different representation than the one used in getValues/serValues.
+Even if this function returns False, all bones are guranteed to be in a valid state:
+The ones which have been read correctly contain their data; the other ones are set back to a safe default (None in most cases)
+So its possible to call save() afterwards even if reading data fromClient faild (through this might violates the assumed consitency-model!).</p>
+<p>&#64;param data: Dictionary from which the data is read
+&#64;type data: Dict
+&#64;returns: True if the data was successfully read; False otherwise (eg. some required fields where missing or invalid)</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="server.skeleton.RelSkel.fromSkel">
+<em class="property">classmethod </em><code class="descname">fromSkel</code><span class="sig-paren">(</span><em>skelCls</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.RelSkel.fromSkel" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Creates a relSkel from a skeleton-class using only the bones explicitly named
+in <a href="#id1"><span class="problematic" id="id2">*</span></a>args</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>skelCls</strong> &#8211; </li>
+<li><strong>args</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.skeleton.RelSkel.unserialize">
+<code class="descname">unserialize</code><span class="sig-paren">(</span><em>values</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.RelSkel.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Loads &#8216;values&#8217; into this skeleton</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>values</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="skellist">
+<h2>SkelList<a class="headerlink" href="#skellist" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="server.skeleton.SkelList">
+<em class="property">class </em><code class="descclassname">server.skeleton.</code><code class="descname">SkelList</code><span class="sig-paren">(</span><em>baseSkel</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.SkelList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">list</span></code></a></p>
+<p>This class is used to hold multiple skeletons together with other, commonly used information.</p>
+<p>SkelLists are returned by Skel().all()...fetch()-constructs and provide additional information
+about the data base query, for fetching additional entries.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="server_api.html#server.db.Query.cursor" title="server.db.Query.cursor"><strong>cursor</strong></a> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Holds the cursor within a query.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="server.skeleton.SkelList.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>baseSkel</em><span class="sig-paren">)</span><a class="headerlink" href="#server.skeleton.SkelList.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#64;param baseSkel: The baseclass for all entries in this list</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.skeleton.SkelList.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#server.skeleton.SkelList.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/viur.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Skeletons</a><ul>
+<li><a class="reference internal" href="#relskel">RelSkel</a></li>
+<li><a class="reference internal" href="#skellist">SkelList</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="bones/bones_api.html" title="previous chapter">Bones</a></li>
+      <li>Next: <a href="applications.html" title="next chapter">ViUR Applications</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/skeletons.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <script>
+        
+    $(document).ready(function() {
+        $('#popuplogin').click(function(e) {
+               e.stopPropagation();
+        });
+    });
+    
+    
+        $(document).ready(function () {
+            $('#hamburgericon').click(function () {
+                $(".sphinxsidebarwrapper").fadeIn(100);
+                $("#fcside").fadeIn(100);
+                $("body").css({ overflow: 'hidden' });
+            });
+        });
+    
+        $(document).ready(function () {
+            $('#fcside').click(function () {
+                $("body").css({ overflow: 'inherit' });
+                $(".sphinxsidebarwrapper").fadeOut(100);
+                $("#fcside").fadeOut(100);
+            });
+        });
+        
+            
+        var thescroll=0;
+        var scrolling =false;
+
+    function scrolleventhandler (e) {
+
+        if( thescroll > $(window).scrollTop()){
+            scrolldir=-1;
+        }else{
+            scrolldir=1;
+        }
+        thescroll=$(window).scrollTop();
+        wh=parseInt($("body").css("height").replace("px", ""))
+
+        if (scrolldir>0) {
+            $('.logo').addClass("is-scrolled");
+            $('.is2').addClass("is-scrolled2");
+            $('.is3').addClass("is-scrolled3");
+            $('.is4').addClass("is-scrolled4");
+            $('.is5').addClass("is-scrolled5");
+            $('.viur').addClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').addClass("is-scrolled7");
+            
+        } else {
+            $('.logo').removeClass("is-scrolled");
+            $('.is2').removeClass("is-scrolled2");
+            $('.is3').removeClass("is-scrolled3");
+            $('.is4').removeClass("is-scrolled4");
+            $('.is5').removeClass("is-scrolled5");
+            $('.viur').removeClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').removeClass("is-scrolled7");
+            
+        }
+
+    }
+    
+	$(window).scroll(scrolleventhandler);
+	$(window).resize(scrolleventhandler);
+    </script>
+    
+    
+<header class="is2">
+	<div class="binding">
+
+		<div class="logo">
+			<a href="#">
+				<img class="is7" src="_static/viur.png" title="ViUR - Information System">
+			</a>
+			<h3 class="is3">Information System</h3>
+		</div>
+
+		<div class="topnav  no-mobil">
+			<ul class="topnavlist is2">
+				<li>
+					<a class="viur is2 is4" href="#">
+						<h2 class="is5">Download</h2>
+						<span class="is3">Win | Mac | Linux</span>
+					</a>
+				</li>
+				<li>
+					<a class="community is2 is4" href="#">
+						<h2 class="is5">Community</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+				<li>
+					<a class="develop is2 is4" href="#">
+						<h2 class="is5">Development</h2>
+						<span class="is3">Source Code | GIT</span>
+					</a>
+				</li>
+				<li>
+					<a class="docu is2 is4" href="#">
+						<h2 class="not-mobile is5">Documentation</h2>
+						<h2 class="not-desktop is5">Docs</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+	</div>
+</header>
+    
+    <div id="fcside"></div>
+    <div class="footer">
+      &copy;2015, Mausbrand Informationssysteme GmbH.
+      
+      | <a href="/impressum">Impressum</a> |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4a0+</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/skeletons.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

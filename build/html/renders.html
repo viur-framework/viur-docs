@@ -1,0 +1,1523 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Renders &mdash; ViUR Server 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/mbtemplate.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ViUR Server 1.1.0 documentation" href="index.html" />
+    <link rel="next" title="Sessions" href="session.html" />
+    <link rel="prev" title="Other commonly accessed functionality" href="common-used.html" />
+   
+  
+  <link rel="icon" href="_static/favicon.png" type="image/png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="renders">
+<h1>Renders<a class="headerlink" href="#renders" title="Permalink to this headline">¶</a></h1>
+<p>In ViUR, the logic rendering the actual output is separated from the application logic.
+Each application communicates with its assigned render using the API defined below, and that render
+is responsible of rendering the data supplied to the desired output format.
+Currently, ViUR provides renders for</p>
+<blockquote>
+<div><ul class="simple">
+<li>Html (using the jinja2 template engine)</li>
+<li>json</li>
+<li>pdf</li>
+<li>rss</li>
+<li>xml</li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Not every render is capable of performing every action. The pdf-render is currently lacking support of embedded forms,
+so its currently not possible to add or edit entities using the pdf-render.</p>
+</div>
+<p>The default render is <em>jinja2</em>. This render uses the jinja2 template engine to provide a simple an fast way of wrapping data into html templates.
+We recommend to use this render for new projects wherever possible, but its also possible to build you own render and use a different template engine.
+ViUR does some magic on startup to map each render to modules. Each render gets its own prefix under which modules enabled for this render are reachable.
+The only exception is the default-render; its modules are available without prefix. In the following example, all requests are made to the same module (page)
+and action (list all pages), but to different renders. The first request will be routed to the default render (as said, usually jinja2), the second will
+render the same data as pdf, and the third one will yield the data as json.</p>
+<div class="highlight-python"><div class="highlight"><pre>/page/list
+/pdf/page/list
+/json/page/list
+</pre></div>
+</div>
+<p>The pairing from modules - renders is initialized by calling the <a class="reference internal" href="server_api.html#server.setup" title="server.setup"><code class="xref py py-func docutils literal"><span class="pre">server.setup()</span></code></a> command. It accepts an optional third parameter <em>default</em>
+which allows specifying the name of the default render.</p>
+<p>subsection{Jinja2}
+The jinja2 render offers the whole default-functionality of jinja2 and adds some ViUR specific extras.</p>
+<div class="section" id="admin">
+<h2>Admin<a class="headerlink" href="#admin" title="Permalink to this headline">¶</a></h2>
+<p>The admin-render is a clone of the json render. The only customisation is that access to this render is restricted
+to users having &#8216;admin&#8217; or &#8216;root&#8217; access.</p>
+</div>
+<div class="section" id="jinja2">
+<h2>Jinja2<a class="headerlink" href="#jinja2" title="Permalink to this headline">¶</a></h2>
+<p>Jinja2 is the default template engine in ViUR. Data made available to templates if prepared to its use-case. In view,
+a skeleton is passed in a different way than in edit/add. In views, data from bones is mapped in the following ways:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>String and Text-bones contain their value as string if they are not translated. If translation is enabled for such</dt>
+<dd><p class="first">bones, a special wrapper is returned, yielding the content of that bone in the language of the current request
+(If there is no translation available for that bone in this language, ViUR tries to choose the best one from
+that bone). If you need to access the data of such a bone in different languages, append [&#8220;lang&#8221;].</p>
+<div class="last highlight-python"><div class="highlight"><pre>{{skel.name}} {# Returns the contents of name in the current language #}
+{{skel.name[&quot;de&quot;]}} {# Retrives the contents in German. Might be None if no such translation was saved #}
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>SelectOne and SelectMulti-Bones return a wapper that yields the <em>key</em> of the selected options. The (translated)</dt>
+<dd><p class="first">Description is available by appending <em>.descr</em></p>
+<div class="last highlight-python"><div class="highlight"><pre>{{skel.option}} {# The *key* (or list-of-keys) of that selection #}
+{{skel.option.descr}} {# The *description* (or list-of-descriptions) of that selection #}
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Relational and ExtendedRelationalBones yield a dictionary (or list-of-dicts) containing the id and any keys</dt>
+<dd><p class="first">named in refKeys of the referenced object. If a bone is multiple, a special list of such dictionaries is provided,
+allowing direct selection of values from those dictionaries.</p>
+<div class="last highlight-python"><div class="highlight"><pre>{{skel.rel}} {# A dict like {&quot;id&quot;: &quot;ah......&quot;, &quot;name&quot;: &quot;TestEntry&quot;} for multiple=False#}
+{{skel.rel}} {# A list of dict like [{&quot;id&quot;: &quot;ah......&quot;, &quot;name&quot;: &quot;TestEntry1&quot;}, {&quot;id&quot;: &quot;ah......&quot;, &quot;name&quot;: &quot;TestEntry2&quot;}] for multiple=True#}
+{{skel.rel.name}} {# A list of all values for *name* like  [&quot;TestEntry1&quot;, &quot;TestEntry2&quot;] #}
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><p class="first">PasswordBones are always None as passwords are stored hashed and cannot be read.</p>
+</li>
+<li><p class="first">All other Bones contain their native types (Int/Float/Bool)</p>
+</li>
+</ul>
+</div></blockquote>
+<p>In edit/add forms, no such conversion is performed. ViUR passes a dictionary of <em>structure</em>, <em>errors</em> and <em>value</em>.
+<em>Structure</em> is a OrderedDict, containing all the information needed to render a input field for that bone (visible?, readOnly?, <em>values</em> for select*Bones, ...).
+<em>Value</em> is a dictionary, containing the <em>raw</em> values of these bones (ie. whats&#8217;ever in skel[bone].value).
+<em>Errors</em> lists errors returned from the save during the last save attempt (if it has been tried to save the entry, but
+it was rejected due to invalid/missing data). ViUR provides a ready-to-use macro to create a html form from this data.</p>
+<p>In addition to the data, ViUR also exposed several functions and filters to your templates.</p>
+<blockquote>
+<div><ul class="simple">
+<li>requestParams: Returns a dictionary of the parameters send along with the current Get/Post request. Keys and Values</li>
+</ul>
+<blockquote>
+<div>have been htmlQuoted for safety reasons.</div></blockquote>
+<ul class="simple">
+<li>getSession: Reads a separate space of the current session and returns the keys/values stored there</li>
+<li>setSession: Stores a new key-&gt;value pair in the session. Its saved in a seperate space of the session so it can</li>
+</ul>
+<blockquote>
+<div>never conflict with data stored by ViUR/modul-level code.</div></blockquote>
+<ul class="simple">
+<li>getSkel: Returns the structure of the requested skel. The format is same as in edit/add.</li>
+<li>getEntry: Fetches a entry from the datastore and returns it in the same format as in view/list. This obeys
+canView/listFilter from the module - if the current user has no access to that entry, none is returned.</li>
+<li>TBD</li>
+</ul>
+</div></blockquote>
+<p>&#8212; LIST OF builtin filters/funcs</p>
+<span class="target" id="module-server.render.jinja2.default"></span><dl class="class">
+<dt id="server.render.jinja2.default.ListWrapper">
+<em class="property">class </em><code class="descclassname">server.render.jinja2.default.</code><code class="descname">ListWrapper</code><span class="sig-paren">(</span><em>src</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.ListWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">list</span></code></a></p>
+<p>Monkey-Patching for lists.
+Allows collecting sub-properties by using []
+Example: [ {&#8220;key&#8221;:&#8221;1&#8221;}, {&#8220;key&#8221;:&#8221;2&#8221;} ][&#8220;key&#8221;] &#8211;&gt; [&#8220;1&#8221;,&#8221;2&#8221;]</p>
+<dl class="method">
+<dt id="server.render.jinja2.default.ListWrapper.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>src</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.ListWrapper.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes this wrapper by copying the values from src</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.render.jinja2.default.ListWrapper.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#server.render.jinja2.default.ListWrapper.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="server.render.jinja2.default.Render">
+<em class="property">class </em><code class="descclassname">server.render.jinja2.default.</code><code class="descname">Render</code><span class="sig-paren">(</span><em>parent=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>The core jinja2 render.</p>
+<p>This is the bridge between your ViUR modules and your templates.
+First, the default jinja2-api is exposed to your templates. See <a class="reference external" href="http://jinja.pocoo.org/">http://jinja.pocoo.org/</a> for
+more information. Second, we&#8217;ll pass data das global variables to templates depending on the
+current action.</p>
+<blockquote>
+<div><ul class="simple">
+<li>For list() we&#8217;ll pass <cite>skellist</cite> - a <a class="reference internal" href="#server.render.jinja2.default.SkelListWrapper" title="server.render.jinja2.default.SkelListWrapper"><code class="xref py py-class docutils literal"><span class="pre">server.render.jinja2.default.SkelListWrapper</span></code></a> instance</li>
+<li>For view(): skel - a dictionary with values from the skeleton prepared for use inside html</li>
+<li>For add()/edit: a dictionary as <cite>skel</cite> with <cite>values</cite>, <cite>structure</cite> and <cite>errors</cite> as keys.</li>
+</ul>
+</div></blockquote>
+<p>Third, a bunch of global filters (like urlencode) and functions (getEntry, ..) are available  to templates.</p>
+<p>See the ViUR Documentation for more information about functions and data available to jinja2 templates.</p>
+<p>Its possible for modules to extend the list of filters/functions available to templates by defining
+a function called <cite>jinjaEnv</cite>. Its called from the render when the environment is first created and
+can extend/override the functionality exposed to templates.</p>
+<dl class="class">
+<dt id="server.render.jinja2.default.Render.KeyValueWrapper">
+<em class="property">class </em><code class="descname">KeyValueWrapper</code><span class="sig-paren">(</span><em>key</em>, <em>descr</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.KeyValueWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>This holds one Key-Value pair for
+selectOne/selectMulti Bones.</p>
+<p>It allows to directly treat the key as string,
+but still makes the translated description of that
+key available.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.render.jinja2.default.Render.__weakref__">
+<code class="descclassname">Render.</code><code class="descname">__weakref__</code><a class="headerlink" href="#server.render.jinja2.default.Render.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.add">
+<code class="descclassname">Render.</code><code class="descname">add</code><span class="sig-paren">(</span><em>skel</em>, <em>tpl=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page for adding an entry.</p>
+<p>The template must construct the HTML-form on itself; the required information
+are passed via skel.structure, skel.value and skel.errors.</p>
+<p>A jinja2-macro, which builds such kind of forms, is shipped with the server.</p>
+<p>Any data in <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs is passed unmodified to the template.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>skel</strong> (<em>server.db.skeleton.Skeleton</em>) &#8211; Skeleton of the entry which should be created.</li>
+<li><strong>tpl</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of a different template, which should be used instead of the default one.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns the emitted HTML response.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.addDirSuccess">
+<code class="descclassname">Render.</code><code class="descname">addDirSuccess</code><span class="sig-paren">(</span><em>rootNode</em>, <em>path</em>, <em>dirname</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.addDirSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page, informing that the directory has been successfully created.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rootNode</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; RootNode-key in which the directory has been created</li>
+<li><strong>path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path in which the directory has been created</li>
+<li><strong>dirname</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of the newly created directory</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns the emitted HTML response.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.addItemSuccess">
+<code class="descclassname">Render.</code><code class="descname">addItemSuccess</code><span class="sig-paren">(</span><em>skel</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.addItemSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page, informing that the entry has been successfully created.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>skel</strong> (<em>server.db.skeleton.Skeleton</em>) &#8211; Skeleton which contains the data of the new entity</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns the emitted HTML response.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.checkForOldLinePrefix">
+<code class="descclassname">Render.</code><code class="descname">checkForOldLinePrefix</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.checkForOldLinePrefix" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>This method checks the given template for lines starting with &#8220;##&#8221; - the old, now unsupported
+Line-Prefix. Bail out if such prefixes are used. This is a temporary safety measure; will be
+removed after 01.05.2017.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fn</strong> &#8211; The filename to check</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.cloneSuccess">
+<code class="descclassname">Render.</code><code class="descname">cloneSuccess</code><span class="sig-paren">(</span><em>tpl=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.cloneSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page informing that the items sortindex was successfully changed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> (<em>ndb.Expando</em>) &#8211; ndb.Expando instance of the item that was changed</li>
+<li><strong>tpl</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of a different template, which should be used instead of the default one</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns the emitted HTML response.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.collectSkelData">
+<code class="descclassname">Render.</code><code class="descname">collectSkelData</code><span class="sig-paren">(</span><em>skel</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.collectSkelData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares values of one <code class="xref py py-class docutils literal"><span class="pre">server.db.skeleton.Skeleton</span></code> or a list of skeletons for output.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>skel</strong> (<em>server.db.skeleton.Skeleton</em>) &#8211; Skeleton which structure will be processed.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary or list of dictionaries.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.copySuccess">
+<code class="descclassname">Render.</code><code class="descname">copySuccess</code><span class="sig-paren">(</span><em>srcrepo</em>, <em>srcpath</em>, <em>name</em>, <em>destrepo</em>, <em>destpath</em>, <em>type</em>, <em>deleteold</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.copySuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page, informing that an entry has been successfully copied/moved.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>srcrepo</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; RootNode-key from which has been copied/moved</li>
+<li><strong>srcpath</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path from which the entry has been copied/moved</li>
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of the entry which has been copied/moved</li>
+<li><strong>destrepo</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; RootNode-key to which has been copied/moved</li>
+<li><strong>destpath</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to which the entries has been copied/moved</li>
+<li><strong>type</strong> (<a class="reference external" href="http://docs.python.org/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) &#8211; &#8220;entry&#8221;: Copy/Move an entry, everything else: Copy/Move an directory</li>
+<li><strong>deleteold</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; &#8220;0&#8221;: Copy, &#8220;1&#8221;: Move</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns the emitted HTML response.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.deleteSuccess">
+<code class="descclassname">Render.</code><code class="descname">deleteSuccess</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.deleteSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page, informing that the entry has been successfully deleted.</p>
+<p>The provided parameters depend on the application calling this:
+List and Hierarchy pass the id of the deleted entry, while Tree passes
+the rootNode and path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns the emitted HTML response.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.edit">
+<code class="descclassname">Render.</code><code class="descname">edit</code><span class="sig-paren">(</span><em>skel</em>, <em>tpl=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.edit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page for modifying an entry.</p>
+<p>The template must construct the HTML-form on itself; the required information
+are passed via skel.structure, skel.value and skel.errors.</p>
+<p>A jinja2-macro, which builds such kind of forms, is shipped with the server.</p>
+<p>Any data in <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs is passed unmodified to the template.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>skel</strong> (<em>server.db.skeleton.Skeleton</em>) &#8211; Skeleton of the entry which should be modified.</li>
+<li><strong>tpl</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of a different template, which should be used instead of the default one.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns the emitted HTML response.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.editItemSuccess">
+<code class="descclassname">Render.</code><code class="descname">editItemSuccess</code><span class="sig-paren">(</span><em>skel</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.editItemSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page, informing that the entry has been successfully modified.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>skel</strong> (<em>server.db.skeleton.Skeleton</em>) &#8211; Skeleton which contains the data of the modified entity</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns the emitted HTML response.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.execRequest">
+<code class="descclassname">Render.</code><code class="descname">execRequest</code><span class="sig-paren">(</span><em>path</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.execRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 global: Perform an internal Request.</p>
+<p>This function allows to embed the result of another request inside the current template.
+All optional parameters are passed to the requested resource.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; Local part of the url, e.g. user/list. Must not start with an /.</td>
+</tr>
+</tbody>
+</table>
+<p>Must not include an protocol or hostname.
+:type path: str</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Whatever the requested resource returns. This is <em>not</em> limited to strings!</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.fetchList">
+<code class="descclassname">Render.</code><code class="descname">fetchList</code><span class="sig-paren">(</span><em>module</em>, <em>skel='viewSkel'</em>, <em>_noEmptyFilter=False</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.fetchList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 global: Fetches a list of entries which match the given filter criteria.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>module</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of the module from which list should be fetched.</li>
+<li><strong>skel</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of the skeleton that is used to fetching the list.</li>
+<li><strong>_noEmptyFilter</strong> &#8211; If True, this function will not return any results if at least one</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>parameter is an empty list. This is useful to prevent filtering (e.g. by key) not being
+performed because the list is empty.
+:type _noEmptyFilter: bool</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns a dict that contains the &#8220;skellist&#8221; and &#8220;cursor&#8221; information,</td>
+</tr>
+</tbody>
+</table>
+<p>or None on error case.
+:rtype: dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.getCurrentUser">
+<code class="descclassname">Render.</code><code class="descname">getCurrentUser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.getCurrentUser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 global: Returns the current user from the session, or None if not logged in.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A dict containing user data. Returns None if no user data is available.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.getEntry">
+<code class="descclassname">Render.</code><code class="descname">getEntry</code><span class="sig-paren">(</span><em>module</em>, <em>key=None</em>, <em>skel='viewSkel'</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.getEntry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 global: Fetch an entry from a given module, and return the data as a dict,
+prepared for direct use in the output.</p>
+<p>It is possible to specify a different data-model as the one used for rendering
+(e.g. an editSkel).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>module</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of the module, from which the data should be fetched.</li>
+<li><strong>key</strong> &#8211; Requested entity-key in an urlsafe-format. If the module is a Singleton</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>application, the parameter can be omitted.
+:type key: str</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>skel</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Specifies and optionally different data-model</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict on success, False on error.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict | bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.getEnv">
+<code class="descclassname">Render.</code><code class="descname">getEnv</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.getEnv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constucts the Jinja2 environment.</p>
+<p>If an application specifies an jinja2Env function, this function
+can alter the environment before its used to parse any template.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Extended Jinja2 environment.</td>
+</tr>
+</tbody>
+</table>
+<p>:rtype jinja2.Environment</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.getHostUrl">
+<code class="descclassname">Render.</code><code class="descname">getHostUrl</code><span class="sig-paren">(</span><em>forceSSL=False</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.getHostUrl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 global: Retrieve hostname with prototcol.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns the hostname, including the currently used protocol, e.g: <a class="reference external" href="http://www.example.com">http://www.example.com</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.getLanguage">
+<code class="descclassname">Render.</code><code class="descname">getLanguage</code><span class="sig-paren">(</span><em>resolveAlias=False</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.getLanguage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 global: Returns the language used for this request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>resolveAlias</strong> &#8211; If True, the function tries to resolve the current language</td>
+</tr>
+</tbody>
+</table>
+<p>using conf[&#8220;viur.languageAliasMap&#8221;].
+:type resolveAlias: bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.getLoaders">
+<code class="descclassname">Render.</code><code class="descname">getLoaders</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.getLoaders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of Jinja2 loaders which should be used.</p>
+<p>May be overridden to provide an alternative loader
+(e.g. for fetching templates from the datastore).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.getRequestParams">
+<code class="descclassname">Render.</code><code class="descname">getRequestParams</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.getRequestParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 global: Allows for accessing the request-parameters from the template.</p>
+<p>These returned values are escaped, as users tend to use these in an unsafe manner.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of parameter and values.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.getSession">
+<code class="descclassname">Render.</code><code class="descname">getSession</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.getSession" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 global: Allows templates to store variables server-side inside the session.</p>
+<p>Note: This is done in a separated part of the session for security reasons.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A dictionary of session variables.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.getSkel">
+<code class="descclassname">Render.</code><code class="descname">getSkel</code><span class="sig-paren">(</span><em>module</em>, <em>skel='viewSkel'</em>, <em>subSkel=None</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.getSkel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 global: Returns the skeleton structure instead of data for a module.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>module</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Module from which the skeleton is retrieved.</li>
+<li><strong>skel</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of the skeleton.</li>
+<li><strong>subSkel</strong> (<em>str or None</em>) &#8211; If set, return just that subskel instead of the whole skeleton</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.getTemplateFileName">
+<code class="descclassname">Render.</code><code class="descname">getTemplateFileName</code><span class="sig-paren">(</span><em>template</em>, <em>ignoreStyle=False</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.getTemplateFileName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the filename of the template.</p>
+<p>This function decides in which language and which style a given template is rendered.
+The style is provided as get-parameters for special-case templates that differ from
+their usual way.</p>
+<p>It is advised to override this function in case that
+<a class="reference internal" href="#server.render.jinja2.default.Render.getLoaders" title="server.render.jinja2.default.Render.getLoaders"><code class="xref py py-func docutils literal"><span class="pre">server.render.jinja2.default.Render.getLoaders()</span></code></a> is redefined.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>template</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The basename of the template to use.</li>
+<li><strong>ignoreStyle</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; Ignore any maybe given style hints.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Filename of the template</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.list">
+<code class="descclassname">Render.</code><code class="descname">list</code><span class="sig-paren">(</span><em>skellist</em>, <em>tpl=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a list of entries.</p>
+<p>Any data in <a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs is passed unmodified to the template.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>skellist</strong> (<em>server.db.skeleton.SkelList</em>) &#8211; List of Skeletons with entries to display.</li>
+<li><strong>tpl</strong> &#8211; Name of a different template, which should be used instead of the default one.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Param:</th><td class="field-body"><p class="first">tpl: str</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns the emitted HTML response.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.listRootNodeContents">
+<code class="descclassname">Render.</code><code class="descname">listRootNodeContents</code><span class="sig-paren">(</span><em>subdirs</em>, <em>entries</em>, <em>tpl=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.listRootNodeContents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders the contents of a given RootNode.</p>
+<p>This differs from list(), as one level in the tree-application may contains two different
+child-types: Entries and folders.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subdirs</strong> &#8211; List of (sub-)directories on the current level</li>
+<li><strong>entries</strong> (<em>server.db.skeleton.SkelList</em>) &#8211; List of entries of the current level</li>
+<li><strong>tpl</strong> &#8211; Name of a different template, which should be used instead of the default one</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Param:</th><td class="field-body"><p class="first">tpl: str</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns the emitted HTML response.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.listRootNodes">
+<code class="descclassname">Render.</code><code class="descname">listRootNodes</code><span class="sig-paren">(</span><em>repos</em>, <em>tpl=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.listRootNodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a list of available repositories.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>repos</strong> (<a class="reference internal" href="#server.render.pdf.default.Render.list" title="server.render.pdf.default.Render.list"><em>list</em></a>) &#8211; List of repositories (dict with &#8220;key&#8221;=&gt;Repo-Key and &#8220;name&#8221;=&gt;Repo-Name)</li>
+<li><strong>tpl</strong> &#8211; Name of a different template, which should be used instead of the default one.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Param:</th><td class="field-body"><p class="first">tpl: str</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns the emitted HTML response.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.moduleName">
+<code class="descclassname">Render.</code><code class="descname">moduleName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.moduleName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 global: Retrieve name of current module where this renderer is used within.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns the name of the current module, or empty string if there is no module set.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.modulePath">
+<code class="descclassname">Render.</code><code class="descname">modulePath</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.modulePath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 global: Retrieve path of current module the renderer is used within.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns the path of the current module, or empty string if there is no module set.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.quotePlus">
+<code class="descclassname">Render.</code><code class="descname">quotePlus</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.quotePlus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 filter: Make a string URL-safe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>val</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; String to be quoted.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Quoted string.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.renameSuccess">
+<code class="descclassname">Render.</code><code class="descname">renameSuccess</code><span class="sig-paren">(</span><em>rootNode</em>, <em>path</em>, <em>src</em>, <em>dest</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.renameSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page, informing that the entry has been successfully renamed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rootNode</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; RootNode-key in which the entry has been renamed</li>
+<li><strong>path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path in which the entry has been renamed</li>
+<li><strong>src</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Old name of the entry</li>
+<li><strong>dest</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; New name of the entry</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns the emitted HTML response.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.renderEmail">
+<code class="descclassname">Render.</code><code class="descname">renderEmail</code><span class="sig-paren">(</span><em>skel</em>, <em>tpl</em>, <em>dests</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.renderEmail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders an email.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>skel</strong> (<em>server.db.skeleton.Skeleton | dict</em>) &#8211; Skeleton or dict which data to supply to the template.</li>
+<li><strong>tpl</strong> &#8211; Name of the email-template to use. If this string is longer than 100 characters,</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>this string is interpreted as the template contents instead of its filename.
+:type tpl: str</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dests</strong> (<em>list | str</em>) &#8211; Destination recipients.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns a tuple consisting of email header and body.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str, str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.renderSkelStructure">
+<code class="descclassname">Render.</code><code class="descname">renderSkelStructure</code><span class="sig-paren">(</span><em>skel</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.renderSkelStructure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dumps the structure of a <code class="xref py py-class docutils literal"><span class="pre">server.db.skeleton.Skeleton</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>skel</strong> (<em>server.db.skeleton.Skeleton</em>) &#8211; Skeleton which structure will be processed.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The rendered dictionary.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.reparentSuccess">
+<code class="descclassname">Render.</code><code class="descname">reparentSuccess</code><span class="sig-paren">(</span><em>obj</em>, <em>tpl=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.reparentSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page informing that the item was successfully moved.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>obj</strong> (<em>ndb.Expando</em>) &#8211; ndb.Expando instance of the item that was moved.</li>
+<li><strong>tpl</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of a different template, which should be used instead of the default one</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.setIndexSuccess">
+<code class="descclassname">Render.</code><code class="descname">setIndexSuccess</code><span class="sig-paren">(</span><em>obj</em>, <em>tpl=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.setIndexSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page informing that the items sortindex was successfully changed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> (<em>ndb.Expando</em>) &#8211; ndb.Expando instance of the item that was changed</li>
+<li><strong>tpl</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of a different template, which should be used instead of the default one</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns the emitted HTML response.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.setSession">
+<code class="descclassname">Render.</code><code class="descname">setSession</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.setSession" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 global: Allows templates to store variables on server-side inside the session.</p>
+<p>Note: This is done in a separated part of the session for security reasons.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of the key</li>
+<li><strong>value</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#any" title="(in Python v2.7)"><em>any</em></a>) &#8211; Value to store with name.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.shortKey">
+<code class="descclassname">Render.</code><code class="descname">shortKey</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.shortKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 filter: Make a shortkey from an entity-key.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>val</strong> &#8211; Entity-key as string.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Shortkey on success, None on error.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.updateURL">
+<code class="descclassname">Render.</code><code class="descname">updateURL</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.updateURL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja2 global: Constructs a new URL based on the current requests url.</p>
+<p>Given parameters are replaced if they exists in the current requests url, otherwise there appended.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns a well-formed URL.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.jinja2.default.Render.view">
+<code class="descclassname">Render.</code><code class="descname">view</code><span class="sig-paren">(</span><em>skel</em>, <em>tpl=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.Render.view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a single entry.</p>
+<p>Any data in <a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs is passed unmodified to the template.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>skel</strong> &#8211; Skeleton to be displayed.</li>
+<li><strong>tpl</strong> &#8211; Name of a different template, which should be used instead of the default one.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Param:</th><td class="field-body"><p class="first">tpl: str</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns the emitted HTML response.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="server.render.jinja2.default.SkelListWrapper">
+<em class="property">class </em><code class="descclassname">server.render.jinja2.default.</code><code class="descname">SkelListWrapper</code><span class="sig-paren">(</span><em>src</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.jinja2.default.SkelListWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.render.jinja2.default.ListWrapper" title="server.render.jinja2.default.ListWrapper"><code class="xref py py-class docutils literal"><span class="pre">server.render.jinja2.default.ListWrapper</span></code></a></p>
+<p>Like ListWrapper, but takes the additional properties
+of skellist into account - namely cursor and customQueryInfo.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-server.render.json.default">
+<span id="json"></span><h2>Json<a class="headerlink" href="#module-server.render.json.default" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-server.render.pdf.default">
+<span id="pdf"></span><h2>PDF<a class="headerlink" href="#module-server.render.pdf.default" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="server.render.pdf.default.Render">
+<em class="property">class </em><code class="descclassname">server.render.pdf.default.</code><code class="descname">Render</code><span class="sig-paren">(</span><em>parent=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.render.jinja2.default.Render" title="server.render.jinja2.default.Render"><code class="xref py py-class docutils literal"><span class="pre">server.render.jinja2.default.Render</span></code></a></p>
+<dl class="attribute">
+<dt id="server.render.pdf.default.Render.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.render.pdf.default'</em><a class="headerlink" href="#server.render.pdf.default.Render.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>skel</em>, <em>tpl=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page for adding an entry.
+The template must construct the html-form itself; the required informations
+are passed as skel.structure, skel.value and skel.errors.
+An jinja2-macro, wich builds such an form, is shipped with the server.
+&#64;param skel: Skeleton of the entry which should be created
+&#64;type skel: Skeleton
+&#64;param tpl: Name of an different template, which should be used instead of the default one
+&#64;param: tpl: String</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.addDirSuccess">
+<code class="descname">addDirSuccess</code><span class="sig-paren">(</span><em>rootNode</em>, <em>path</em>, <em>dirname</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.addDirSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render an page, informing that the directory has been successfully created.
+&#64;param rootNode: RootNode-key in which the directory has been created
+&#64;type rootNode: String
+&#64;param path: Path in which the directory has been created
+&#64;type path: String:
+&#64;param dirname: Name of the newly created directory
+&#64;type dirname: string
+&#64;type skel: Skeleton</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.addItemSuccess">
+<code class="descname">addItemSuccess</code><span class="sig-paren">(</span><em>key</em>, <em>skel</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.addItemSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render an page, informing that the entry has been successfully created.
+&#64;param key: Urlsafe key of the new entry
+&#64;type key: String
+&#64;param skel: Skeleton which contains the data of the new entity
+&#64;type skel: Skeleton</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.copySuccess">
+<code class="descname">copySuccess</code><span class="sig-paren">(</span><em>srcrepo</em>, <em>srcpath</em>, <em>name</em>, <em>destrepo</em>, <em>destpath</em>, <em>type</em>, <em>deleteold</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.copySuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render an page, informing that an entry has been successfully copied/moved.
+&#64;param srcrepo: RootNode-key from which has been copied/moved
+&#64;type srcrepo: String
+&#64;param srcpath: Path from which the entry has been copied/moved
+&#64;type srcpath: String
+&#64;type name: Name of the entry which has been copied/moved
+&#64;type name: String
+&#64;param destrepo: RootNode-key to which has been copied/moved
+&#64;type destrepo: String
+&#64;param destpath: Path to which the entries has been copied/moved
+&#64;type destpath: String
+&#64;param type: &#8220;entry&#8221;: Copy/Move an entry, everything else: Copy/Move an directory
+&#64;type type: string
+&#64;param deleteold: &#8220;0&#8221;: Copy, &#8220;1&#8221;: Move
+&#64;type deleteold: string</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.deleteSuccess">
+<code class="descname">deleteSuccess</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.deleteSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render an page, informing that the entry has been successfully deleted.
+Parameters depends on the application calling this:
+List and Hierachy pass the key of the deleted Entry, while Tree passes the rootNode and path.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.edit">
+<code class="descname">edit</code><span class="sig-paren">(</span><em>skel</em>, <em>tpl=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.edit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page for modifying an entry.
+The template must construct the html-form itself; the required informations
+are passed as skel.structure, skel.value and skel.errors.
+An jinja2-macro, wich builds such an form, is shipped with the server.
+&#64;param skel: Skeleton of the entry which should be modified
+&#64;type skel: Skeleton
+&#64;param tpl: Name of an different template, which should be used instead of the default one
+&#64;param: tpl: String</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.editItemSuccess">
+<code class="descname">editItemSuccess</code><span class="sig-paren">(</span><em>skel</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.editItemSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render an page, informing that the entry has been successfully modified.
+&#64;param skel: Skeleton which contains the data of the new entity
+&#64;type skel: Skeleton</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.getLoaders">
+<code class="descname">getLoaders</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.getLoaders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the List of Jinja2-Loaders which should be used.
+May be overriden to provide an alternative loader
+(eg. fetch templates from the datastore).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.getTemplateFileName">
+<code class="descname">getTemplateFileName</code><span class="sig-paren">(</span><em>template</em>, <em>ignoreStyle=False</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.getTemplateFileName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the filename of the template.
+This decides in which language and which style a given template is rendered.
+If getLoaders if overriden, this method should be also.
+&#64;param template: Name of the template to use
+&#64;type template: string
+&#64;param ignoreStyle: Ignore any maybe given style hints
+&#64;type ignoreStyle: bool
+&#64;returns: Filename of the template</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.list">
+<code class="descname">list</code><span class="sig-paren">(</span><em>skellist</em>, <em>tpl=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a list of entries.
+&#64;param skellist: Skellist-instance which the entries to display
+&#64;type skellist: Skellist
+&#64;param tpl: Name of an different template, which should be used instead of the default one
+&#64;param: tpl: String</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.listRootNodeContents">
+<code class="descname">listRootNodeContents</code><span class="sig-paren">(</span><em>subdirs</em>, <em>entries</em>, <em>tpl=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.listRootNodeContents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders the contents of a given RootNode.
+This differs from list(), as one level in the tree-application may contains two different Child-Types: Entries and Folders.
+&#64;param subdirs: List of (sub-) Directories on the current level
+&#64;type repos: List
+&#64;param entries: Skellist-instance which the entries of the current level
+&#64;type entries: Skellist
+&#64;param tpl: Name of an different template, which should be used instead of the default one
+&#64;param: tpl: String</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.listRootNodes">
+<code class="descname">listRootNodes</code><span class="sig-paren">(</span><em>repos</em>, <em>tpl=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.listRootNodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a list of available repositories.
+&#64;param repos: List of repositories ( Dictionaries with &#8220;key&#8221;=&gt;Repo-Key and &#8220;name&#8221;=&gt;Repo-Name )
+&#64;type repos: List
+&#64;param tpl: Name of an different template, which should be used instead of the default one
+&#64;param: tpl: String</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.render.pdf.default.Render.pdfPath">
+<code class="descname">pdfPath</code><em class="property"> = 'pdf'</em><a class="headerlink" href="#server.render.pdf.default.Render.pdfPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.renameSuccess">
+<code class="descname">renameSuccess</code><span class="sig-paren">(</span><em>rootNode</em>, <em>path</em>, <em>src</em>, <em>dest</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.renameSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render an page, informing that an entry has been successfully renamed.
+&#64;param rootNode: RootNode-key in which the entry has been renamed
+&#64;type rootNode: String
+&#64;param path: Path in which the entry has been renamed
+&#64;type path: String:
+&#64;param src: Old name of the entry
+&#64;type src: string
+&#64;param dest: New name of the entry
+&#64;type dest: string
+&#64;type skel: Skeleton</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.reparentSuccess">
+<code class="descname">reparentSuccess</code><span class="sig-paren">(</span><em>repoObj</em>, <em>tpl=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.reparentSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page informing that the item was successfully moved.
+&#64;param repoObj: ndb.Expando instance of the item that was moved
+&#64;type repoObj: ndb.Expando
+&#64;param tpl: Name of an different template, which should be used instead of the default one
+&#64;param: tpl: String</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.setIndexSuccess">
+<code class="descname">setIndexSuccess</code><span class="sig-paren">(</span><em>dbobj</em>, <em>tpl=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.setIndexSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page informing that the items sortindex was successfully changed.
+&#64;param repoObj: ndb.Expando instance of the item that was changed
+&#64;type repoObj: ndb.Expando
+&#64;param tpl: Name of an different template, which should be used instead of the default one
+&#64;param: tpl: String</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.pdf.default.Render.view">
+<code class="descname">view</code><span class="sig-paren">(</span><em>skel</em>, <em>tpl=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.pdf.default.Render.view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders a page to display a single item
+&#64;param skel: Skeleton which contains the data of the entity
+&#64;type skel: Skeleton
+&#64;param tpl: Name of an different template, which should be used instead of the default one
+&#64;param: tpl: String</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-server.render.rss.default">
+<span id="rss"></span><h2>RSS<a class="headerlink" href="#module-server.render.rss.default" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="server.render.rss.default.DefaultRender">
+<em class="property">class </em><code class="descclassname">server.render.rss.default.</code><code class="descname">DefaultRender</code><span class="sig-paren">(</span><em>parent=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.rss.default.DefaultRender" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>This is a really simple render, providing data as RSS-Stream.
+Only list is supported.
+Each application must specify an &#8220;rssInfo&#8221; - dict, which gives this
+render additional information how the data should be formated.
+E.g.</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>rssInfo = {     &#8220;feed&#8221;: {       &#8220;title&#8221;: &#8220;My RSS Feed&#8221; , </dt>
+<dd><blockquote class="first">
+<div><blockquote>
+<div><p>&#8220;link&#8221;: &#8220;<a class="reference external" href="http://www.example.com">http://www.example.com</a>&#8221;,
+&#8220;descr&#8221;: &#8220;An example&#8221;, 
+&#8220;lang&#8221;: &#8220;en&#8221;, 
+&#8220;author&#8221;: &#8220;Me, Myself and I&#8221;, 
+&#8220;date&#8221;: datetime.now(),
+&#8220;image&#8221;: {      &#8220;url&#8221;:&#8221;<a class="reference external" href="https://example.com/image.jpg">https://example.com/image.jpg</a>&#8220;</p>
+<blockquote>
+<div>&#8220;title&#8221;:&#8221;My RSS Feed&#8221;,
+&#8220;link&#8221;:&#8221;<a class="reference external" href="https://example.com/">https://example.com/</a>&#8220;}</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p>},</p>
+</div></blockquote>
+<dl class="last docutils">
+<dt>&#8220;item&#8221;: {       &#8220;title&#8221;: lambda skel: skel.name.value, </dt>
+<dd>&#8220;descr&#8221;: lambda skel: skel.descr.value[ : 255], 
+&#8220;link&#8221;: lambda skel: &#8220;<a class="reference external" href="http://example.com/calender/view/%s">http://example.com/calender/view/%s</a>&#8221; % skel.id.value, 
+&#8220;id&#8221;: lambda skel: skel.id.value, 
+&#8220;date&#8221;: lambda skel: skel.creationdate.value
+}</dd>
+</dl>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>Each value can be eiter a string, any callable taking no arguments in &#8220;feed&#8221; and one argument (the skeleton) in &#8220;item&#8221;, or a datetime object.
+Its possible to return datetime-objects from the callable.
+Each key in &#8220;feed&#8221; and &#8220;item&#8221; can be missing (it will be filled with default values), however the structure rssInfo = { &#8220;feed&#8221;: {},&#8221;item&#8221;: {} } must be present.</p>
+<dl class="attribute">
+<dt id="server.render.rss.default.DefaultRender.__dict__">
+<code class="descname">__dict__</code><em class="property"> = dict_proxy({'__module__': 'server.render.rss.default', 'postamble': &lt;string.Template object at 0x1048b4590&gt;, '__weakref__': &lt;attribute '__weakref__' of 'DefaultRender' objects&gt;, 'image': &lt;string.Template object at 0x1048b4550&gt;, 'list': &lt;function list at 0x104a74aa0&gt;, '__getattr__': &lt;function __getattr__ at 0x104a74a28&gt;, 'item': &lt;string.Template object at 0x1048b4510&gt;, '__dict__': &lt;attribute '__dict__' of 'DefaultRender' objects&gt;, 'preamble': &lt;string.Template object at 0x1048b44d0&gt;, '__doc__': '\n\t\tThis is a really simple render, providing data as RSS-Stream.\n\t\tOnly list is supported.\n\t\tEach application must specify an &quot;rssInfo&quot; - dict, which gives this\n\t\trender additional information how the data should be formated.\n\t\tE.g.\n\t\t\trssInfo = { \t&quot;feed&quot;: {\t&quot;title&quot;: &quot;My RSS Feed&quot; , \n\t\t\t\t\t\t\t\t&quot;link&quot;: &quot;http://www.example.com&quot;,\n\t\t\t\t\t\t\t\t&quot;descr&quot;: &quot;An example&quot;, \n\t\t\t\t\t\t\t\t&quot;lang&quot;: &quot;en&quot;, \n\t\t\t\t\t\t\t\t&quot;author&quot;: &quot;Me, Myself and I&quot;, \n\t\t\t\t\t\t\t\t&quot;date&quot;: datetime.now(),\n\t\t\t\t\t\t\t\t&quot;image&quot;: {\t&quot;url&quot;:&quot;https://example.com/image.jpg&quot;\n\t\t\t\t\t\t\t\t\t\t\t&quot;title&quot;:&quot;My RSS Feed&quot;,\n\t\t\t\t\t\t\t\t\t\t\t&quot;link&quot;:&quot;https://example.com/&quot;}\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t&quot;item&quot;: {\t&quot;title&quot;: lambda skel: skel.name.value, \n\t\t\t\t\t\t\t\t&quot;descr&quot;: lambda skel: skel.descr.value[ : 255], \n\t\t\t\t\t\t\t\t&quot;link&quot;: lambda skel: &quot;http://example.com/calender/view/%s&quot; % skel.id.value, \n\t\t\t\t\t\t\t\t&quot;id&quot;: lambda skel: skel.id.value, \n\t\t\t\t\t\t\t\t&quot;date&quot;: lambda skel: skel.creationdate.value\n\t\t\t\t\t\t\t\t}\n\t\t\t}\n\t\tEach value can be eiter a string, any callable taking no arguments in &quot;feed&quot; and one argument (the skeleton) in &quot;item&quot;, or a datetime object.\n\t\tIts possible to return datetime-objects from the callable.\n\t\tEach key in &quot;feed&quot; and &quot;item&quot; can be missing (it will be filled with default values), however the structure rssInfo = { &quot;feed&quot;: {},&quot;item&quot;: {} } must be present.\n\t', '__init__': &lt;function __init__ at 0x104a749b0&gt;})</em><a class="headerlink" href="#server.render.rss.default.DefaultRender.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.render.rss.default.DefaultRender.__getattr__">
+<code class="descname">__getattr__</code><span class="sig-paren">(</span><em>attr</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.rss.default.DefaultRender.__getattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Catch all attempts to access a different render-function except of list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.render.rss.default.DefaultRender.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>parent=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.rss.default.DefaultRender.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.render.rss.default.DefaultRender.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.render.rss.default'</em><a class="headerlink" href="#server.render.rss.default.DefaultRender.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.render.rss.default.DefaultRender.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#server.render.rss.default.DefaultRender.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.render.rss.default.DefaultRender.image">
+<code class="descname">image</code><em class="property"> = &lt;string.Template object&gt;</em><a class="headerlink" href="#server.render.rss.default.DefaultRender.image" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.render.rss.default.DefaultRender.item">
+<code class="descname">item</code><em class="property"> = &lt;string.Template object&gt;</em><a class="headerlink" href="#server.render.rss.default.DefaultRender.item" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.render.rss.default.DefaultRender.list">
+<code class="descname">list</code><span class="sig-paren">(</span><em>skellist</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.render.rss.default.DefaultRender.list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.render.rss.default.DefaultRender.postamble">
+<code class="descname">postamble</code><em class="property"> = &lt;string.Template object&gt;</em><a class="headerlink" href="#server.render.rss.default.DefaultRender.postamble" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.render.rss.default.DefaultRender.preamble">
+<code class="descname">preamble</code><em class="property"> = &lt;string.Template object&gt;</em><a class="headerlink" href="#server.render.rss.default.DefaultRender.preamble" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="vi">
+<h2>Vi<a class="headerlink" href="#vi" title="Permalink to this headline">¶</a></h2>
+<p>Like the admin-render, this is a clone of the json render.
+The only customisation is that access to this render is restricted to users having &#8216;admin&#8217; or &#8216;root&#8217; access.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/viur.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Renders</a><ul>
+<li><a class="reference internal" href="#admin">Admin</a></li>
+<li><a class="reference internal" href="#jinja2">Jinja2</a></li>
+<li><a class="reference internal" href="#module-server.render.json.default">Json</a></li>
+<li><a class="reference internal" href="#module-server.render.pdf.default">PDF</a></li>
+<li><a class="reference internal" href="#module-server.render.rss.default">RSS</a></li>
+<li><a class="reference internal" href="#vi">Vi</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="common-used.html" title="previous chapter">Other commonly accessed functionality</a></li>
+      <li>Next: <a href="session.html" title="next chapter">Sessions</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/renders.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <script>
+        
+    $(document).ready(function() {
+        $('#popuplogin').click(function(e) {
+               e.stopPropagation();
+        });
+    });
+    
+    
+        $(document).ready(function () {
+            $('#hamburgericon').click(function () {
+                $(".sphinxsidebarwrapper").fadeIn(100);
+                $("#fcside").fadeIn(100);
+                $("body").css({ overflow: 'hidden' });
+            });
+        });
+    
+        $(document).ready(function () {
+            $('#fcside').click(function () {
+                $("body").css({ overflow: 'inherit' });
+                $(".sphinxsidebarwrapper").fadeOut(100);
+                $("#fcside").fadeOut(100);
+            });
+        });
+        
+            
+        var thescroll=0;
+        var scrolling =false;
+
+    function scrolleventhandler (e) {
+
+        if( thescroll > $(window).scrollTop()){
+            scrolldir=-1;
+        }else{
+            scrolldir=1;
+        }
+        thescroll=$(window).scrollTop();
+        wh=parseInt($("body").css("height").replace("px", ""))
+
+        if (scrolldir>0) {
+            $('.logo').addClass("is-scrolled");
+            $('.is2').addClass("is-scrolled2");
+            $('.is3').addClass("is-scrolled3");
+            $('.is4').addClass("is-scrolled4");
+            $('.is5').addClass("is-scrolled5");
+            $('.viur').addClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').addClass("is-scrolled7");
+            
+        } else {
+            $('.logo').removeClass("is-scrolled");
+            $('.is2').removeClass("is-scrolled2");
+            $('.is3').removeClass("is-scrolled3");
+            $('.is4').removeClass("is-scrolled4");
+            $('.is5').removeClass("is-scrolled5");
+            $('.viur').removeClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').removeClass("is-scrolled7");
+            
+        }
+
+    }
+    
+	$(window).scroll(scrolleventhandler);
+	$(window).resize(scrolleventhandler);
+    </script>
+    
+    
+<header class="is2">
+	<div class="binding">
+
+		<div class="logo">
+			<a href="#">
+				<img class="is7" src="_static/viur.png" title="ViUR - Information System">
+			</a>
+			<h3 class="is3">Information System</h3>
+		</div>
+
+		<div class="topnav  no-mobil">
+			<ul class="topnavlist is2">
+				<li>
+					<a class="viur is2 is4" href="#">
+						<h2 class="is5">Download</h2>
+						<span class="is3">Win | Mac | Linux</span>
+					</a>
+				</li>
+				<li>
+					<a class="community is2 is4" href="#">
+						<h2 class="is5">Community</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+				<li>
+					<a class="develop is2 is4" href="#">
+						<h2 class="is5">Development</h2>
+						<span class="is3">Source Code | GIT</span>
+					</a>
+				</li>
+				<li>
+					<a class="docu is2 is4" href="#">
+						<h2 class="not-mobile is5">Documentation</h2>
+						<h2 class="not-desktop is5">Docs</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+	</div>
+</header>
+    
+    <div id="fcside"></div>
+    <div class="footer">
+      &copy;2015, Mausbrand Informationssysteme GmbH.
+      
+      | <a href="/impressum">Impressum</a> |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4a0+</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/renders.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

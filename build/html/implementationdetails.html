@@ -1,0 +1,434 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Implementation Details &mdash; ViUR Server 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/mbtemplate.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ViUR Server 1.1.0 documentation" href="index.html" />
+    <link rel="prev" title="Tasks" href="tasks.html" />
+   
+  
+  <link rel="icon" href="_static/favicon.png" type="image/png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="implementation-details">
+<h1>Implementation Details<a class="headerlink" href="#implementation-details" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="relations">
+<h2>Relations<a class="headerlink" href="#relations" title="Permalink to this headline">¶</a></h2>
+<p>ViUR provides relations ontop of the non-relational datastore. In the following we&#8217;ll explain how these relations are
+implemented, what are the limits of this implementation and how much overhead it produces.</p>
+<div class="section" id="filtering-by-properties-of-the-referenced-object">
+<h3>Filtering by properties of the referenced object<a class="headerlink" href="#filtering-by-properties-of-the-referenced-object" title="Permalink to this headline">¶</a></h3>
+<p>In ViUR, the actual implementation of relations depend on their type. For n:1 relations (i.e. an object is referring
+<em>one</em> other object, we can simply copy the id (and everything from <cite>refKeys</cite>) into the referring object.
+Assume we have a Skeleton &#8220;Product&#8221; consisting of a Name, Price and Category, with Categrory being a reference
+to separate Skeleton &#8220;Category&#8221;.</p>
+<div class="align-center figure" id="id5">
+<img alt="Datamodel for this example of n:1 Relations" src="_images/relations1.png" />
+<p class="caption"><span class="caption-text">Datamodel for this example of n:1 Relations</span></p>
+</div>
+<p>Lets assume that <em>id</em>, <em>available</em> and <em>active</em> is in the refKeys for that relation, so we can filter by products which
+are in a category, which is available in a given region and generally active.
+The final object written to the datastore for our product will be denormalized and look like the following</p>
+<div class="align-center figure" id="id6">
+<img alt="Deserialized object in the datastore" src="_images/relations2.png" />
+<p class="caption"><span class="caption-text">Deserialized object in the datastore</span></p>
+</div>
+<p>For n:m relations, this trick won&#8217;t work. We would get a list of values for each referenced property, collecting all
+values for that property from all referenced objects at once:</p>
+<div class="align-center figure" id="id7">
+<img alt="Deserialized object in the datastore if we do n:m relations that way" src="_images/relations3.png" />
+<p class="caption"><span class="caption-text">Deserialized object in the datastore if we do n:m relations that way</span></p>
+</div>
+<p>Now filtering by two properties of the referenced object could mess up. If we would filter by products which&#8217;s category
+is available in a given region <em>and</em> is active, the query would also return results, which have at least one active
+category, and one (possibly <em>different</em>) category that&#8217;s available in the given region.
+So assume we&#8217;ve referenced two categories, one available in [&#8220;de&#8221;,&#8221;at&#8221;,&#8221;ch&#8221;] and being active, the other one not active
+and available in [&#8220;gb&#8221;, &#8220;us&#8221;], a query by active=True <em>and</em> available=&#8221;gb&#8221; should not yield that entity as a result.
+Yet, with this model, it does. So it&#8217;s impossible to enforce that both requirements are meet by the same referenced category.</p>
+<p>So for n:m relations, ViUR uses a different approach. We&#8217;ll just store the Json-Encoded data from the referenced object
+inside the referring object (so that fetching this object from the datastore contains all required information needed
+for that relational bone, so we don&#8217;t need to fetch the referenced entity also). To allow efficient filtering, we
+create an new object in the datastore for each object referenced. We&#8217;ll copy each property named in refKeys from the
+referenced object into this new object (prefixed with &#8220;dest.&#8221;), and each property named in parentKeys from the referring
+object. Also the key of the referring and referred, their kinds and the name of the relationalBone are written to these
+objects.</p>
+<div class="align-center figure" id="id8">
+<img alt="Example of viur-relation objects" src="_images/relations4.png" />
+<p class="caption"><span class="caption-text">Example of viur-relation objects</span></p>
+</div>
+<p>As a further optimisation, we&#8217;ll store theses viur-relation objects under the referring object (the referring object
+becomes the parent for these objects). So while querying using viur-relations, we&#8217;ll only fetch the keys of these
+objects machtech - never the viur-relations objects itself.
+Having the keys, we can extract the keys of the parent from these keys and we can fetch them directly.</p>
+</div>
+<div class="section" id="updating-values">
+<h3>Updating values<a class="headerlink" href="#updating-values" title="Permalink to this headline">¶</a></h3>
+<p>The second challenge is keeping this data consistent. As we copy data from the referenced object either into the
+referring object or into itermediate viur-relation objects, we need a way to update this data if the referred object
+is edited. As the viur-relation objects are updated each time the referring object is saved, we&#8217;ll only need to cover
+the case the referred object changes. So everytime a skeleton is updated, ViUR creates a deferred task, which checks
+the viur-relation table if this entity is referenced by any other entity and updates these entries accordingly.
+For n:1 relations, we could either check the data-models if there are any n:1 to the kind of the entry changed (which
+might require several queries and indexes, or we could also write a small viur-relational entry. We&#8217;ve choosed to write
+the viur-relational entry (just containing the keys and kinds of both entries and name of the bone) so we can save a lot
+of compound indexes here. There are also some other tweaks to keep the overhead low, like writing a last update
+timestamp into these objects, so an object won&#8217;t get updated twice if it contains two seperate relations to the changed
+object.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Theses updates don&#8217;t cascade. If you name properties in refKeys, which have been copied in the referenced entity
+itself by another relation there, this won&#8217;t be updated! So if you have
+Entry a &#8211;&gt; relation1 &#8211;&gt; Entry b &#8211;&gt; relation2 &#8211;&gt; Entry c
+and Entry c is updated, <em>only</em> data in Entry b gets updated too. If you have listed something like &#8220;relation2.name&#8221;
+in the refKeys of relation1, this will be missed and Entry a (or its viur-relation object&#8217;s) will still contain
+the old value for relation2.name</p>
+</div>
+</div>
+</div>
+<div class="section" id="randomslicebone">
+<h2>RandomSliceBone<a class="headerlink" href="#randomslicebone" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>To demonstrate the implementation-details, we&#8217;ll use an Example of selecting two randomly chosen elements from a set
+of 15 entities in the datastore with <a href="#id1"><span class="problematic" id="id2">*</span></a>slices*=2, <a href="#id3"><span class="problematic" id="id4">*</span></a>sliceSize*=1 and fetch a total of two entities (amount=2).
+In order to simulate the orderby=random from traditional databases, this bone writes a randomly chosen float from
+[0..1) along with the entry saved to the datastore. Each time the skeleton is updated, this randomly chosen value
+also updated.</p>
+<div class="align-center figure" id="id9">
+<img alt="Implemenation-Details for randomSliceBone" src="_images/randomSliceBone1.png" />
+<p class="caption"><span class="caption-text">Example representation of our random float value from the 15 Entries</span></p>
+</div>
+<p>Now, if a randomly chosen set of entries is requested by fetching a list with orderby=random,
+this bone shuffles a new random-value for each slice we are going to fetch from the datastore.
+This allows us to select these entities, which random properties are closest to the random value we&#8217;ve chosen.
+So for each slice 2 subqueries are send to the datastore: Entities, which random property are &lt;= our random value
+(sorted descending), and entities which random property is &gt; our random value.</p>
+<div class="align-center figure" id="id10">
+<img alt="Implemenation-Details for randomSliceBone" src="_images/randomSliceBone2.png" />
+<p class="caption"><span class="caption-text">Example from above, with 2 randomly chosen slices and the entites we&#8217;ve fetched from the datastore</span></p>
+</div>
+<p>To increase the randomness of entities returned, we&#8217;ve now fetched four times the amount of entities requested.
+In the last step, we select randomly select the two entities we&#8217;ll return from these eight entities we&#8217;ve fetched.</p>
+<div class="align-center figure" id="id11">
+<img alt="Implemenation-Details for randomSliceBone" src="_images/randomSliceBone3.png" />
+<p class="caption"><span class="caption-text">Entites actually returned in black</span></p>
+</div>
+</div></blockquote>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In the default configuration of two slices and a sliceSize of 0.5, each request using orderby=random uses 2 times
+more datastore quota than a normal request. This can be reduced to a single db read overhead by setting slices=1
+and sliceSize=0.5. But this also reduces the actual randomness of the entities returned. On the other hand it&#8217;s
+possible to increase the randomness by increasing slices and/or sliceSize (which will use up more quota in turn).</p>
+</div>
+</div>
+<div class="section" id="spatialbone">
+<h2>SpatialBone<a class="headerlink" href="#spatialbone" title="Permalink to this headline">¶</a></h2>
+<p>The (Geo-)spatial Bone implements proximity searches. It provides a somewhat efficient way to retrieve entities,
+which are closest to a given point. Our algorithm is based on two assumptions:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p class="first">The region we&#8217;re searching is small enough to ignore errors introduced by transferring the spherical earth surface
+into a flat map. This means you cannot search the whole world. Your data must be limited to a
+region/country/continent.</p>
+</li>
+<li><p class="first">The region is larger than the actual area of interest. This means that there&#8217;s a predefined limit on distance, in
+which results are useful. It&#8217;s okay to discard results outside of this limit, even if they would have been the
+closest ones.
+.. Example:</p>
+<div class="highlight-python"><div class="highlight"><pre>If you query your application to the next Pub, you might expect results within a range of 100km. A Pub in
+500km distance would probably be useless to you - even if it would be the closest one, so it&#39;s okay if this
+algorithm doesn&#39;t find it.
+</pre></div>
+</div>
+</li>
+</ol>
+</div></blockquote>
+<p>Use this bone only if your use-case meet these assumptions!</p>
+<p>Lets assume we have a very sparse map, got a point somewhere inside and want to get the entries close around.</p>
+<blockquote>
+<div><div class="align-center figure" id="id12">
+<img alt="Implemenation-Details for randomSliceBone" src="_images/spatialBone1.png" />
+<p class="caption"><span class="caption-text">A sparse map, our position and the elements close around</span></p>
+</div>
+</div></blockquote>
+<p>Our algorithm uses a sweepline to fetch the points close to the given position. So one subquery is performed for each
+possible direction on the map (North/South/East/West), which fetches the next n Points in the given direction</p>
+<p>Lets assume we have a very sparse map, got a point somewhere inside and want to get the entries close around.</p>
+<blockquote>
+<div><div class="align-center figure" id="id13">
+<img alt="Implemenation-Details for randomSliceBone" src="_images/spatialBone2.png" />
+<p class="caption"><span class="caption-text">Start of the first Sweepline</span></p>
+</div>
+<div class="align-center figure" id="id14">
+<img alt="Implemenation-Details for randomSliceBone" src="_images/spatialBone3.png" />
+<p class="caption"><span class="caption-text">End of the first Sweepline after 5 processed points</span></p>
+</div>
+<div class="align-center figure" id="id15">
+<img alt="Implemenation-Details for randomSliceBone" src="_images/spatialBone4.png" />
+<p class="caption"><span class="caption-text">Final result after running all four sweepline. Processed points in green, Points that have been seen multiple
+times in yellow.</span></p>
+</div>
+</div></blockquote>
+<p>While this simple approach catches all points in the close surrounding, is also catches points far outside the
+area of intrest.</p>
+<blockquote>
+<div><div class="align-center figure" id="id16">
+<img alt="Implemenation-Details for randomSliceBone" src="_images/spatialBone5.png" />
+<p class="caption"><span class="caption-text">Points that have been processed, but that are way too far from the area of interest</span></p>
+</div>
+</div></blockquote>
+<p>This gets even worse if the map is more dense populated.</p>
+<blockquote>
+<div><div class="align-center figure" id="id17">
+<img alt="Implemenation-Details for randomSliceBone" src="_images/spatialBone6.png" />
+<p class="caption"><span class="caption-text">Processed points in a more dense map</span></p>
+</div>
+</div></blockquote>
+<p>This is where the second assumpion comes in hand.
+We split the map into alleys that are three times wider than the limit on distance that we&#8217;ll consider. So if your
+use-case requires a distance up to 100km, a alley will be roughly 300km width/height.
+Allys will overlap (an ally will start each 100km)</p>
+<blockquote>
+<div><div class="align-center figure" id="id18">
+<img alt="Implemenation-Details for randomSliceBone" src="_images/spatialBone7.png" />
+<p class="caption"><span class="caption-text">First two overlapping alleys</span></p>
+</div>
+</div></blockquote>
+<p>This has two implications. First, every point lies within up to three allys. And there is always at least one ally,
+which boarders have at least 100km distance to the given point.</p>
+<blockquote>
+<div><div class="align-center figure" id="id19">
+<img alt="Implemenation-Details for randomSliceBone" src="_images/spatialBone8.png" />
+<p class="caption"><span class="caption-text">Ally, which borders are at least 100km distance to the given point</span></p>
+</div>
+</div></blockquote>
+<p>Now its possible to limit the sweepline to points inside this special ally. If apply this alleys on both directions
+we can limit each sweepline to ignore points outside the area of interest.</p>
+<blockquote>
+<div><div class="align-center figure" id="id20">
+<img alt="Implemenation-Details for randomSliceBone" src="_images/spatialBone9.png" />
+<p class="caption"><span class="caption-text">Both allys with the first sweepline executed</span></p>
+</div>
+</div></blockquote>
+<p>After running all four sweeplines we can sort the fetched results by distance and we can determine the guranteed
+correctness, ie. the distance for which we can prove that there can&#8217;t be any points we&#8217;ve missed.
+Our algorithm may return points further away, but there might be points in between which we could have missed.</p>
+<blockquote>
+<div><div class="align-center figure" id="id21">
+<img alt="Implemenation-Details for randomSliceBone" src="_images/spatialBone10.png" />
+<p class="caption"><span class="caption-text">Size of the minimum guranteed correctness distance</span></p>
+</div>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/viur.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Implementation Details</a><ul>
+<li><a class="reference internal" href="#relations">Relations</a><ul>
+<li><a class="reference internal" href="#filtering-by-properties-of-the-referenced-object">Filtering by properties of the referenced object</a></li>
+<li><a class="reference internal" href="#updating-values">Updating values</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#randomslicebone">RandomSliceBone</a></li>
+<li><a class="reference internal" href="#spatialbone">SpatialBone</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="tasks.html" title="previous chapter">Tasks</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/implementationdetails.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <script>
+        
+    $(document).ready(function() {
+        $('#popuplogin').click(function(e) {
+               e.stopPropagation();
+        });
+    });
+    
+    
+        $(document).ready(function () {
+            $('#hamburgericon').click(function () {
+                $(".sphinxsidebarwrapper").fadeIn(100);
+                $("#fcside").fadeIn(100);
+                $("body").css({ overflow: 'hidden' });
+            });
+        });
+    
+        $(document).ready(function () {
+            $('#fcside').click(function () {
+                $("body").css({ overflow: 'inherit' });
+                $(".sphinxsidebarwrapper").fadeOut(100);
+                $("#fcside").fadeOut(100);
+            });
+        });
+        
+            
+        var thescroll=0;
+        var scrolling =false;
+
+    function scrolleventhandler (e) {
+
+        if( thescroll > $(window).scrollTop()){
+            scrolldir=-1;
+        }else{
+            scrolldir=1;
+        }
+        thescroll=$(window).scrollTop();
+        wh=parseInt($("body").css("height").replace("px", ""))
+
+        if (scrolldir>0) {
+            $('.logo').addClass("is-scrolled");
+            $('.is2').addClass("is-scrolled2");
+            $('.is3').addClass("is-scrolled3");
+            $('.is4').addClass("is-scrolled4");
+            $('.is5').addClass("is-scrolled5");
+            $('.viur').addClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').addClass("is-scrolled7");
+            
+        } else {
+            $('.logo').removeClass("is-scrolled");
+            $('.is2').removeClass("is-scrolled2");
+            $('.is3').removeClass("is-scrolled3");
+            $('.is4').removeClass("is-scrolled4");
+            $('.is5').removeClass("is-scrolled5");
+            $('.viur').removeClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').removeClass("is-scrolled7");
+            
+        }
+
+    }
+    
+	$(window).scroll(scrolleventhandler);
+	$(window).resize(scrolleventhandler);
+    </script>
+    
+    
+<header class="is2">
+	<div class="binding">
+
+		<div class="logo">
+			<a href="#">
+				<img class="is7" src="_static/viur.png" title="ViUR - Information System">
+			</a>
+			<h3 class="is3">Information System</h3>
+		</div>
+
+		<div class="topnav  no-mobil">
+			<ul class="topnavlist is2">
+				<li>
+					<a class="viur is2 is4" href="#">
+						<h2 class="is5">Download</h2>
+						<span class="is3">Win | Mac | Linux</span>
+					</a>
+				</li>
+				<li>
+					<a class="community is2 is4" href="#">
+						<h2 class="is5">Community</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+				<li>
+					<a class="develop is2 is4" href="#">
+						<h2 class="is5">Development</h2>
+						<span class="is3">Source Code | GIT</span>
+					</a>
+				</li>
+				<li>
+					<a class="docu is2 is4" href="#">
+						<h2 class="not-mobile is5">Documentation</h2>
+						<h2 class="not-desktop is5">Docs</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+	</div>
+</header>
+    
+    <div id="fcside"></div>
+    <div class="footer">
+      &copy;2015, Mausbrand Informationssysteme GmbH.
+      
+      | <a href="/impressum">Impressum</a> |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4a0+</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/implementationdetails.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

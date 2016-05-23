@@ -1,0 +1,295 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Shop &mdash; ViUR Server 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mbtemplate.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="ViUR Server 1.1.0 documentation" href="../index.html" />
+    <link rel="next" title="User" href="user.html" />
+    <link rel="prev" title="Modules" href="index.html" />
+   
+  
+  <link rel="icon" href="_static/favicon.png" type="image/png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="shop">
+<h1>Shop<a class="headerlink" href="#shop" title="Permalink to this headline">¶</a></h1>
+<p>ViUR offers a order module, providing a step by step checkout process,
+integration of payment service providers like paypal or sofort.com and a simple state machine helping
+the user keeping track of the state of individual orders.</p>
+<p>[Bild Statemachine]</p>
+<p>The module is mostly usable out of the box, but it needs some information&#8217;s about what it should process.
+First, it assumes that you use the cart module. If you don’t, you probably need to override the checkout function,
+catch the case when step and id are None, and store the information what the user is about to order yourself.
+Second, you must override the method <code class="xref py py-func docutils literal"><span class="pre">server.modules.order.Order.getBillItems()</span></code>, which returns a list on items to put on the bill for
+the given order-id. Its also recommended to override the <code class="xref py py-func docutils literal"><span class="pre">server.modules.order.Order.getBillPdf()</span></code> and
+<code class="xref py py-func docutils literal"><span class="pre">server.modules.order.Order.getDeliverNotePdf()</span></code> methods.
+If overridden, they must return the bill/deliverynote as a PDF bytestring.
+It also provides server hooks like <code class="xref py py-func docutils literal"><span class="pre">server.modules.order.Order.sendOrderPayedEmai()</span></code>},
+which can be used to trigger custom actions if an order reaches the corresponding state.
+If the default functionality isn&#8217;t enough, it can be customized in several ways.</p>
+<p>The module-level property <a href="#id1"><span class="problematic" id="id2">:py:attribute:`server.modules.order.Order.steps`</span></a> describes the steps the user has to go through in order to complete the checkout process.
+Each step usually consist of one skeleton presented to the user (fe. the bill or shipping address).
+If you need to query more or less data from the user during the checkout process, just add or remove
+skeletons from that steps property. The property <em>mainHander</em> always references a skeleton.
+The mode is either view (the skeletons data is just displayed to the user, but hes unable to alter that data) or edit.
+<em>Skeleton</em> names the skeleton presented to the user, template the name of the template used to render
+that skeleton and descr a human-readable descripton for that step.
+Its possible to hook additional logic to the checkout-process using <em>preHandler</em> and <em>postHandler</em>.
+Each can hold a callable (or a list of callables) executed either before the skeleton of that step
+is presented to the user (preHandler) or after the user submitted valid information&#8217;s for that step (postHandler).
+Each handler can inject an html-page into the checkout process by raising the <a href="#id3"><span class="problematic" id="id4">:py:exception:`server.modules.order.Order.ReturnHtml`</span></a> exception.
+For preHandlers its also possible to skip the step they&#8217;re executed in by raising <a href="#id5"><span class="problematic" id="id6">:py:exception:`server.modules.order.Order.SkipStep`</span></a>
+(Note that this also skips any remaining pre/post Handlers of that step).
+If the default state-machine doesnt fit your needs, it can be extended by registering your own states
+(by overriding the states-property) and hooking the predefined set*State* methods.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">It is not recommend to remove existing states from the module.
+If you need distinct groups of invoice numbers for different sets of items you are selling, override the assignBillSequence.</p>
+</div>
+<div class="section" id="paypal">
+<h2>Paypal<a class="headerlink" href="#paypal" title="Permalink to this headline">¶</a></h2>
+<p>To activate Paypal in your Shop, you need to request an API-Key from Paypal first.</p>
+<blockquote>
+<div><ul class="simple">
+<li>Login to you Account</li>
+<li>Choose My Account -&gt; Profile -&gt; My Settings</li>
+<li>Select API Access (under Account Information)</li>
+<li>Choose Option 2 - Request API credentials to create your own API username and password.</li>
+</ul>
+</div></blockquote>
+<p>Now you&#8217;ll see the API-Credentials for your account.
+Finally, add them to your configuration</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">conf</span><span class="p">[</span><span class="s2">&quot;paypal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;USER&#39;</span> <span class="p">:</span> <span class="s1">&#39;&lt;your API user&gt;&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;PWD&#39;</span> <span class="p">:</span> <span class="s1">&#39;&lt;your API password&gt;&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;SIGNATURE&#39;</span> <span class="p">:</span> <span class="s1">&#39;&lt;your API signature&#39;</span>
+                 <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sofort-com">
+<h2>Sofort.com<a class="headerlink" href="#sofort-com" title="Permalink to this headline">¶</a></h2>
+<p>For Sofort.com ViUR needs your UserID, ProjectID, ProjectPassword and NotificationPassword.
+Login to your Account and create a new <strong>classic project</strong>.
+Set its Success-URL to <em>https://{Your APP-ID}.appspot.com/order/doSofort</em>, its cancel/failure URL
+to <em>https://{Your APP-ID}.appspot.com/order/sofortFailed</em> and enable HTTP-Post notifications to
+<em>https://{Your APP-ID}.appspot.com/order/sofortStatus</em>.
+Select My Project -&gt; Select your Project -&gt; Advanced Settings -&gt; Password and Hash-Algorithm.
+Select Create/Display your Project and Notification Password. Finally, set Input-Validation to SHA512.
+Configure ViUR to use these newly created credentials.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">conf</span><span class="p">[</span><span class="s2">&quot;sofort&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;userid&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;your user id&gt;&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;projectid&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;project id&gt;&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;projectpassword&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;project password&gt;&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;notificationpassword&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;notification password&gt;&quot;</span>
+                  <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/viur.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Shop</a><ul>
+<li><a class="reference internal" href="#paypal">Paypal</a></li>
+<li><a class="reference internal" href="#sofort-com">Sofort.com</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Modules</a></li>
+      <li>Next: <a href="user.html" title="next chapter">User</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/modules/order.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <script>
+        
+    $(document).ready(function() {
+        $('#popuplogin').click(function(e) {
+               e.stopPropagation();
+        });
+    });
+    
+    
+        $(document).ready(function () {
+            $('#hamburgericon').click(function () {
+                $(".sphinxsidebarwrapper").fadeIn(100);
+                $("#fcside").fadeIn(100);
+                $("body").css({ overflow: 'hidden' });
+            });
+        });
+    
+        $(document).ready(function () {
+            $('#fcside').click(function () {
+                $("body").css({ overflow: 'inherit' });
+                $(".sphinxsidebarwrapper").fadeOut(100);
+                $("#fcside").fadeOut(100);
+            });
+        });
+        
+            
+        var thescroll=0;
+        var scrolling =false;
+
+    function scrolleventhandler (e) {
+
+        if( thescroll > $(window).scrollTop()){
+            scrolldir=-1;
+        }else{
+            scrolldir=1;
+        }
+        thescroll=$(window).scrollTop();
+        wh=parseInt($("body").css("height").replace("px", ""))
+
+        if (scrolldir>0) {
+            $('.logo').addClass("is-scrolled");
+            $('.is2').addClass("is-scrolled2");
+            $('.is3').addClass("is-scrolled3");
+            $('.is4').addClass("is-scrolled4");
+            $('.is5').addClass("is-scrolled5");
+            $('.viur').addClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').addClass("is-scrolled7");
+            
+        } else {
+            $('.logo').removeClass("is-scrolled");
+            $('.is2').removeClass("is-scrolled2");
+            $('.is3').removeClass("is-scrolled3");
+            $('.is4').removeClass("is-scrolled4");
+            $('.is5').removeClass("is-scrolled5");
+            $('.viur').removeClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').removeClass("is-scrolled7");
+            
+        }
+
+    }
+    
+	$(window).scroll(scrolleventhandler);
+	$(window).resize(scrolleventhandler);
+    </script>
+    
+    
+<header class="is2">
+	<div class="binding">
+
+		<div class="logo">
+			<a href="#">
+				<img class="is7" src="_static/viur.png" title="ViUR - Information System">
+			</a>
+			<h3 class="is3">Information System</h3>
+		</div>
+
+		<div class="topnav  no-mobil">
+			<ul class="topnavlist is2">
+				<li>
+					<a class="viur is2 is4" href="#">
+						<h2 class="is5">Download</h2>
+						<span class="is3">Win | Mac | Linux</span>
+					</a>
+				</li>
+				<li>
+					<a class="community is2 is4" href="#">
+						<h2 class="is5">Community</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+				<li>
+					<a class="develop is2 is4" href="#">
+						<h2 class="is5">Development</h2>
+						<span class="is3">Source Code | GIT</span>
+					</a>
+				</li>
+				<li>
+					<a class="docu is2 is4" href="#">
+						<h2 class="not-mobile is5">Documentation</h2>
+						<h2 class="not-desktop is5">Docs</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+	</div>
+</header>
+    
+    <div id="fcside"></div>
+    <div class="footer">
+      &copy;2015, Mausbrand Informationssysteme GmbH.
+      
+      | <a href="/impressum">Impressum</a> |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4a0+</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="../_sources/modules/order.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

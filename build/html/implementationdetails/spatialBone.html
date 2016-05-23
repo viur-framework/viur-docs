@@ -1,0 +1,306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>SpatialBone &mdash; ViUR Server 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mbtemplate.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="ViUR Server 1.1.0 documentation" href="../index.html" />
+   
+  
+  <link rel="icon" href="_static/favicon.png" type="image/png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="spatialbone">
+<h1>SpatialBone<a class="headerlink" href="#spatialbone" title="Permalink to this headline">¶</a></h1>
+<p>The (Geo-)spatial Bone implements proximity searches. It provides a somewhat efficient way to retrieve entities,
+which are closest to a given point. Our algorithm is based on two assumptions:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p class="first">The region we&#8217;re searching is small enough to ignore errors introduced by transferring the spherical earth surface
+into a flat map. This means you cannot search the whole world. Your data must be limited to a
+region/country/continent.</p>
+</li>
+<li><p class="first">The region is larger than the actual area of interest. This means that there&#8217;s a predefined limit on distance, in
+which results are useful. It&#8217;s okay to discard results outside of this limit, even if they would have been the
+closest ones.
+.. Example:</p>
+<div class="highlight-python"><div class="highlight"><pre>If you query your application to the next Pub, you might expect results within a range of 100km. A Pub in
+500km distance would probably be useless to you - even if it would be the closest one, so it&#39;s okay if this
+algorithm doesn&#39;t find it.
+</pre></div>
+</div>
+</li>
+</ol>
+</div></blockquote>
+<p>Use this bone only if your use-case meet these assumptions!</p>
+<p>Lets assume we have a very sparse map, got a point somewhere inside and want to get the entries close around.</p>
+<blockquote>
+<div><div class="align-center figure" id="id1">
+<img alt="Implemenation-Details for randomSliceBone" src="implementationdetails/images/implementationdetails/spatialBone1.png" />
+<p class="caption"><span class="caption-text">A sparse map, our position and the elements close around</span></p>
+</div>
+</div></blockquote>
+<p>Our algorithm uses a sweepline to fetch the points close to the given position. So one subquery is performed for each
+possible direction on the map (North/South/East/West), which fetches the next n Points in the given direction</p>
+<p>Lets assume we have a very sparse map, got a point somewhere inside and want to get the entries close around.</p>
+<blockquote>
+<div><div class="align-center figure" id="id2">
+<img alt="Implemenation-Details for randomSliceBone" src="implementationdetails/images/implementationdetails/spatialBone2.png" />
+<p class="caption"><span class="caption-text">Start of the first Sweepline</span></p>
+</div>
+<div class="align-center figure" id="id3">
+<img alt="Implemenation-Details for randomSliceBone" src="implementationdetails/images/implementationdetails/spatialBone3.png" />
+<p class="caption"><span class="caption-text">End of the first Sweepline after 5 processed points</span></p>
+</div>
+<div class="align-center figure" id="id4">
+<img alt="Implemenation-Details for randomSliceBone" src="implementationdetails/images/implementationdetails/spatialBone4.png" />
+<p class="caption"><span class="caption-text">Final result after running all four sweepline. Processed points in green, Points that have been seen multiple
+times in yellow.</span></p>
+</div>
+</div></blockquote>
+<p>While this simple approach catches all points in the close surrounding, is also catches points far outside the
+area of intrest.</p>
+<blockquote>
+<div><div class="align-center figure" id="id5">
+<img alt="Implemenation-Details for randomSliceBone" src="implementationdetails/images/implementationdetails/spatialBone5.png" />
+<p class="caption"><span class="caption-text">Points that have been processed, but that are way too far from the area of interest</span></p>
+</div>
+</div></blockquote>
+<p>This gets even worse if the map is more dense populated.</p>
+<blockquote>
+<div><div class="align-center figure" id="id6">
+<img alt="Implemenation-Details for randomSliceBone" src="implementationdetails/images/implementationdetails/spatialBone6.png" />
+<p class="caption"><span class="caption-text">Processed points in a more dense map</span></p>
+</div>
+</div></blockquote>
+<p>This is where the second assumpion comes in hand.
+We split the map into alleys that are three times wider than the limit on distance that we&#8217;ll consider. So if your
+use-case requires a distance up to 100km, a alley will be roughly 300km width/height.
+Allys will overlap (an ally will start each 100km)</p>
+<blockquote>
+<div><div class="align-center figure" id="id7">
+<img alt="Implemenation-Details for randomSliceBone" src="implementationdetails/images/implementationdetails/spatialBone7.png" />
+<p class="caption"><span class="caption-text">First two overlapping alleys</span></p>
+</div>
+</div></blockquote>
+<p>This has two implications. First, every point lies within up to three allys. And there is always at least one ally,
+which boarders have at least 100km distance to the given point.</p>
+<blockquote>
+<div><div class="align-center figure" id="id8">
+<img alt="Implemenation-Details for randomSliceBone" src="implementationdetails/images/implementationdetails/spatialBone8.png" />
+<p class="caption"><span class="caption-text">Ally, which borders are at least 100km distance to the given point</span></p>
+</div>
+</div></blockquote>
+<p>Now its possible to limit the sweepline to points inside this special ally. If apply this alleys on both directions
+we can limit each sweepline to ignore points outside the area of interest.</p>
+<blockquote>
+<div><div class="align-center figure" id="id9">
+<img alt="Implemenation-Details for randomSliceBone" src="implementationdetails/images/implementationdetails/spatialBone9.png" />
+<p class="caption"><span class="caption-text">Both allys with the first sweepline executed</span></p>
+</div>
+</div></blockquote>
+<p>After running all four sweeplines we can sort the fetched results by distance and we can determine the guranteed
+correctness, ie. the distance for which we can prove that there can&#8217;t be any points we&#8217;ve missed.
+Our algorithm may return points further away, but there might be points in between which we could have missed.</p>
+<blockquote>
+<div><div class="align-center figure" id="id10">
+<img alt="Implemenation-Details for randomSliceBone" src="implementationdetails/images/implementationdetails/spatialBone10.png" />
+<p class="caption"><span class="caption-text">Size of the minimum guranteed correctness distance</span></p>
+</div>
+</div></blockquote>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/viur.png" alt="Logo"/>
+            </a></p><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/implementationdetails/spatialBone.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <script>
+        
+    $(document).ready(function() {
+        $('#popuplogin').click(function(e) {
+               e.stopPropagation();
+        });
+    });
+    
+    
+        $(document).ready(function () {
+            $('#hamburgericon').click(function () {
+                $(".sphinxsidebarwrapper").fadeIn(100);
+                $("#fcside").fadeIn(100);
+                $("body").css({ overflow: 'hidden' });
+            });
+        });
+    
+        $(document).ready(function () {
+            $('#fcside').click(function () {
+                $("body").css({ overflow: 'inherit' });
+                $(".sphinxsidebarwrapper").fadeOut(100);
+                $("#fcside").fadeOut(100);
+            });
+        });
+        
+            
+        var thescroll=0;
+        var scrolling =false;
+
+    function scrolleventhandler (e) {
+
+        if( thescroll > $(window).scrollTop()){
+            scrolldir=-1;
+        }else{
+            scrolldir=1;
+        }
+        thescroll=$(window).scrollTop();
+        wh=parseInt($("body").css("height").replace("px", ""))
+
+        if (scrolldir>0) {
+            $('.logo').addClass("is-scrolled");
+            $('.is2').addClass("is-scrolled2");
+            $('.is3').addClass("is-scrolled3");
+            $('.is4').addClass("is-scrolled4");
+            $('.is5').addClass("is-scrolled5");
+            $('.viur').addClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').addClass("is-scrolled7");
+            
+        } else {
+            $('.logo').removeClass("is-scrolled");
+            $('.is2').removeClass("is-scrolled2");
+            $('.is3').removeClass("is-scrolled3");
+            $('.is4').removeClass("is-scrolled4");
+            $('.is5').removeClass("is-scrolled5");
+            $('.viur').removeClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').removeClass("is-scrolled7");
+            
+        }
+
+    }
+    
+	$(window).scroll(scrolleventhandler);
+	$(window).resize(scrolleventhandler);
+    </script>
+    
+    
+<header class="is2">
+	<div class="binding">
+
+		<div class="logo">
+			<a href="#">
+				<img class="is7" src="_static/viur.png" title="ViUR - Information System">
+			</a>
+			<h3 class="is3">Information System</h3>
+		</div>
+
+		<div class="topnav  no-mobil">
+			<ul class="topnavlist is2">
+				<li>
+					<a class="viur is2 is4" href="#">
+						<h2 class="is5">Download</h2>
+						<span class="is3">Win | Mac | Linux</span>
+					</a>
+				</li>
+				<li>
+					<a class="community is2 is4" href="#">
+						<h2 class="is5">Community</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+				<li>
+					<a class="develop is2 is4" href="#">
+						<h2 class="is5">Development</h2>
+						<span class="is3">Source Code | GIT</span>
+					</a>
+				</li>
+				<li>
+					<a class="docu is2 is4" href="#">
+						<h2 class="not-mobile is5">Documentation</h2>
+						<h2 class="not-desktop is5">Docs</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+	</div>
+</header>
+    
+    <div id="fcside"></div>
+    <div class="footer">
+      &copy;2015, Mausbrand Informationssysteme GmbH.
+      
+      | <a href="/impressum">Impressum</a> |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4a0+</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="../_sources/implementationdetails/spatialBone.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

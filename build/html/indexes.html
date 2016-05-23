@@ -1,0 +1,250 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Indexes &mdash; ViUR Server 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/mbtemplate.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ViUR Server 1.1.0 documentation" href="index.html" />
+    <link rel="next" title="Modules" href="modules/index.html" />
+    <link rel="prev" title="Storing Data" href="db.html" />
+   
+  
+  <link rel="icon" href="_static/favicon.png" type="image/png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="indexes">
+<h1>Indexes<a class="headerlink" href="#indexes" title="Permalink to this headline">¶</a></h1>
+<p>The datastore doesn&#8217;t provide a good and efficient method for pagination.
+In traditional relational (SQL) databases, it&#8217;s common to implement pagination using skip - ignoring
+results before the given page and fetch only the results of the requested page.
+This is possible on the datastore too, but is highly inefficient. Each skipped result costs time and one small-op.
+Therefore, ViUR doesn&#8217;t provide support for this pagination method.
+The recommended method for pagination on the GAE is using cursors. While this approach is efficient,
+it has one mayor drawback: It doesn&#8217;t allow for random access. The user is forced to click <a href="#id1"><span class="problematic" id="id2">``</span></a>next page&#8217;&#8217; five
+times to reach the fifth page, he cannot jump to that page directly.
+ViUR provides a functionality which solves that problem under certain circumstances.
+It can store an index for each query in the datastore, containing a list of start-cursors (one for each page).
+This way, it&#8217;s possible to provide efficient random access to lists.
+As said, this works only under certain circumstances:</p>
+<blockquote>
+<div><ul class="simple">
+<li>You <em>must</em> know all possible querys in advance. This implies that the total number of queries is limited.</li>
+</ul>
+<blockquote>
+<div>Note that queries with the same structure, but with different parameters are different queries in this case
+(price$gt=5 and price$gt=10 are <em>different</em> queries!).</div></blockquote>
+<ul class="simple">
+<li>On adding/editing/deleting an entry, you <em>must</em> be able to name all queries that might contain this entry.</li>
+<li>The average write-rate per index <em>should</em> not exceed 1/min. It wont fail if it does, but its efficiency will decrease!</li>
+</ul>
+</div></blockquote>
+<p>If these requirements are meet, using an index is easy.
+Create a new instance of the indexmannager, specifying the pageSize (number of results per page) and maxPage (upper bound of pages).
+The pageSize must match the limit of the queries run later.
+Then just create your datastore query as usual (by calling db.Query or skel.all()) and call
+<a class="reference internal" href="server_api.html#server.indexes.IndexMannager.cursorForQuery" title="server.indexes.IndexMannager.cursorForQuery"><code class="xref py py-func docutils literal"><span class="pre">server.indexes.IndexMannager.cursorForQuery()</span></code></a> with this query and the page the user requested.
+It will return an cursor that points to the first element of the requested page. If the page is out-of-range for
+the given query (or it exceeds maxPages), None is returned (which can still be safely passed to query.setCursor as it means <a href="#id3"><span class="problematic" id="id4">``</span></a>first page&#8217;&#8216;).
+Alternatively it&#8217;s possible to call <a class="reference internal" href="server_api.html#server.indexes.IndexMannager.getPages" title="server.indexes.IndexMannager.getPages"><code class="xref py py-func docutils literal"><span class="pre">server.indexes.IndexMannager.getPages()</span></code></a> with that query,
+returning a list of startcursors (one cursor per page).
+The length of that list equals the total amout of pages available for this query.
+If an entry is added/edited/deleted, create the queries that might contain this entry (again using db.Query() or skel.all()) and pass these
+queries to <a class="reference internal" href="server_api.html#server.indexes.IndexMannager.refreshIndex" title="server.indexes.IndexMannager.refreshIndex"><code class="xref py py-func docutils literal"><span class="pre">server.indexes.IndexMannager.refreshIndex()</span></code></a>.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/viur.png" alt="Logo"/>
+            </a></p><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="db.html" title="previous chapter">Storing Data</a></li>
+      <li>Next: <a href="modules/index.html" title="next chapter">Modules</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/indexes.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <script>
+        
+    $(document).ready(function() {
+        $('#popuplogin').click(function(e) {
+               e.stopPropagation();
+        });
+    });
+    
+    
+        $(document).ready(function () {
+            $('#hamburgericon').click(function () {
+                $(".sphinxsidebarwrapper").fadeIn(100);
+                $("#fcside").fadeIn(100);
+                $("body").css({ overflow: 'hidden' });
+            });
+        });
+    
+        $(document).ready(function () {
+            $('#fcside').click(function () {
+                $("body").css({ overflow: 'inherit' });
+                $(".sphinxsidebarwrapper").fadeOut(100);
+                $("#fcside").fadeOut(100);
+            });
+        });
+        
+            
+        var thescroll=0;
+        var scrolling =false;
+
+    function scrolleventhandler (e) {
+
+        if( thescroll > $(window).scrollTop()){
+            scrolldir=-1;
+        }else{
+            scrolldir=1;
+        }
+        thescroll=$(window).scrollTop();
+        wh=parseInt($("body").css("height").replace("px", ""))
+
+        if (scrolldir>0) {
+            $('.logo').addClass("is-scrolled");
+            $('.is2').addClass("is-scrolled2");
+            $('.is3').addClass("is-scrolled3");
+            $('.is4').addClass("is-scrolled4");
+            $('.is5').addClass("is-scrolled5");
+            $('.viur').addClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').addClass("is-scrolled7");
+            
+        } else {
+            $('.logo').removeClass("is-scrolled");
+            $('.is2').removeClass("is-scrolled2");
+            $('.is3').removeClass("is-scrolled3");
+            $('.is4').removeClass("is-scrolled4");
+            $('.is5').removeClass("is-scrolled5");
+            $('.viur').removeClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').removeClass("is-scrolled7");
+            
+        }
+
+    }
+    
+	$(window).scroll(scrolleventhandler);
+	$(window).resize(scrolleventhandler);
+    </script>
+    
+    
+<header class="is2">
+	<div class="binding">
+
+		<div class="logo">
+			<a href="#">
+				<img class="is7" src="_static/viur.png" title="ViUR - Information System">
+			</a>
+			<h3 class="is3">Information System</h3>
+		</div>
+
+		<div class="topnav  no-mobil">
+			<ul class="topnavlist is2">
+				<li>
+					<a class="viur is2 is4" href="#">
+						<h2 class="is5">Download</h2>
+						<span class="is3">Win | Mac | Linux</span>
+					</a>
+				</li>
+				<li>
+					<a class="community is2 is4" href="#">
+						<h2 class="is5">Community</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+				<li>
+					<a class="develop is2 is4" href="#">
+						<h2 class="is5">Development</h2>
+						<span class="is3">Source Code | GIT</span>
+					</a>
+				</li>
+				<li>
+					<a class="docu is2 is4" href="#">
+						<h2 class="not-mobile is5">Documentation</h2>
+						<h2 class="not-desktop is5">Docs</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+	</div>
+</header>
+    
+    <div id="fcside"></div>
+    <div class="footer">
+      &copy;2015, Mausbrand Informationssysteme GmbH.
+      
+      | <a href="/impressum">Impressum</a> |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4a0+</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/indexes.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tasks &mdash; ViUR Server 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/mbtemplate.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ViUR Server 1.1.0 documentation" href="index.html" />
+    <link rel="next" title="Implementation Details" href="implementationdetails.html" />
+    <link rel="prev" title="Sessions" href="session.html" />
+   
+  
+  <link rel="icon" href="_static/favicon.png" type="image/png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="tasks">
+<h1>Tasks<a class="headerlink" href="#tasks" title="Permalink to this headline">¶</a></h1>
+<p>ViUR comes with a sophisticated interface for tasks, providing a standardized way of
+having a function called in a regular interval, providing an interface for tasks that
+can be called by the user on demand, and deferring functionality from the current request.</p>
+<div class="section" id="time-based">
+<h2>Time based<a class="headerlink" href="#time-based" title="Permalink to this headline">¶</a></h2>
+<p>A common problem on the GAE is having certain functionality executed in a regular interval.
+ViUR simplifies this down to a decorator. Just wrap a function with :py:decorator:&#8217;server.tasks.PeriodicTask&#8217; and
+ViUR will call it in a regular interval.
+The decorator takes one argument - the interval.
+ViUR will not call your function faster than once in each interval-minutes.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is the <em>lower</em> bound. There is no guarantee that it will be called
+each &#8216;interval&#8217; minutes. The upper bound is defined in cron.yaml and currently defaults
+to each 4 hours.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Time-based tasks can be a bound or unbound Function. If a function is bound (defined
+in a class) it will be called once for each module derived from this class. If there is no instance
+of its class, it won&#8217;t be called. If its unbound (defined at module-level) it will be called,
+regardless if any Class in its module is used or not.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">There&#8217;s currently only a main loop which calls all function scheduled for execution. It has a time-limit of 10 minutes.
+If your task takes more than a few minutes to execute, you should defer that code. Otherwise your tasks (all tasks in total)
+might exceed these 10 minutes, which causes the request to be aborted despite not all tasks had been called yet.</p>
+</div>
+</div>
+<div class="section" id="deferred">
+<h2>Deferred<a class="headerlink" href="#deferred" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes its necessary to delay the execution of some specific code, so it won&#8217;t slow down the
+response of the current request. ViUR provides the <a href="#id1"><span class="problematic" id="id2">:py:decorator:`server.tasks.callDefered`</span></a> Decorator for such cases.
+A function decorated this way will never execute in the context of the current request. All calls to
+such a function are catched, its parameters serialized, and a task is created to call this function later.
+These calls are executed in a deferred task which can run up to 10 minutes. As these tasks run deferred, they run outside
+of the current context where they had been created. ViUR however will preserve the following two values:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The currently logged in user (if any). If the task was created in the context of a known user, calls to utils.getCurrentUser()
+will return the same values as it would have returned when the task had been created.</li>
+<li>The language used for the request. Within the deferred task any calls to i18N functions provided by ViUR will yield
+results in the language of the original request.</li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<blockquote>
+<div>A deferred function cannot return a value! The return-value for the code calling such a function</div></blockquote>
+<p class="last">will always be None, and any return-value generated by the function (when its actually called) will be discarded.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This replaces the deferred-api provided by the GAE itself. Don&#8217;t use it - it will break assumptions
+made by ViUR!</p>
+</div>
+</div>
+<div class="section" id="on-demand">
+<h2>On Demand<a class="headerlink" href="#on-demand" title="Permalink to this headline">¶</a></h2>
+<p>The third use-case for tasks is on demand: A task that&#8217;s run infrequently by the user.
+One example is our rebuild searchindex task: If changes are made to a data-model (ie. include
+the contents of a Bone in the fulltext search), and there is already data in the datastore
+created by the old model, its necessary to update the searchindex, as it doesn&#8217;t contain
+the contents of that bone yet.
+It would be a waste of resources if rebuild each index frequently.
+So this task is only called on demand. If the developer has made changes to the datamodel,
+he calls that task once for the affected index.
+Creating such a task is also easy, its a Class derived from <a class="reference internal" href="#server.tasks.CallableTaskBase" title="server.tasks.CallableTaskBase"><code class="xref py py-class docutils literal"><span class="pre">server.tasks.CallableTaskBase</span></code></a> and decorated with
+<a href="#id3"><span class="problematic" id="id4">:py:decorator:`server.tasks.CallableTask`</span></a>. The derived subclass must override the following properties and functions.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="25%" />
+<col width="63%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Type</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>id</td>
+<td>Property (String)</td>
+<td>An unique identifier for this task.</td>
+</tr>
+<tr class="row-odd"><td>name</td>
+<td>Property (String)</td>
+<td>A short human-readable description</td>
+</tr>
+<tr class="row-even"><td>descr</td>
+<td>Property (String)</td>
+<td>A longer explanation</td>
+</tr>
+<tr class="row-odd"><td>canCall</td>
+<td>Function</td>
+<td>Must return True if the current user (if any) is allowed
+to execute that task. Return False otherwise.</td>
+</tr>
+<tr class="row-even"><td>dataSkel</td>
+<td>Function or Skeleton-class</td>
+<td>If your tasks need additional Input (ie: which searchindex?)
+from the user, query him by returning an skeleton.
+Return None if you don&#8217;t need any information.</td>
+</tr>
+<tr class="row-odd"><td>execute</td>
+<td>Function</td>
+<td>Does the actual work. If you returned a skeleton in <em>dataSkel</em>,
+the values of that Skeleton are passed as keyword arguments.</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="server.tasks.CallableTaskBase">
+<em class="property">class </em><code class="descclassname">server.tasks.</code><code class="descname">CallableTaskBase</code><a class="headerlink" href="#server.tasks.CallableTaskBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for user-callable tasks.
+Must be subclassed.</p>
+<dl class="method">
+<dt id="server.tasks.CallableTaskBase.canCall">
+<code class="descname">canCall</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.tasks.CallableTaskBase.canCall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks wherever the current user can execute this task
+&#64;returns bool</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="server.tasks.noRetry">
+<code class="descclassname">server.tasks.</code><code class="descname">noRetry</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#server.tasks.noRetry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prevents a deferred Function from beeing called a second time</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="server.tasks.callDeferred">
+<code class="descclassname">server.tasks.</code><code class="descname">callDeferred</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#server.tasks.callDeferred" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a decorator, which allways calls the function deferred.
+Unlike Googles implementation, this one works (with bound functions)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="server.tasks.PeriodicTask">
+<code class="descclassname">server.tasks.</code><code class="descname">PeriodicTask</code><span class="sig-paren">(</span><em>intervall</em><span class="sig-paren">)</span><a class="headerlink" href="#server.tasks.PeriodicTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator to call a function periodic during maintenance.
+Intervall defines a lower bound for the call-frequency for this task;
+it will not be called faster than each intervall minutes.
+(Note that the actual delay between two sequent might be much larger)
+&#64;param intervall: Call at most every intervall minutes. 0 means call as often as possible.
+&#64;type intervall: Int</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="server.tasks.CallableTask">
+<code class="descclassname">server.tasks.</code><code class="descname">CallableTask</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="headerlink" href="#server.tasks.CallableTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Marks a Class as representing a user-callable Task.
+It <em>should</em> extend CallableTaskBase and <em>must</em> provide
+its API</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="server.tasks.StartupTask">
+<code class="descclassname">server.tasks.</code><code class="descname">StartupTask</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="headerlink" href="#server.tasks.StartupTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Functions decorated with this are called shortly at instance startup.
+It&#8217;s <em>not</em> guaranteed that they actually run on the instance that just started up!
+Wrapped functions must not take any arguments.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/viur.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tasks</a><ul>
+<li><a class="reference internal" href="#time-based">Time based</a></li>
+<li><a class="reference internal" href="#deferred">Deferred</a></li>
+<li><a class="reference internal" href="#on-demand">On Demand</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="session.html" title="previous chapter">Sessions</a></li>
+      <li>Next: <a href="implementationdetails.html" title="next chapter">Implementation Details</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/tasks.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <script>
+        
+    $(document).ready(function() {
+        $('#popuplogin').click(function(e) {
+               e.stopPropagation();
+        });
+    });
+    
+    
+        $(document).ready(function () {
+            $('#hamburgericon').click(function () {
+                $(".sphinxsidebarwrapper").fadeIn(100);
+                $("#fcside").fadeIn(100);
+                $("body").css({ overflow: 'hidden' });
+            });
+        });
+    
+        $(document).ready(function () {
+            $('#fcside').click(function () {
+                $("body").css({ overflow: 'inherit' });
+                $(".sphinxsidebarwrapper").fadeOut(100);
+                $("#fcside").fadeOut(100);
+            });
+        });
+        
+            
+        var thescroll=0;
+        var scrolling =false;
+
+    function scrolleventhandler (e) {
+
+        if( thescroll > $(window).scrollTop()){
+            scrolldir=-1;
+        }else{
+            scrolldir=1;
+        }
+        thescroll=$(window).scrollTop();
+        wh=parseInt($("body").css("height").replace("px", ""))
+
+        if (scrolldir>0) {
+            $('.logo').addClass("is-scrolled");
+            $('.is2').addClass("is-scrolled2");
+            $('.is3').addClass("is-scrolled3");
+            $('.is4').addClass("is-scrolled4");
+            $('.is5').addClass("is-scrolled5");
+            $('.viur').addClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').addClass("is-scrolled7");
+            
+        } else {
+            $('.logo').removeClass("is-scrolled");
+            $('.is2').removeClass("is-scrolled2");
+            $('.is3').removeClass("is-scrolled3");
+            $('.is4').removeClass("is-scrolled4");
+            $('.is5').removeClass("is-scrolled5");
+            $('.viur').removeClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').removeClass("is-scrolled7");
+            
+        }
+
+    }
+    
+	$(window).scroll(scrolleventhandler);
+	$(window).resize(scrolleventhandler);
+    </script>
+    
+    
+<header class="is2">
+	<div class="binding">
+
+		<div class="logo">
+			<a href="#">
+				<img class="is7" src="_static/viur.png" title="ViUR - Information System">
+			</a>
+			<h3 class="is3">Information System</h3>
+		</div>
+
+		<div class="topnav  no-mobil">
+			<ul class="topnavlist is2">
+				<li>
+					<a class="viur is2 is4" href="#">
+						<h2 class="is5">Download</h2>
+						<span class="is3">Win | Mac | Linux</span>
+					</a>
+				</li>
+				<li>
+					<a class="community is2 is4" href="#">
+						<h2 class="is5">Community</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+				<li>
+					<a class="develop is2 is4" href="#">
+						<h2 class="is5">Development</h2>
+						<span class="is3">Source Code | GIT</span>
+					</a>
+				</li>
+				<li>
+					<a class="docu is2 is4" href="#">
+						<h2 class="not-mobile is5">Documentation</h2>
+						<h2 class="not-desktop is5">Docs</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+	</div>
+</header>
+    
+    <div id="fcside"></div>
+    <div class="footer">
+      &copy;2015, Mausbrand Informationssysteme GmbH.
+      
+      | <a href="/impressum">Impressum</a> |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4a0+</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/tasks.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

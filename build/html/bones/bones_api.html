@@ -1,0 +1,2841 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Bones &mdash; ViUR Server 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mbtemplate.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="ViUR Server 1.1.0 documentation" href="../index.html" />
+    <link rel="next" title="Skeletons" href="../skeletons.html" />
+    <link rel="prev" title="Getting started" href="../quickstart.html" />
+   
+  
+  <link rel="icon" href="_static/favicon.png" type="image/png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="bones">
+<h1>Bones<a class="headerlink" href="#bones" title="Permalink to this headline">¶</a></h1>
+<p>The bones define which datatypes are supported by ViUR. The following table lists all bones shipped with ViUR, but it&#8217;s
+also possible to implement custom bones on a per-project base.</p>
+<div class="section" id="datatypes">
+<h2>Datatypes<a class="headerlink" href="#datatypes" title="Permalink to this headline">¶</a></h2>
+<p>The following data-types are provided by ViUR (in lexical order).</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="34%" />
+<col width="47%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Usecase</th>
+<th class="head">Parameters</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>baseBone</td>
+<td>Base class for all bones.
+Every custom-bone must subclass this.
+Its not used by the system directly,
+but it can be used to store additional
+data computed by the system.</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>defaultValue (None): Preinitialize this bone with the</dt>
+<dd><p class="first last">given value.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>required (False): Require the user to supply a <em>valid</em></dt>
+<dd><p class="first last">value for this bone (i.e. this field. cannot be
+left blank). Whats <em>valid</em> for this bone depends
+on the specific subclass.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>params (None): Optional dictionary which will be</dt>
+<dd><p class="first last">passed along with the bone to the admin and
+templates. Put project-specific data here.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>multiple (False): Allow this bone to have more than</dt>
+<dd><p class="first last">one value. Not supported by all subclasses
+(eg. password).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>indexed (False): Include its value in the searchindex.</dt>
+<dd><dl class="first last docutils">
+<dt>Whats exactly included is determined by the</dt>
+<dd><p class="first last">subclass.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>vfunc (None): Function, which checks if a given</dt>
+<dd><p class="first last">value is valid. Subclasses can override isInvalid
+instead. If multiple values are allowed, this is
+called once for each value.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>readOnly (False): If true, prevents the user from</dt>
+<dd><p class="first last">modifying the value. Its still possible to set
+its value from within the application by assigning
+to bone.value.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>visible (True): If false, this bone wont show up in</dt>
+<dd><p class="first last">add/edit forms. Nevertheless its possible for the
+template to expose its value in list/view.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>booleanBone</td>
+<td>Stores a Yes/No choice.
+Derives from selectOne.</td>
+<td><em>(no additional parameters)</em></td>
+</tr>
+<tr class="row-even"><td>captchaBone</td>
+<td><p class="first">Renders a captcha. It&#8217;s value is not
+stored inside the datastore. This bone
+is always required (except on the local
+development server where its displayed
+but not validated).
+Don&#8217;t include this into entities
+editable by the admin (or remove the</p>
+<blockquote>
+<div>Captcha from the skeleton if its build</div></blockquote>
+<p class="last">for an admin),as the admin is not
+capable of displaying captchas.</p>
+</td>
+<td><ul class="first last">
+<li><p class="first">required: Parameter ignored and always True</p>
+</li>
+<li><dl class="first docutils">
+<dt>publicKey (None): Google&#8217;s ReCaptcha - PublicKey.</dt>
+<dd><p class="first last">If None, its tried to read from
+conf[&#8216;viur.captcha.publicKey&#8217;]</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>privateKey (None): Google&#8217;s ReCaptcha - privateKey.</dt>
+<dd><p class="first last">If None, its tried to read from
+conf[&#8216;viur.captcha.privateKey&#8217;]</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>colorBone</td>
+<td>Allows selecting a color. Its stored in
+HTML-Hex notation. Dynamically supports
+4/8 Bits/Pixel (e.g. #00FFCC or #0FC)</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>mode (enum): Color-mode to use.</dt>
+<dd><p class="first last">Either &#8216;rgb&#8217; or &#8216;rgba&#8217;.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>dateBone</td>
+<td>Stores a date, a time, or both.</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>creationMagic (False): If True, this bone will store</dt>
+<dd><p class="first last">the current date/time if a new entity is saved.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>updateMagic (False): If True, always store the current</dt>
+<dd><p class="first last">date/time if the entity is saved.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>date (True): Store the Date-Part. If False, only the</dt>
+<dd><p class="first last">time will be saved.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>time (True): Store the Time-Part. If False, only the</dt>
+<dd><p class="first last">date will be saved, the time will always be 00:00.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>localize (False): Automatically convert into the</dt>
+<dd><p class="first last">users native timezone.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>emailBone</td>
+<td>Like stringBone, but requires a valid
+email-address to be provided</td>
+<td><em>(no additional parameters)</em></td>
+</tr>
+<tr class="row-even"><td>fileBone</td>
+<td>Stores a reference to an uploaded file.
+Extends treeItemBone. This reference is
+<strong>strong</strong> (the only strong reference
+you will find inside ViUR).
+If a user deletes a file from his
+file-repository it vanishes there, but
+the file is kept as ong as an entity
+references that file.</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>format (str): Hint for the admin how to name</dt>
+<dd><p class="first last">elements of this type.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>hierarchyBone</td>
+<td>Stores a reference to an entity inside
+an hierarchy-application
+Extends relationalBone.</td>
+<td><em>(no additional parameters)</em></td>
+</tr>
+<tr class="row-even"><td>numericBone</td>
+<td>Holds numeric values (ints or floats)
+For floats, the precision can be
+specified in decimal-places.</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>precision (0): If 0, values will be rounded to Int,</dt>
+<dd><p class="first last">otherwise specify the precision (amount of
+decimal-digits) of floats.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">min (-2^30): Minimum accepted value (including).</p>
+</li>
+<li><p class="first">max (2^30): Maximum accepted value (including).</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>passwordBone</td>
+<td>Stores a Password. Its always empty if
+read from DB. If saved with an empty
+value, the password is left unchanged,
+otherwise its stored as a salted
+sha512-hash.</td>
+<td><em>(no additional parameters)</em></td>
+</tr>
+<tr class="row-even"><td>randomSliceBone</td>
+<td>Implements orderby=random known from
+traditional relational databases.
+Does not store any user-supplied data</td>
+<td><ul class="first simple">
+<li>slices (2): Amount of slices to fetch on each request</li>
+<li>sliceSize (0.5): What size does each slice have</li>
+</ul>
+<p class="last">See Chapter implementationdetails for more information</p>
+</td>
+</tr>
+<tr class="row-odd"><td>relationalBone</td>
+<td>Implements relations to other entities.
+(Usually in Lists, see treeItemBone,
+treeDirBone and hierarchyBone) for other
+use cases.</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>type (None): Name of the entities to link to.</dt>
+<dd><p class="first last">Must match their kind-name.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>module (None): Name of the module to link to.</dt>
+<dd><p class="first last">Must match their module-name. If left blank, the
+type argument is also used as the module-name.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>refKeys (None): List of properties of the linked</dt>
+<dd><p class="first last">Entity which will be included in the relation.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>parentKeys (None): List of properties of the Entity</dt>
+<dd><p class="first last">which holds this relation which will be included.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>format (&#8216;&#8217;$(name)``): Hint for the admin how to name</dt>
+<dd><p class="first last">elements of this type. See
+admin/utils.py:formatString for more information.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>using: a RelSkel-Class determining what properties</dt>
+<dd><p class="first last">should be stored with each referenced entry</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>selectCountryBone</td>
+<td>Allows selecting a country. Stores it&#8217;s
+values as ISO2 or ISO3 - Country-codes.
+Converts the value if its mode is
+switched between these codes afterwards</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>codes (selectCountryBone.ISO2): Which code to use.</dt>
+<dd><p class="first last">Either selectCountryBone.ISO2 or
+selectCountryBone.ISO3.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>selectMultiBone</td>
+<td>Allows selecting multiple values from
+a predefined set.</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>defaultValue ( None ): A list of elements, which will</dt>
+<dd><p class="first last">be selected by default.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>values (None): Dictionary of Key=&gt;Names. Names will</dt>
+<dd><p class="first last">form the visible List of items to choose from,
+Keys are the ones which are saved to DB.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>selectOneBone</td>
+<td>Allows choosing one value from a list.</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>defaultValue( None ): Element (Its key) which will</dt>
+<dd><p class="first last">be selected by default.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>values (None): Dictionary of Key=&gt;Names. Names will</dt>
+<dd><p class="first last">form the visible List of items to choose from,
+Keys are the ones which are saved to DB.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>spartialBone</td>
+<td>Stores a pair of latitude/longitude
+coordinates and allows performing a
+proximity search</td>
+<td><ul class="first last">
+<li><p class="first">boundsLat: Outer boundary for latitude values</p>
+</li>
+<li><p class="first">boundsLng: Outer boundary for longitude values</p>
+</li>
+<li><dl class="first docutils">
+<dt>gridDimensions: Number of sub-regions the map will</dt>
+<dd><p class="first last">be divided in</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>stringBone</td>
+<td>Stores a short String (up to 254 Chars).</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>caseSensitive( False ): If True, keep an</dt>
+<dd><p class="first last">case-Insensitive index for searching.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>textBone</td>
+<td>Stores a longer String or RichText.</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>validHtml( <em>undefined</em> ): Set of html-tags valid for</dt>
+<dd><p class="first last">this bone. If None, all tags are removed. See
+server/bones.textBone.py for more information.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>treeDirBone</td>
+<td>References a Folder inside an
+Tree-application.</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>type( None ): Name of the application of which</dt>
+<dd><p class="first last">directories should referenced</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td>treeItemBone</td>
+<td>References a Entity inside an
+Tree-application.</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>type( None ): Name of the application of which</dt>
+<dd><p class="first last">directories should referenced</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td>userBone</td>
+<td>References an User. Works with
+GoogleUser aswell as CustomUser
+(adapts automatically)</td>
+<td><ul class="first last">
+<li><dl class="first docutils">
+<dt>creationMagic (False): If True, save the current user</dt>
+<dd><p class="first last">on creating an entity. Saves None if the entity
+is created by a guest.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>updateMagic (False): If True, save the current User</dt>
+<dd><p class="first last">every time the entity is modified. Saves None
+if the entity is created by a guest.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-server.bones.bone">
+<span id="base-bone"></span><h2>Base bone<a class="headerlink" href="#module-server.bones.bone" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="server.bones.bone.baseBone">
+<em class="property">class </em><code class="descclassname">server.bones.bone.</code><code class="descname">baseBone</code><span class="sig-paren">(</span><em>descr=''</em>, <em>defaultValue=None</em>, <em>required=False</em>, <em>params=None</em>, <em>multiple=False</em>, <em>indexed=False</em>, <em>searchable=False</em>, <em>vfunc=None</em>, <em>readOnly=False</em>, <em>visible=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="attribute">
+<dt id="server.bones.bone.baseBone.__dict__">
+<code class="descname">__dict__</code><em class="property"> = dict_proxy({'performMagic': &lt;function performMagic at 0x104ac5938&gt;, 'buildDBFilter': &lt;function buildDBFilter at 0x104ac5668&gt;, '__module__': 'server.bones.bone', 'postSavedHandler': &lt;function postSavedHandler at 0x104ac59b0&gt;, 'hasDBField': True, 'serialize': &lt;function serialize at 0x104ac5578&gt;, 'getUniquePropertyIndexValue': &lt;function getUniquePropertyIndexValue at 0x104ac5848&gt;, '__dict__': &lt;attribute '__dict__' of 'baseBone' objects&gt;, 'buildDBSort': &lt;function buildDBSort at 0x104ac56e0&gt;, 'getSearchTags': &lt;function getSearchTags at 0x104ac5758&gt;, '__weakref__': &lt;attribute '__weakref__' of 'baseBone' objects&gt;, '__init__': &lt;function __init__ at 0x104ac5410&gt;, '__new__': &lt;staticmethod object at 0x104acfd38&gt;, 'isInvalid': &lt;function isInvalid at 0x104ac5500&gt;, 'getReferencedBlobs': &lt;function getReferencedBlobs at 0x104ac58c0&gt;, 'unserialize': &lt;function unserialize at 0x104ac55f0&gt;, '__doc__': None, 'postDeletedHandler': &lt;function postDeletedHandler at 0x104ac5a28&gt;, 'getSearchDocumentFields': &lt;function getSearchDocumentFields at 0x104ac57d0&gt;, 'fromClient': &lt;function fromClient at 0x104ac5488&gt;, 'type': 'hidden', 'refresh': &lt;function refresh at 0x104ac5aa0&gt;, 'mergeFrom': &lt;function mergeFrom at 0x104ac5b18&gt;})</em><a class="headerlink" href="#server.bones.bone.baseBone.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>descr=''</em>, <em>defaultValue=None</em>, <em>required=False</em>, <em>params=None</em>, <em>multiple=False</em>, <em>indexed=False</em>, <em>searchable=False</em>, <em>vfunc=None</em>, <em>readOnly=False</em>, <em>visible=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a new Bone.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>descr</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Textual, human-readable description of that bone. Will be translated.</li>
+<li><strong>defaultValue</strong> (<em>mixed</em>) &#8211; If set, this bone will be preinitialized with this value</li>
+<li><strong>required</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; If True, the user must enter a valid value for this bone (the server refuses to save the
+skeleton otherwise)</li>
+<li><strong>multiple</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; If True, multiple values can be given. (ie. n:m relations instead of n:1)</li>
+<li><strong>indexed</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; If True, this bone will be included in indexes. This is needed if you
+want to run queries against this bone. If False, it will save datastore write-ops.</li>
+<li><strong>searchable</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; If True, this bone will be included in the fulltext search. Can be used
+without the need of also been indexed.</li>
+<li><strong>vfunc</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#callable" title="(in Python v2.7)"><em>callable</em></a>) &#8211; If given, a callable validating the user-supplied value for this bone. This
+callable must return None if the value is valid, a String containing an meaningfull
+error-message for the user otherwise.</li>
+<li><strong>readOnly</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; If True, the user is unable to change the value of this bone. If a value for
+this bone is given along the POST-Request during Add/Edit, this value will be ignored.
+Its still possible for the developer to modify this value by assigning skel.bone.value.</li>
+<li><strong>visible</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; If False, the value of this bone should be hidden from the user. This does <em>not</em>
+protect the value from beeing exposed in a template, nor from being transfered to the
+client (ie to the admin or as hidden-value in html-forms)
+Again: This is just a hint. It cannot be used as a security precaution.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The kwarg &#8216;multiple&#8217; is not supported by all bones (fe. selectOneBone)</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.bone.baseBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.bone'</em><a class="headerlink" href="#server.bones.bone.baseBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="server.bones.bone.baseBone.__new__">
+<em class="property">static </em><code class="descname">__new__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.bone.baseBone.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#server.bones.bone.baseBone.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.buildDBFilter">
+<code class="descname">buildDBFilter</code><span class="sig-paren">(</span><em>name</em>, <em>skel</em>, <em>dbFilter</em>, <em>rawFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.buildDBFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the searchfilter a client specified in his Request into
+something understood by the datastore.
+This function must:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Ignore all filters not targeting this bone</p>
+</li>
+<li><dl class="first docutils">
+<dt>Safely handle malformed data in rawFilter</dt>
+<dd><p class="first last">(this parameter is directly controlled by the client)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The property-name this bone has in its Skeleton (not the description!)</li>
+<li><strong>skel</strong> (<a class="reference internal" href="../skeletons.html#server.skeleton.Skeleton" title="server.skeleton.Skeleton"><code class="xref py py-class docutils literal"><span class="pre">server.skeleton.Skeleton</span></code></a>) &#8211; The <a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a> this bone is part of</li>
+<li><strong>dbFilter</strong> (<a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a>) &#8211; The current <a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a> instance the filters should be applied to</li>
+<li><strong>rawFilter</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; The dictionary of filters the client wants to have applied</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The modified <a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.buildDBSort">
+<code class="descname">buildDBSort</code><span class="sig-paren">(</span><em>name</em>, <em>skel</em>, <em>dbFilter</em>, <em>rawFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.buildDBSort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as buildDBFilter, but this time its not about filtering
+the results, but by sorting them.
+Again: rawFilter is controlled by the client, so you <em>must</em> expect and safely hande
+malformed data!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The property-name this bone has in its Skeleton (not the description!)</li>
+<li><strong>skel</strong> (<a class="reference internal" href="../skeletons.html#server.skeleton.Skeleton" title="server.skeleton.Skeleton"><code class="xref py py-class docutils literal"><span class="pre">server.skeleton.Skeleton</span></code></a>) &#8211; The <a class="reference internal" href="../skeletons.html#server.skeleton.Skeleton" title="server.skeleton.Skeleton"><code class="xref py py-class docutils literal"><span class="pre">server.skeleton.Skeleton</span></code></a> instance this bone is part of</li>
+<li><strong>dbFilter</strong> (<a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a>) &#8211; The current <a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a> instance the filters should be applied to</li>
+<li><strong>rawFilter</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; The dictionary of filters the client wants to have applied</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The modified <a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.fromClient">
+<code class="descname">fromClient</code><span class="sig-paren">(</span><em>name</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.fromClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a value from the client.
+If this value is valis for this bone,
+store this value and return None.
+Otherwise our previous value is
+left unchanged and an error-message
+is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>String</em>) &#8211; Our name in the skeleton</li>
+<li><strong>data</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; User-supplied request-data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None or str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.getReferencedBlobs">
+<code class="descname">getReferencedBlobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.getReferencedBlobs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the list of blob keys referenced from this bone</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.getSearchDocumentFields">
+<code class="descname">getSearchDocumentFields</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.getSearchDocumentFields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of search-fields (GAE search API) for this bone.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.getSearchTags">
+<code class="descname">getSearchTags</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.getSearchTags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of Strings which will be included in the
+fulltext-index for this bone.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This function gets only called, if the ViUR internal
+fulltext-search is used. If you enable the search-API
+by setting a searchIndex on the skeleton, getSearchDocumentFields
+is called instead.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of Strings</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.getUniquePropertyIndexValue">
+<code class="descname">getUniquePropertyIndexValue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.getUniquePropertyIndexValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an hash for our current value, used to store in the uniqueProptertyValue index.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.bone.baseBone.hasDBField">
+<code class="descname">hasDBField</code><em class="property"> = True</em><a class="headerlink" href="#server.bones.bone.baseBone.hasDBField" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.isInvalid">
+<code class="descname">isInvalid</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.isInvalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns None if the value would be valid for
+this bone, an error-message otherwise.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.mergeFrom">
+<code class="descname">mergeFrom</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.mergeFrom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clones the values from other into this instance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.performMagic">
+<code class="descname">performMagic</code><span class="sig-paren">(</span><em>isAdd</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.performMagic" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function applies &#8220;magically&#8221; functionality which f.e. inserts the current Date or the current user.
+&#64;param isAdd: Signals whereever this is an add or edit operation.
+:type isAdd: bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.postDeletedHandler">
+<code class="descname">postDeletedHandler</code><span class="sig-paren">(</span><em>skel</em>, <em>boneName</em>, <em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.postDeletedHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be overridden to perform  further actions after the main entity has been deleted.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>skel</strong> (<a class="reference internal" href="../skeletons.html#server.skeleton.Skeleton" title="server.skeleton.Skeleton"><em>Skeleton</em></a>) &#8211; The skeleton this bone belongs to</li>
+<li><strong>boneName</strong> (<em>String</em>) &#8211; Name of this bone</li>
+<li><strong>key</strong> &#8211; The old Database Key of hte entity we&#8217;ve deleted</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.postSavedHandler">
+<code class="descname">postSavedHandler</code><span class="sig-paren">(</span><em>boneName</em>, <em>skel</em>, <em>key</em>, <em>dbObj</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.postSavedHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be overridden to perform further actions after the main entity has been written.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>boneName</strong> (<em>String</em>) &#8211; Name of this bone</li>
+<li><strong>skel</strong> (<a class="reference internal" href="../skeletons.html#server.skeleton.Skeleton" title="server.skeleton.Skeleton"><em>Skeleton</em></a>) &#8211; The skeleton this bone belongs to</li>
+<li><strong>key</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The (new?) Database Key we&#8217;ve written to</li>
+<li><strong>dbObj</strong> (<a class="reference internal" href="../server_api.html#server.db.Entity" title="server.db.Entity"><em>db.Entity</em></a>) &#8211; The db.Entity object written</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.refresh">
+<code class="descname">refresh</code><span class="sig-paren">(</span><em>boneName</em>, <em>skel</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refresh all values we might have cached from other entities.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>name</em>, <em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serializes this bone into something we
+can write into the datastore.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>String</em>) &#8211; The property-name this bone has in its Skeleton (not the description!)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.bone.baseBone.type">
+<code class="descname">type</code><em class="property"> = 'hidden'</em><a class="headerlink" href="#server.bones.bone.baseBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.baseBone.unserialize">
+<code class="descname">unserialize</code><span class="sig-paren">(</span><em>name</em>, <em>expando</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.baseBone.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse of serialize. Evaluates whats
+read from the datastore and populates
+this bone accordingly.
+:param name: The property-name this bone has in its Skeleton (not the description!)
+:type name: String
+:param expando: An instance of the dictionary-like db.Entity class
+:type expando: db.Entity
+:returns: bool</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="server.bones.bone.boneFactory">
+<em class="property">class </em><code class="descclassname">server.bones.bone.</code><code class="descname">boneFactory</code><span class="sig-paren">(</span><em>cls</em>, <em>args</em>, <em>kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.boneFactory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.bone.boneFactory.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.boneFactory.__call__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.bone.boneFactory.__dict__">
+<code class="descname">__dict__</code><em class="property"> = dict_proxy({'__module__': 'server.bones.bone', '__dict__': &lt;attribute '__dict__' of 'boneFactory' objects&gt;, '__repr__': &lt;function __repr__ at 0x104ac5320&gt;, '__call__': &lt;function __call__ at 0x104ac52a8&gt;, '__weakref__': &lt;attribute '__weakref__' of 'boneFactory' objects&gt;, '__doc__': None, '__init__': &lt;function __init__ at 0x104ac5230&gt;})</em><a class="headerlink" href="#server.bones.bone.boneFactory.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.boneFactory.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>cls</em>, <em>args</em>, <em>kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.boneFactory.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.bone.boneFactory.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.bone'</em><a class="headerlink" href="#server.bones.bone.boneFactory.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.bone.boneFactory.__repr__">
+<code class="descname">__repr__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.boneFactory.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.bone.boneFactory.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#server.bones.bone.boneFactory.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="server.bones.bone.getSystemInitialized">
+<code class="descclassname">server.bones.bone.</code><code class="descname">getSystemInitialized</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.getSystemInitialized" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="server.bones.bone.setSystemInitialized">
+<code class="descclassname">server.bones.bone.</code><code class="descname">setSystemInitialized</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.bone.setSystemInitialized" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-server.bones.numericBone">
+<span id="numericbone"></span><h2>numericBone<a class="headerlink" href="#module-server.bones.numericBone" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="server.bones.numericBone.numericBone">
+<em class="property">class </em><code class="descclassname">server.bones.numericBone.</code><code class="descname">numericBone</code><span class="sig-paren">(</span><em>precision=0</em>, <em>min=-1073741824</em>, <em>max=1073741824</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.numericBone.numericBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.bone.baseBone" title="server.bones.bone.baseBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.bone.baseBone</span></code></a></p>
+<p>Holds numeric values.
+Can be used for ints and floats.
+For floats, the precision can be specified in decimal-places.</p>
+<dl class="method">
+<dt id="server.bones.numericBone.numericBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>precision=0</em>, <em>min=-1073741824</em>, <em>max=1073741824</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.numericBone.numericBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a new NumericBone.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>precision</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; How may decimal places should be saved. Zero casts the value to int instead of float.</li>
+<li><strong>min</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Minimum accepted value (including).</li>
+<li><strong>max</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Maximum accepted value (including).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.numericBone.numericBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.numericBone'</em><a class="headerlink" href="#server.bones.numericBone.numericBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.numericBone.numericBone.buildDBFilter">
+<code class="descname">buildDBFilter</code><span class="sig-paren">(</span><em>name</em>, <em>skel</em>, <em>dbFilter</em>, <em>rawFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.numericBone.numericBone.buildDBFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.numericBone.numericBone.fromClient">
+<code class="descname">fromClient</code><span class="sig-paren">(</span><em>name</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.numericBone.numericBone.fromClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a value from the client.
+If this value is valid for this bone,
+store this value and return None.
+Otherwise our previous value is
+left unchanged and an error-message
+is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>String</em>) &#8211; Our name in the skeleton</li>
+<li><strong>data</strong> (<em>Dict</em>) &#8211; <em>User-supplied</em> request-data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None or String</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="server.bones.numericBone.numericBone.generageSearchWidget">
+<em class="property">static </em><code class="descname">generageSearchWidget</code><span class="sig-paren">(</span><em>target</em>, <em>name='NUMERIC BONE'</em>, <em>mode='range'</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.numericBone.numericBone.generageSearchWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.numericBone.numericBone.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>name</em>, <em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.numericBone.numericBone.serialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.numericBone.numericBone.type">
+<code class="descname">type</code><em class="property"> = 'numeric'</em><a class="headerlink" href="#server.bones.numericBone.numericBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.numericBone.numericBone.unserialize">
+<code class="descname">unserialize</code><span class="sig-paren">(</span><em>name</em>, <em>expando</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.numericBone.numericBone.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-server.bones.booleanBone">
+<span id="booleanbone"></span><h2>booleanBone<a class="headerlink" href="#module-server.bones.booleanBone" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="server.bones.booleanBone.booleanBone">
+<em class="property">class </em><code class="descclassname">server.bones.booleanBone.</code><code class="descname">booleanBone</code><span class="sig-paren">(</span><em>defaultValue=False</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.booleanBone.booleanBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.bone.baseBone" title="server.bones.bone.baseBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.bone.baseBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.booleanBone.booleanBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>defaultValue=False</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.booleanBone.booleanBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.booleanBone.booleanBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.booleanBone'</em><a class="headerlink" href="#server.bones.booleanBone.booleanBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.booleanBone.booleanBone.buildDBFilter">
+<code class="descname">buildDBFilter</code><span class="sig-paren">(</span><em>name</em>, <em>skel</em>, <em>dbFilter</em>, <em>rawFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.booleanBone.booleanBone.buildDBFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.booleanBone.booleanBone.fromClient">
+<code class="descname">fromClient</code><span class="sig-paren">(</span><em>name</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.booleanBone.booleanBone.fromClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a value from the client.
+If this value is valid for this bone,
+store this value and return None.
+Otherwise our previous value is
+left unchanged and an error-message
+is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Our name in the skeleton</li>
+<li><strong>data</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; <em>User-supplied</em> request-data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">str or None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="server.bones.booleanBone.booleanBone.generageSearchWidget">
+<em class="property">static </em><code class="descname">generageSearchWidget</code><span class="sig-paren">(</span><em>target</em>, <em>name='BOOLEAN BONE'</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.booleanBone.booleanBone.generageSearchWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.booleanBone.booleanBone.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>name</em>, <em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.booleanBone.booleanBone.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serializes this bone into something we
+can write into the datastore.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The property-name this bone has in its Skeleton (not the description!)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.booleanBone.booleanBone.trueStrs">
+<code class="descname">trueStrs</code><em class="property"> = ['True', '1', 'yes']</em><a class="headerlink" href="#server.bones.booleanBone.booleanBone.trueStrs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.booleanBone.booleanBone.type">
+<code class="descname">type</code><em class="property"> = 'bool'</em><a class="headerlink" href="#server.bones.booleanBone.booleanBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.booleanBone.booleanBone.unserialize">
+<code class="descname">unserialize</code><span class="sig-paren">(</span><em>name</em>, <em>expando</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.booleanBone.booleanBone.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse of serialize. Evaluates whats
+read from the datastore and populates
+this bone accordingly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The property-name this bone has in its Skeleton (not the description!)</li>
+<li><strong>expando</strong> (<code class="xref py py-class docutils literal"><span class="pre">db.Entity</span></code>) &#8211; An instance of the dictionary-like db.Entity class</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="string-based-bones">
+<h2>String-based bones<a class="headerlink" href="#string-based-bones" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-server.bones.stringBone">
+<span id="stringbone"></span><h3>stringBone<a class="headerlink" href="#module-server.bones.stringBone" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="server.bones.stringBone.LanguageWrapper">
+<em class="property">class </em><code class="descclassname">server.bones.stringBone.</code><code class="descname">LanguageWrapper</code><span class="sig-paren">(</span><em>languages</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.LanguageWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a></p>
+<p>Wrapper-class for a multi-language value.
+Its a dictionary, allowing accessing each stored language,
+but can also be used as a string, in which case it tries to
+guess the correct language.</p>
+<dl class="attribute">
+<dt id="server.bones.stringBone.LanguageWrapper.__dict__">
+<code class="descname">__dict__</code><em class="property"> = dict_proxy({'__module__': 'server.bones.stringBone', 'resolve': &lt;function resolve at 0x104ad3410&gt;, '__str__': &lt;function __str__ at 0x104ad3398&gt;, '__dict__': &lt;attribute '__dict__' of 'LanguageWrapper' objects&gt;, '__weakref__': &lt;attribute '__weakref__' of 'LanguageWrapper' objects&gt;, '__doc__': '\n\t\tWrapper-class for a multi-language value.\n\t\tIts a dictionary, allowing accessing each stored language,\n\t\tbut can also be used as a string, in which case it tries to\n\t\tguess the correct language.\n\t', '__init__': &lt;function __init__ at 0x104ad3320&gt;})</em><a class="headerlink" href="#server.bones.stringBone.LanguageWrapper.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.stringBone.LanguageWrapper.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>languages</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.LanguageWrapper.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.stringBone.LanguageWrapper.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.stringBone'</em><a class="headerlink" href="#server.bones.stringBone.LanguageWrapper.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.stringBone.LanguageWrapper.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.LanguageWrapper.__str__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.stringBone.LanguageWrapper.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#server.bones.stringBone.LanguageWrapper.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.stringBone.LanguageWrapper.resolve">
+<code class="descname">resolve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.LanguageWrapper.resolve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Causes this wrapper to evaluate to the best language available for the current request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">str|list of str</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str|list of str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="server.bones.stringBone.stringBone">
+<em class="property">class </em><code class="descclassname">server.bones.stringBone.</code><code class="descname">stringBone</code><span class="sig-paren">(</span><em>caseSensitive=True</em>, <em>multiple=False</em>, <em>languages=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.stringBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.bone.baseBone" title="server.bones.bone.baseBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.bone.baseBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.stringBone.stringBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>caseSensitive=True</em>, <em>multiple=False</em>, <em>languages=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.stringBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.stringBone.stringBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.stringBone'</em><a class="headerlink" href="#server.bones.stringBone.stringBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.stringBone.stringBone.buildDBFilter">
+<code class="descname">buildDBFilter</code><span class="sig-paren">(</span><em>name</em>, <em>skel</em>, <em>dbFilter</em>, <em>rawFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.stringBone.buildDBFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.stringBone.stringBone.buildDBSort">
+<code class="descname">buildDBSort</code><span class="sig-paren">(</span><em>name</em>, <em>skel</em>, <em>dbFilter</em>, <em>rawFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.stringBone.buildDBSort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.stringBone.stringBone.fromClient">
+<code class="descname">fromClient</code><span class="sig-paren">(</span><em>name</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.stringBone.fromClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a value from the client.
+If this value is valid for this bone,
+store this value and return None.
+Otherwise our previous value is
+left unchanged and an error-message
+is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Our name in the <a class="reference internal" href="../skeletons.html#server.skeleton.Skeleton" title="server.skeleton.Skeleton"><code class="xref py py-class docutils literal"><span class="pre">server.skeleton.Skeleton</span></code></a></li>
+<li><strong>data</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; <em>User-supplied</em> request-data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">str or None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="server.bones.stringBone.stringBone.generageSearchWidget">
+<em class="property">static </em><code class="descname">generageSearchWidget</code><span class="sig-paren">(</span><em>target</em>, <em>name='STRING BONE'</em>, <em>mode='equals'</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.stringBone.generageSearchWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.stringBone.stringBone.getSearchDocumentFields">
+<code class="descname">getSearchDocumentFields</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.stringBone.getSearchDocumentFields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of search-fields (GAE search API) for this bone.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.stringBone.stringBone.getSearchTags">
+<code class="descname">getSearchTags</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.stringBone.getSearchTags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.stringBone.stringBone.getUniquePropertyIndexValue">
+<code class="descname">getUniquePropertyIndexValue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.stringBone.getUniquePropertyIndexValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an hash for our current value, used to store in the uniqueProptertyValue index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.stringBone.stringBone.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>name</em>, <em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.stringBone.serialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.stringBone.stringBone.type">
+<code class="descname">type</code><em class="property"> = 'str'</em><a class="headerlink" href="#server.bones.stringBone.stringBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.stringBone.stringBone.unserialize">
+<code class="descname">unserialize</code><span class="sig-paren">(</span><em>name</em>, <em>expando</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.stringBone.stringBone.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse of serialize. Evaluates whats
+read from the datastore and populates
+this bone accordingly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The property-name this bone has in its <a class="reference internal" href="../skeletons.html#server.skeleton.Skeleton" title="server.skeleton.Skeleton"><code class="xref py py-class docutils literal"><span class="pre">server.skeleton.Skeleton</span></code></a> (not the description!)</li>
+<li><strong>expando</strong> (<a class="reference internal" href="../server_api.html#server.db.Entity" title="server.db.Entity"><code class="xref py py-class docutils literal"><span class="pre">server.db.Entity</span></code></a>) &#8211; An instance of the dictionary-like db.Entity class</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-server.bones.textBone">
+<span id="textbone"></span><h3>textBone<a class="headerlink" href="#module-server.bones.textBone" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="server.bones.textBone.HtmlSerializer">
+<em class="property">class </em><code class="descclassname">server.bones.textBone.</code><code class="descname">HtmlSerializer</code><span class="sig-paren">(</span><em>validHtml=None</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.HtmlSerializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/htmlparser.html#HTMLParser.HTMLParser" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">HTMLParser.HTMLParser</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.textBone.HtmlSerializer.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>validHtml=None</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.HtmlSerializer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.textBone.HtmlSerializer.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.textBone'</em><a class="headerlink" href="#server.bones.textBone.HtmlSerializer.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.textBone.HtmlSerializer.cleanup">
+<code class="descname">cleanup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.HtmlSerializer.cleanup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append missing closing tags</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.textBone.HtmlSerializer.handle_charref">
+<code class="descname">handle_charref</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.HtmlSerializer.handle_charref" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.textBone.HtmlSerializer.handle_data">
+<code class="descname">handle_data</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.HtmlSerializer.handle_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.textBone.HtmlSerializer.handle_endtag">
+<code class="descname">handle_endtag</code><span class="sig-paren">(</span><em>tag</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.HtmlSerializer.handle_endtag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.textBone.HtmlSerializer.handle_entityref">
+<code class="descname">handle_entityref</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.HtmlSerializer.handle_entityref" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.textBone.HtmlSerializer.handle_starttag">
+<code class="descname">handle_starttag</code><span class="sig-paren">(</span><em>tag</em>, <em>attrs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.HtmlSerializer.handle_starttag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete all tags except for legal ones</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.textBone.HtmlSerializer.santinize">
+<code class="descname">santinize</code><span class="sig-paren">(</span><em>instr</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.HtmlSerializer.santinize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="server.bones.textBone.textBone">
+<em class="property">class </em><code class="descclassname">server.bones.textBone.</code><code class="descname">textBone</code><span class="sig-paren">(</span><em>validHtml=&lt;class server.bones.textBone.__undefinedC__&gt;</em>, <em>indexed=False</em>, <em>languages=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.textBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.bone.baseBone" title="server.bones.bone.baseBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.bone.baseBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.textBone.textBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>validHtml=&lt;class server.bones.textBone.__undefinedC__&gt;</em>, <em>indexed=False</em>, <em>languages=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.textBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.textBone.textBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.textBone'</em><a class="headerlink" href="#server.bones.textBone.textBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="server.bones.textBone.textBone.__undefinedC__">
+<em class="property">class </em><code class="descname">__undefinedC__</code><a class="headerlink" href="#server.bones.textBone.textBone.__undefinedC__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="server.bones.textBone.textBone.__undefinedC__.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.textBone'</em><a class="headerlink" href="#server.bones.textBone.textBone.__undefinedC__.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.textBone.textBone.fromClient">
+<code class="descclassname">textBone.</code><code class="descname">fromClient</code><span class="sig-paren">(</span><em>name</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.textBone.fromClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a value from the client.
+If this value is valid for this bone,
+store this value and return None.
+Otherwise our previous value is
+left unchanged and an error-message
+is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>String</em>) &#8211; Our name in the skeleton</li>
+<li><strong>data</strong> (<em>Dict</em>) &#8211; <em>User-supplied</em> request-data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None or String</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="server.bones.textBone.textBone.generageSearchWidget">
+<em class="property">static </em><code class="descclassname">textBone.</code><code class="descname">generageSearchWidget</code><span class="sig-paren">(</span><em>target</em>, <em>name='TEXT BONE'</em>, <em>mode='equals'</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.textBone.generageSearchWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.textBone.textBone.getReferencedBlobs">
+<code class="descclassname">textBone.</code><code class="descname">getReferencedBlobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.textBone.getReferencedBlobs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test for /file/download/ links inside our text body.
+Doesn&#8217;t check for actual &lt;a href=&gt; or &lt;img src=&gt; yet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.textBone.textBone.getSearchDocumentFields">
+<code class="descclassname">textBone.</code><code class="descname">getSearchDocumentFields</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.textBone.getSearchDocumentFields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of search-fields (GAE search API) for this bone.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.textBone.textBone.getSearchTags">
+<code class="descclassname">textBone.</code><code class="descname">getSearchTags</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.textBone.getSearchTags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.textBone.textBone.serialize">
+<code class="descclassname">textBone.</code><code class="descname">serialize</code><span class="sig-paren">(</span><em>name</em>, <em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.textBone.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fills this bone with user generated content</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The property-name this bone has in its Skeleton (not the description!)</li>
+<li><strong>entity</strong> (<a class="reference internal" href="../server_api.html#server.db.Entity" title="server.db.Entity"><code class="xref py py-class docutils literal"><span class="pre">server.db.Entity</span></code></a>) &#8211; An instance of the dictionary-like db.Entity class</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the modified <a class="reference internal" href="../server_api.html#server.db.Entity" title="server.db.Entity"><code class="xref py py-class docutils literal"><span class="pre">server.db.Entity</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.textBone.textBone.type">
+<code class="descclassname">textBone.</code><code class="descname">type</code><em class="property"> = 'text'</em><a class="headerlink" href="#server.bones.textBone.textBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.textBone.textBone.unserialize">
+<code class="descclassname">textBone.</code><code class="descname">unserialize</code><span class="sig-paren">(</span><em>name</em>, <em>expando</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.textBone.textBone.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse of serialize. Evaluates whats
+read from the datastore and populates
+this bone accordingly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The property-name this bone has in its Skeleton (not the description!)</li>
+<li><strong>expando</strong> (<code class="xref py py-class docutils literal"><span class="pre">db.Entity</span></code>) &#8211; An instance of the dictionary-like db.Entity class</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-server.bones.emailBone">
+<span id="emailbone"></span><h3>emailBone<a class="headerlink" href="#module-server.bones.emailBone" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="server.bones.emailBone.emailBone">
+<em class="property">class </em><code class="descclassname">server.bones.emailBone.</code><code class="descname">emailBone</code><span class="sig-paren">(</span><em>caseSensitive=True</em>, <em>multiple=False</em>, <em>languages=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.emailBone.emailBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.stringBone.stringBone" title="server.bones.stringBone.stringBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.stringBone.stringBone</span></code></a></p>
+<dl class="attribute">
+<dt id="server.bones.emailBone.emailBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.emailBone'</em><a class="headerlink" href="#server.bones.emailBone.emailBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.emailBone.emailBone.isInvalid">
+<code class="descname">isInvalid</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.emailBone.emailBone.isInvalid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.emailBone.emailBone.type">
+<code class="descname">type</code><em class="property"> = 'str.email'</em><a class="headerlink" href="#server.bones.emailBone.emailBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-server.bones.passwordBone">
+<span id="passwordbone"></span><h3>passwordBone<a class="headerlink" href="#module-server.bones.passwordBone" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="server.bones.passwordBone.passwordBone">
+<em class="property">class </em><code class="descclassname">server.bones.passwordBone.</code><code class="descname">passwordBone</code><span class="sig-paren">(</span><em>caseSensitive=True</em>, <em>multiple=False</em>, <em>languages=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.passwordBone.passwordBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.stringBone.stringBone" title="server.bones.stringBone.stringBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.stringBone.stringBone</span></code></a></p>
+<p>A bone holding passwords.
+This is always empty if read from the database.
+If its saved, its ignored if its values is still empty.
+If its value is not empty, its hashed (with salt) and only the resulting hash 
+will be written to the database</p>
+<dl class="attribute">
+<dt id="server.bones.passwordBone.passwordBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.passwordBone'</em><a class="headerlink" href="#server.bones.passwordBone.passwordBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.passwordBone.passwordBone.isInvalid">
+<code class="descname">isInvalid</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.passwordBone.passwordBone.isInvalid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.passwordBone.passwordBone.minPasswordLength">
+<code class="descname">minPasswordLength</code><em class="property"> = 8</em><a class="headerlink" href="#server.bones.passwordBone.passwordBone.minPasswordLength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.passwordBone.passwordBone.passwordTestThreshold">
+<code class="descname">passwordTestThreshold</code><em class="property"> = 3</em><a class="headerlink" href="#server.bones.passwordBone.passwordBone.passwordTestThreshold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.passwordBone.passwordBone.passwordTests">
+<code class="descname">passwordTests</code><em class="property"> = [&lt;function &lt;lambda&gt; at 0x104afa488&gt;, &lt;function &lt;lambda&gt; at 0x104afa9b0&gt;, &lt;function &lt;lambda&gt; at 0x104afaa28&gt;, &lt;function &lt;lambda&gt; at 0x104afaaa0&gt;]</em><a class="headerlink" href="#server.bones.passwordBone.passwordBone.passwordTests" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.passwordBone.passwordBone.saltLength">
+<code class="descname">saltLength</code><em class="property"> = 13</em><a class="headerlink" href="#server.bones.passwordBone.passwordBone.saltLength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.passwordBone.passwordBone.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>name</em>, <em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.passwordBone.passwordBone.serialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.passwordBone.passwordBone.type">
+<code class="descname">type</code><em class="property"> = 'password'</em><a class="headerlink" href="#server.bones.passwordBone.passwordBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.passwordBone.passwordBone.unserialize">
+<code class="descname">unserialize</code><span class="sig-paren">(</span><em>name</em>, <em>values</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.passwordBone.passwordBone.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="server.bones.passwordBone.pbkdf2">
+<code class="descclassname">server.bones.passwordBone.</code><code class="descname">pbkdf2</code><span class="sig-paren">(</span><em>password</em>, <em>salt</em>, <em>iterations=1001</em>, <em>keylen=42</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.passwordBone.pbkdf2" title="Permalink to this definition">¶</a></dt>
+<dd><p>An implementation of PBKDF2 (<a class="reference external" href="http://wikipedia.org/wiki/PBKDF2">http://wikipedia.org/wiki/PBKDF2</a>)</p>
+<p>Mostly based on the implementation of 
+<a class="reference external" href="https://github.com/mitsuhiko/python-pbkdf2/blob/master/pbkdf2.py">https://github.com/mitsuhiko/python-pbkdf2/blob/master/pbkdf2.py</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Copyright:</th><td class="field-body"><ol class="first loweralpha simple" start="3">
+<li>Copyright 2011 by Armin Ronacher.</li>
+</ol>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">License:</th><td class="field-body"><p class="first last">BSD, see LICENSE for more details.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="selectional-bones">
+<h2>Selectional bones<a class="headerlink" href="#selectional-bones" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="selectonebone">
+<h3>selectOneBone<a class="headerlink" href="#selectonebone" title="Permalink to this headline">¶</a></h3>
+<p>Allow for selection one entry from a pre-defined list of values.</p>
+<span class="target" id="module-server.bones.selectOneBone"></span><dl class="class">
+<dt id="server.bones.selectOneBone.selectOneBone">
+<em class="property">class </em><code class="descclassname">server.bones.selectOneBone.</code><code class="descname">selectOneBone</code><span class="sig-paren">(</span><em>values={}</em>, <em>defaultValue=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectOneBone.selectOneBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.bone.baseBone" title="server.bones.bone.baseBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.bone.baseBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.selectOneBone.selectOneBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>values={}</em>, <em>defaultValue=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectOneBone.selectOneBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new selectOneBone
+:param defaultValue: List of keys which will be checked by default
+:type defaultValue: List
+:param values: Dict of key-&gt;value pairs from which the user can choose from. Values will be translated
+:type values: Dict
+:param sortBy: Either &#8220;keys&#8221; or &#8220;values&#8221;. Sorts the values on clientside either by keys or by (</p>
+<blockquote>
+<div>translated) values</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.selectOneBone.selectOneBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.selectOneBone'</em><a class="headerlink" href="#server.bones.selectOneBone.selectOneBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.selectOneBone.selectOneBone.buildDBFilter">
+<code class="descname">buildDBFilter</code><span class="sig-paren">(</span><em>name</em>, <em>skel</em>, <em>dbFilter</em>, <em>rawFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectOneBone.selectOneBone.buildDBFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.selectOneBone.selectOneBone.fromClient">
+<code class="descname">fromClient</code><span class="sig-paren">(</span><em>name</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectOneBone.selectOneBone.fromClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a value from the client.
+If this value is valis for this bone,
+store this value and return None.
+Otherwise our previous value is
+left unchanged and an error-message
+is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>String</em>) &#8211; Our name in the skeleton</li>
+<li><strong>data</strong> (<em>Dict</em>) &#8211; <em>User-supplied</em> request-data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None or String</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="server.bones.selectOneBone.selectOneBone.generageSearchWidget">
+<em class="property">static </em><code class="descname">generageSearchWidget</code><span class="sig-paren">(</span><em>target</em>, <em>name='SELECTONE BONE'</em>, <em>values=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectOneBone.selectOneBone.generageSearchWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.selectOneBone.selectOneBone.type">
+<code class="descname">type</code><em class="property"> = 'selectone'</em><a class="headerlink" href="#server.bones.selectOneBone.selectOneBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="selectmultibone">
+<h3>selectMultiBone<a class="headerlink" href="#selectmultibone" title="Permalink to this headline">¶</a></h3>
+<p>Allow for selection one several entries from a pre-defined list of values.</p>
+<span class="target" id="module-server.bones.selectMultiBone"></span><dl class="class">
+<dt id="server.bones.selectMultiBone.selectAccessMultiBone">
+<em class="property">class </em><code class="descclassname">server.bones.selectMultiBone.</code><code class="descname">selectAccessMultiBone</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectMultiBone.selectAccessMultiBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.selectMultiBone.selectMultiBone" title="server.bones.selectMultiBone.selectMultiBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.selectMultiBone.selectMultiBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.selectMultiBone.selectAccessMultiBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectMultiBone.selectAccessMultiBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new AccessSelectMultiBone.
+This bone encapulates elements that have a postfix &#8220;-add&#8221;, &#8220;-delete&#8221;,
+&#8220;-view&#8221; and &#8220;-edit&#8221; and visualizes them as a compbound unit.</p>
+<p>This bone is normally used in the userSkel only to provide a
+user data access right selector.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.selectMultiBone.selectAccessMultiBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.selectMultiBone'</em><a class="headerlink" href="#server.bones.selectMultiBone.selectAccessMultiBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.selectMultiBone.selectAccessMultiBone.type">
+<code class="descname">type</code><em class="property"> = 'selectmulti.access'</em><a class="headerlink" href="#server.bones.selectMultiBone.selectAccessMultiBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="server.bones.selectMultiBone.selectMultiBone">
+<em class="property">class </em><code class="descclassname">server.bones.selectMultiBone.</code><code class="descname">selectMultiBone</code><span class="sig-paren">(</span><em>defaultValue=[]</em>, <em>values={}</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectMultiBone.selectMultiBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.bone.baseBone" title="server.bones.bone.baseBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.bone.baseBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.selectMultiBone.selectMultiBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>defaultValue=[]</em>, <em>values={}</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectMultiBone.selectMultiBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new SelectMultiBone
+:param defaultValue: List of keys which will be checked by default
+:type defaultValue: List
+:param values: Dict of key-&gt;value pairs from which the user can choose from. Values will be translated
+:type values: Dict
+:param sortBy: Either &#8220;keys&#8221; or &#8220;values&#8221;. Sorts the values on clientside either by keys or by (</p>
+<blockquote>
+<div>translated) values</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.selectMultiBone.selectMultiBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.selectMultiBone'</em><a class="headerlink" href="#server.bones.selectMultiBone.selectMultiBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.selectMultiBone.selectMultiBone.fromClient">
+<code class="descname">fromClient</code><span class="sig-paren">(</span><em>name</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectMultiBone.selectMultiBone.fromClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a value from the client.
+If this value is valid for this bone,
+store this value and return None.
+Otherwise our previous value is
+left unchanged and an error-message
+is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>String</em>) &#8211; Our name in the skeleton</li>
+<li><strong>data</strong> (<em>Dict</em>) &#8211; <em>User-supplied</em> request-data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None or String</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="server.bones.selectMultiBone.selectMultiBone.generageSearchWidget">
+<em class="property">static </em><code class="descname">generageSearchWidget</code><span class="sig-paren">(</span><em>target</em>, <em>name='SELECTMULTI BONE'</em>, <em>values=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectMultiBone.selectMultiBone.generageSearchWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.selectMultiBone.selectMultiBone.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>name</em>, <em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectMultiBone.selectMultiBone.serialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.selectMultiBone.selectMultiBone.type">
+<code class="descname">type</code><em class="property"> = 'selectmulti'</em><a class="headerlink" href="#server.bones.selectMultiBone.selectMultiBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.selectMultiBone.selectMultiBone.unserialize">
+<code class="descname">unserialize</code><span class="sig-paren">(</span><em>name</em>, <em>expando</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectMultiBone.selectMultiBone.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="selectcountrybone">
+<h3>selectCountryBone<a class="headerlink" href="#selectcountrybone" title="Permalink to this headline">¶</a></h3>
+<p>Selection for a country from a standardized country list.</p>
+<span class="target" id="module-server.bones.selectCountryBone"></span><dl class="class">
+<dt id="server.bones.selectCountryBone.selectCountryBone">
+<em class="property">class </em><code class="descclassname">server.bones.selectCountryBone.</code><code class="descname">selectCountryBone</code><span class="sig-paren">(</span><em>codes=2</em>, <em>sortBy='values'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectCountryBone.selectCountryBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.selectOneBone.selectOneBone" title="server.bones.selectOneBone.selectOneBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.selectOneBone.selectOneBone</span></code></a></p>
+<dl class="attribute">
+<dt id="server.bones.selectCountryBone.selectCountryBone.ISO2">
+<code class="descname">ISO2</code><em class="property"> = 2</em><a class="headerlink" href="#server.bones.selectCountryBone.selectCountryBone.ISO2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.selectCountryBone.selectCountryBone.ISO3">
+<code class="descname">ISO3</code><em class="property"> = 3</em><a class="headerlink" href="#server.bones.selectCountryBone.selectCountryBone.ISO3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.selectCountryBone.selectCountryBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>codes=2</em>, <em>sortBy='values'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectCountryBone.selectCountryBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.selectCountryBone.selectCountryBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.selectCountryBone'</em><a class="headerlink" href="#server.bones.selectCountryBone.selectCountryBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.selectCountryBone.selectCountryBone.unserialize">
+<code class="descname">unserialize</code><span class="sig-paren">(</span><em>name</em>, <em>expando</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.selectCountryBone.selectCountryBone.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-server.bones.hierarchyBone">
+<span id="hierarchical-bones"></span><h2>Hierarchical bones<a class="headerlink" href="#module-server.bones.hierarchyBone" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="server.bones.hierarchyBone.hierarchyBone">
+<em class="property">class </em><code class="descclassname">server.bones.hierarchyBone.</code><code class="descname">hierarchyBone</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.hierarchyBone.hierarchyBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.relationalBone.relationalBone" title="server.bones.relationalBone.relationalBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.relationalBone.relationalBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.hierarchyBone.hierarchyBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.hierarchyBone.hierarchyBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.hierarchyBone.hierarchyBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.hierarchyBone'</em><a class="headerlink" href="#server.bones.hierarchyBone.hierarchyBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-server.bones.treeItemBone"></span><dl class="class">
+<dt id="server.bones.treeItemBone.treeItemBone">
+<em class="property">class </em><code class="descclassname">server.bones.treeItemBone.</code><code class="descname">treeItemBone</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.treeItemBone.treeItemBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.relationalBone.relationalBone" title="server.bones.relationalBone.relationalBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.relationalBone.relationalBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.treeItemBone.treeItemBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.treeItemBone.treeItemBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.treeItemBone.treeItemBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.treeItemBone'</em><a class="headerlink" href="#server.bones.treeItemBone.treeItemBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-server.bones.treeDirBone"></span><dl class="class">
+<dt id="server.bones.treeDirBone.treeDirBone">
+<em class="property">class </em><code class="descclassname">server.bones.treeDirBone.</code><code class="descname">treeDirBone</code><span class="sig-paren">(</span><em>type=None</em>, <em>format='$(name)'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.treeDirBone.treeDirBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.relationalBone.relationalBone" title="server.bones.relationalBone.relationalBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.relationalBone.relationalBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.treeDirBone.treeDirBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>type=None</em>, <em>format='$(name)'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.treeDirBone.treeDirBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.treeDirBone.treeDirBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.treeDirBone'</em><a class="headerlink" href="#server.bones.treeDirBone.treeDirBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-server.bones.fileBone"></span><dl class="class">
+<dt id="server.bones.fileBone.fileBone">
+<em class="property">class </em><code class="descclassname">server.bones.fileBone.</code><code class="descname">fileBone</code><span class="sig-paren">(</span><em>format='$(name)'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.fileBone.fileBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.treeItemBone.treeItemBone" title="server.bones.treeItemBone.treeItemBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.treeItemBone.treeItemBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.fileBone.fileBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>format='$(name)'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.fileBone.fileBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.fileBone.fileBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.fileBone'</em><a class="headerlink" href="#server.bones.fileBone.fileBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.fileBone.fileBone.getReferencedBlobs">
+<code class="descname">getReferencedBlobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.fileBone.fileBone.getReferencedBlobs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.fileBone.fileBone.refKeys">
+<code class="descname">refKeys</code><em class="property"> = ['name', 'meta_mime', 'metamime', 'mimetype', 'dlkey', 'servingurl', 'size']</em><a class="headerlink" href="#server.bones.fileBone.fileBone.refKeys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.fileBone.fileBone.refresh">
+<code class="descname">refresh</code><span class="sig-paren">(</span><em>boneName</em>, <em>skel</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.fileBone.fileBone.refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refresh all values we might have cached from other entities.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.fileBone.fileBone.type">
+<code class="descname">type</code><em class="property"> = 'file'</em><a class="headerlink" href="#server.bones.fileBone.fileBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.fileBone.fileBone.unserialize">
+<code class="descname">unserialize</code><span class="sig-paren">(</span><em>name</em>, <em>expando</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.fileBone.fileBone.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="relational-bones">
+<h2>Relational bones<a class="headerlink" href="#relational-bones" title="Permalink to this headline">¶</a></h2>
+<p>One of ViURs core features is providing relations ontop of the non-relational datastore.
+This Bone wraps this functionality into a standard property for your datamodel.
+There are just 2 Properties to set to use this bone. <em>Descrition</em> (as with any bone), and <em>type</em>.
+The <em>type</em> parameter determines what kinds are being referenced. It <em>must</em> match a kindName defined by a skeleton.
+If your module for that kind has a different name, you must also set the <em>module</em> parameter. I.E. if you referencing
+a kind <em>news</em>, but your news-module is available at /my_news_module/ instead of /news/, you must set it. Otherwise
+you won&#8217;t be able to select any values in your admin tool. <em>refKeys</em> and <em>parentKeys</em> determine what properties are
+available in a relational query.</p>
+<p>Example:
+Your news-skeleton has a property <em>ispublic</em> and references a skeleton product, which has a property <em>color</em>.
+If you need to filter your news by associated products in a specific color, you need to include <em>color</em> in the
+<em>refKeys</em> of that relationalBone.
+If you need to update your filter to also only return public news, you have to include <em>public</em> in the <em>parentKeys</em> list.</p>
+<p>Sometimes it&#8217;s needed to store additional data along with such a relation (i.E. on a relation student-&gt;exam you might
+want to store the note received in that exam). In such a case create a new Skeleton (use RelSkel as base-class - <em>not</em>
+Skeleton!) and pass this class in the <em>using</em>-parameter. You can also use filtering on such a relSkel (i.E. find students
+which archived at least x points for a given exam).</p>
+<blockquote>
+<div><div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">If you ever encounter an query, that includes a relational filter and doesn&#8217;t return any results despite it should,
+check your server-log. Usually you miss a property in parent/ref-Keys and ViUR will warn you about that. Otherwise
+try to rebuild the search-index of the kind that relationalBone is in.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><em>refKeys</em> must be always set. However, <em>parentKeys</em> are only used if you also specify multiple=True. Otherwise
+that property is ignored.</p>
+</div>
+</div></blockquote>
+<span class="target" id="module-server.bones.relationalBone"></span><dl class="class">
+<dt id="server.bones.relationalBone.relationalBone">
+<em class="property">class </em><code class="descclassname">server.bones.relationalBone.</code><code class="descname">relationalBone</code><span class="sig-paren">(</span><em>type=None</em>, <em>module=None</em>, <em>refKeys=None</em>, <em>parentKeys=None</em>, <em>multiple=True</em>, <em>format='$(name)'</em>, <em>using=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.bone.baseBone" title="server.bones.bone.baseBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.bone.baseBone</span></code></a></p>
+<p>This is our magic class implementing relations.</p>
+<p>This implementation is read-efficient, e.g. filtering by relational-properties only costs an additional
+small-op for each entity returned.
+However, it costs several more write-ops for writing an entity to the db.
+(These costs are somewhat around additional (4+len(refKeys)+len(parentKeys)) write-ops for each referenced
+property) for multiple=True relationalBones and (4+len(refKeys)) for n:1 relations)</p>
+<p>So don&#8217;t use this if you expect data being read less frequently than written! (Sorry, we don&#8217;t have a
+write-efficient method yet)
+To speedup writes to (maybe) referenced entities, information in these relations isn&#8217;t updated instantly.
+Once a skeleton is updated, a deferred task is kicked off which updates the references to
+that skeleton (if any).
+As a result, you might see stale data until this task has been finished.</p>
+<dl class="docutils">
+<dt>Example:</dt>
+<dd><ul class="first last simple">
+<li>Entity A references Entity B.</li>
+<li>Both have a property &#8220;name&#8221;.</li>
+<li>Entity B gets updated (it name changes).</li>
+<li>As &#8220;A&#8221; has a copy of entity &#8220;B&#8221;s values, you&#8217;ll see &#8220;B&#8221;s old name inside the values of the
+relationalBone when fetching entity A.</li>
+</ul>
+</dd>
+</dl>
+<p>If you filter a list by relational properties, this will also use the old data! (Eg. filtering A&#8217;s list by
+B&#8217;s new name won&#8217;t return any result)</p>
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>type=None</em>, <em>module=None</em>, <em>refKeys=None</em>, <em>parentKeys=None</em>, <em>multiple=True</em>, <em>format='$(name)'</em>, <em>using=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize a new relationalBone.
+:param type: KindName of the referenced property.
+:type type: String
+:param module: Name of the modul which should be used to select entities of kind &#8220;type&#8221;. If not set,</p>
+<blockquote>
+<div>the value of &#8220;type&#8221; will be used (the kindName must match the moduleName)</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>refKeys</strong> (<em>List of Strings</em>) &#8211; A list of properties to include from the referenced property. These properties will be
+avaiable in the template without having to fetch the referenced property. Filtering is also only possible
+by properties named here!</li>
+<li><strong>parentKeys</strong> (<em>List of Strings</em>) &#8211; A list of properties from the current skeleton to include. If mixing filtering by
+relational properties and properties of the class itself, these must be named here.</li>
+<li><strong>multiple</strong> (<a class="reference external" href="http://docs.python.org/library/constants.html#False" title="(in Python v2.7)"><em>False</em></a>) &#8211; If True, allow referencing multiple Elements of the given class. (Eg. n:n-relation.
+otherwise its n:1 )</li>
+<li><strong>format</strong> (<em>String</em>) &#8211; Hint for the admin how to display such an relation. See admin/utils.py:formatString for
+more information</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.relationalBone.relationalBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.relationalBone'</em><a class="headerlink" href="#server.bones.relationalBone.relationalBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone._restoreValueFromDatastore">
+<code class="descname">_restoreValueFromDatastore</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone._restoreValueFromDatastore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restores one of our values (including the Rel- and Using-Skel) from the serialized data read from the datastore
+:param value: Json-Encoded datastore property
+:return: Our Value (with restored RelSkel and using-Skel)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone._rewriteQuery">
+<code class="descname">_rewriteQuery</code><span class="sig-paren">(</span><em>name</em>, <em>skel</em>, <em>dbFilter</em>, <em>rawFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone._rewriteQuery" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rewrites a datastore query to operate on &#8220;viur-relations&#8221; instead of the original kind.
+This is needed to perform relational queries on n:m relations.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone.buildDBFilter">
+<code class="descname">buildDBFilter</code><span class="sig-paren">(</span><em>name</em>, <em>skel</em>, <em>dbFilter</em>, <em>rawFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone.buildDBFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone.buildDBSort">
+<code class="descname">buildDBSort</code><span class="sig-paren">(</span><em>name</em>, <em>skel</em>, <em>dbFilter</em>, <em>rawFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone.buildDBSort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone.filterHook">
+<code class="descname">filterHook</code><span class="sig-paren">(</span><em>name</em>, <em>query</em>, <em>param</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone.filterHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook installed by buildDbFilter.
+This rewrites all filters added to the query after buildDbFilter has been run to match the
+layout of our viur-relations index.
+Also performs sanity checks wherever this query is possible at all.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone.fromClient">
+<code class="descname">fromClient</code><span class="sig-paren">(</span><em>name</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone.fromClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a value from the client.
+If this value is valid for this bone,
+store this value and return None.
+Otherwise our previous value is
+left unchanged and an error-message
+is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>String</em>) &#8211; Our name in the skeleton</li>
+<li><strong>data</strong> (<em>Dict</em>) &#8211; <em>User-supplied</em> request-data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None or String</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone.getSearchDocumentFields">
+<code class="descname">getSearchDocumentFields</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone.getSearchDocumentFields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone.isInvalid">
+<code class="descname">isInvalid</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone.isInvalid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone.orderHook">
+<code class="descname">orderHook</code><span class="sig-paren">(</span><em>name</em>, <em>query</em>, <em>orderings</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone.orderHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook installed by buildDbFilter.
+This rewrites all orderings added to the query after buildDbFilter has been run to match the
+layout of our viur-relations index.
+Also performs sanity checks wherever this query is possible at all.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.relationalBone.relationalBone.parentKeys">
+<code class="descname">parentKeys</code><em class="property"> = ['key', 'name']</em><a class="headerlink" href="#server.bones.relationalBone.relationalBone.parentKeys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone.postDeletedHandler">
+<code class="descname">postDeletedHandler</code><span class="sig-paren">(</span><em>skel</em>, <em>key</em>, <em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone.postDeletedHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone.postSavedHandler">
+<code class="descname">postSavedHandler</code><span class="sig-paren">(</span><em>boneName</em>, <em>skel</em>, <em>key</em>, <em>dbfields</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone.postSavedHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.relationalBone.relationalBone.refKeys">
+<code class="descname">refKeys</code><em class="property"> = ['key', 'name']</em><a class="headerlink" href="#server.bones.relationalBone.relationalBone.refKeys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone.refresh">
+<code class="descname">refresh</code><span class="sig-paren">(</span><em>boneName</em>, <em>skel</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone.refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refresh all values we might have cached from other entities.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>name</em>, <em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone.serialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.relationalBone.relationalBone.unserialize">
+<code class="descname">unserialize</code><span class="sig-paren">(</span><em>name</em>, <em>expando</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.relationalBone.relationalBone.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-server.bones.captchaBone">
+<span id="miscellaneous-bones"></span><h2>Miscellaneous bones<a class="headerlink" href="#module-server.bones.captchaBone" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="server.bones.captchaBone.captchaBone">
+<em class="property">class </em><code class="descclassname">server.bones.captchaBone.</code><code class="descname">captchaBone</code><span class="sig-paren">(</span><em>publicKey=None</em>, <em>privateKey=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.captchaBone.captchaBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.bone.baseBone" title="server.bones.bone.baseBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.bone.baseBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.captchaBone.captchaBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>publicKey=None</em>, <em>privateKey=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.captchaBone.captchaBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.captchaBone.captchaBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.captchaBone'</em><a class="headerlink" href="#server.bones.captchaBone.captchaBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.captchaBone.captchaBone.fromClient">
+<code class="descname">fromClient</code><span class="sig-paren">(</span><em>name</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.captchaBone.captchaBone.fromClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a value from the client.
+If this value is valid for this bone,
+store this value and return None.
+Otherwise our previous value is
+left unchanged and an error-message
+is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>String</em>) &#8211; Our name in the skeleton</li>
+<li><strong>data</strong> (<em>Dict</em>) &#8211; <em>User-supplied</em> request-data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None or String</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.captchaBone.captchaBone.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>name</em>, <em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.captchaBone.captchaBone.serialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.captchaBone.captchaBone.type">
+<code class="descname">type</code><em class="property"> = 'captcha'</em><a class="headerlink" href="#server.bones.captchaBone.captchaBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.captchaBone.captchaBone.unserialize">
+<code class="descname">unserialize</code><span class="sig-paren">(</span><em>name</em>, <em>values</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.captchaBone.captchaBone.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-server.bones.colorBone"></span><dl class="class">
+<dt id="server.bones.colorBone.colorBone">
+<em class="property">class </em><code class="descclassname">server.bones.colorBone.</code><code class="descname">colorBone</code><span class="sig-paren">(</span><em>mode='rgb'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.colorBone.colorBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.bone.baseBone" title="server.bones.bone.baseBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.bone.baseBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.colorBone.colorBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>mode='rgb'</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.colorBone.colorBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.colorBone.colorBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.colorBone'</em><a class="headerlink" href="#server.bones.colorBone.colorBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.colorBone.colorBone.fromClient">
+<code class="descname">fromClient</code><span class="sig-paren">(</span><em>name</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.colorBone.colorBone.fromClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a value from the client.
+If this value is valid for this bone,
+store this value and return None.
+Otherwise our previous value is
+left unchanged and an error-message
+is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Our name in the skeleton</li>
+<li><strong>data</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; <em>User-supplied</em> request-data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">str or None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.colorBone.colorBone.type">
+<code class="descname">type</code><em class="property"> = 'color'</em><a class="headerlink" href="#server.bones.colorBone.colorBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-server.bones.dateBone"></span><dl class="class">
+<dt id="server.bones.dateBone.ExtendedDateTime">
+<em class="property">class </em><code class="descclassname">server.bones.dateBone.</code><code class="descname">ExtendedDateTime</code><a class="headerlink" href="#server.bones.dateBone.ExtendedDateTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/datetime.html#datetime.datetime" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">datetime.datetime</span></code></a></p>
+<dl class="attribute">
+<dt id="server.bones.dateBone.ExtendedDateTime.__dict__">
+<code class="descname">__dict__</code><em class="property"> = dict_proxy({'__module__': 'server.bones.dateBone', 'totimestamp': &lt;function totimestamp at 0x104ae5758&gt;, '__dict__': &lt;attribute '__dict__' of 'ExtendedDateTime' objects&gt;, '__weakref__': &lt;attribute '__weakref__' of 'ExtendedDateTime' objects&gt;, '__doc__': None, 'strftime': &lt;function strftime at 0x104af32a8&gt;})</em><a class="headerlink" href="#server.bones.dateBone.ExtendedDateTime.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.dateBone.ExtendedDateTime.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.dateBone'</em><a class="headerlink" href="#server.bones.dateBone.ExtendedDateTime.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.dateBone.ExtendedDateTime.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#server.bones.dateBone.ExtendedDateTime.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.dateBone.ExtendedDateTime.strftime">
+<code class="descname">strftime</code><span class="sig-paren">(</span><em>format</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.dateBone.ExtendedDateTime.strftime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides correct localized names for directives like %a which dont get translated on GAE properly
+This currently replaces %a, %A, %b, %B, %c, %x and %X.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>format</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; String containing the Format to apply.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.dateBone.ExtendedDateTime.totimestamp">
+<code class="descname">totimestamp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.dateBone.ExtendedDateTime.totimestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts this DateTime-Object back into Unixtime</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="server.bones.dateBone.dateBone">
+<em class="property">class </em><code class="descclassname">server.bones.dateBone.</code><code class="descname">dateBone</code><span class="sig-paren">(</span><em>creationMagic=False</em>, <em>updateMagic=False</em>, <em>date=True</em>, <em>time=True</em>, <em>localize=False</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.dateBone.dateBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.bone.baseBone" title="server.bones.bone.baseBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.bone.baseBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.dateBone.dateBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>creationMagic=False</em>, <em>updateMagic=False</em>, <em>date=True</em>, <em>time=True</em>, <em>localize=False</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.dateBone.dateBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Initializes a new dateBone.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">param creationMagic:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">Use the current time as value when creating an entity; ignoring this bone if the
+entity gets updated.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">type creationMagic:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">bool</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">param updateMagic:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">Use the current time whenever this entity is saved.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">type updateMagic:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">bool</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">param date:</th><td class="field-body">Should this bone contain a date-information?</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type date:</th><td class="field-body">bool</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">param time:</th><td class="field-body">Should this bone contain time information?</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type time:</th><td class="field-body">bool</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">param localize:</th><td class="field-body">Automatically convert this time into the users timezone? Only valid if this bone</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<dl class="docutils">
+<dt>contains date and time-information!</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">type localize:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.dateBone.dateBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.dateBone'</em><a class="headerlink" href="#server.bones.dateBone.dateBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.dateBone.dateBone.buildDBFilter">
+<code class="descname">buildDBFilter</code><span class="sig-paren">(</span><em>name</em>, <em>skel</em>, <em>dbFilter</em>, <em>rawFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.dateBone.dateBone.buildDBFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.dateBone.dateBone.fromClient">
+<code class="descname">fromClient</code><span class="sig-paren">(</span><em>name</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.dateBone.dateBone.fromClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a value from the client.
+If this value is valid for this bone,
+store this value and return None.
+Otherwise our previous value is
+left unchanged and an error-message
+is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Our name in the skeleton</li>
+<li><strong>data</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; <em>User-supplied</em> request-data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">str or None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="server.bones.dateBone.dateBone.generageSearchWidget">
+<em class="property">static </em><code class="descname">generageSearchWidget</code><span class="sig-paren">(</span><em>target</em>, <em>name='DATE BONE'</em>, <em>mode='range'</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.dateBone.dateBone.generageSearchWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.dateBone.dateBone.guessTimeZone">
+<code class="descname">guessTimeZone</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.dateBone.dateBone.guessTimeZone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Guess the timezone the user is supposed to be in.
+If it cant be guessed, a safe default (UTC) is used</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.dateBone.dateBone.performMagic">
+<code class="descname">performMagic</code><span class="sig-paren">(</span><em>isAdd</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.dateBone.dateBone.performMagic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.dateBone.dateBone.readLocalized">
+<code class="descname">readLocalized</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.dateBone.dateBone.readLocalized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a (probably localized Value) from the Client and convert it back to UTC</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.dateBone.dateBone.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>name</em>, <em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.dateBone.dateBone.serialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.dateBone.dateBone.setLocalized">
+<code class="descname">setLocalized</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.dateBone.dateBone.setLocalized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Date read from DB (UTC) to the requesters local time</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.dateBone.dateBone.type">
+<code class="descname">type</code><em class="property"> = 'date'</em><a class="headerlink" href="#server.bones.dateBone.dateBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.dateBone.dateBone.unserialize">
+<code class="descname">unserialize</code><span class="sig-paren">(</span><em>name</em>, <em>expando</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.dateBone.dateBone.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-server.bones.userBone"></span><dl class="class">
+<dt id="server.bones.userBone.userBone">
+<em class="property">class </em><code class="descclassname">server.bones.userBone.</code><code class="descname">userBone</code><span class="sig-paren">(</span><em>creationMagic=False</em>, <em>updateMagic=False</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.userBone.userBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.relationalBone.relationalBone" title="server.bones.relationalBone.relationalBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.relationalBone.relationalBone</span></code></a></p>
+<dl class="method">
+<dt id="server.bones.userBone.userBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>creationMagic=False</em>, <em>updateMagic=False</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.userBone.userBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.userBone.userBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.userBone'</em><a class="headerlink" href="#server.bones.userBone.userBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.userBone.userBone.datafields">
+<code class="descname">datafields</code><em class="property"> = ['name']</em><a class="headerlink" href="#server.bones.userBone.userBone.datafields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.userBone.userBone.performMagic">
+<code class="descname">performMagic</code><span class="sig-paren">(</span><em>isAdd</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.userBone.userBone.performMagic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.userBone.userBone.type">
+<code class="descname">type</code><em class="property"> = 'user'</em><a class="headerlink" href="#server.bones.userBone.userBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-server.bones.randomSliceBone"></span><dl class="function">
+<dt id="server.bones.randomSliceBone.random">
+<code class="descclassname">server.bones.randomSliceBone.</code><code class="descname">random</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; x in the interval [0, 1).<a class="headerlink" href="#server.bones.randomSliceBone.random" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="server.bones.randomSliceBone.randomSliceBone">
+<em class="property">class </em><code class="descclassname">server.bones.randomSliceBone.</code><code class="descname">randomSliceBone</code><span class="sig-paren">(</span><em>indexed=True</em>, <em>visible=False</em>, <em>readOnly=True</em>, <em>slices=2</em>, <em>sliceSize=0.5</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.randomSliceBone.randomSliceBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.bone.baseBone" title="server.bones.bone.baseBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.bone.baseBone</span></code></a></p>
+<p>Simulates the orderby=random from SQL.
+If you sort by this bone, the query will return a random set of elements from that query.</p>
+<dl class="method">
+<dt id="server.bones.randomSliceBone.randomSliceBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>indexed=True</em>, <em>visible=False</em>, <em>readOnly=True</em>, <em>slices=2</em>, <em>sliceSize=0.5</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.randomSliceBone.randomSliceBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a new randomSliceBone.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.randomSliceBone.randomSliceBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.randomSliceBone'</em><a class="headerlink" href="#server.bones.randomSliceBone.randomSliceBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.randomSliceBone.randomSliceBone.buildDBSort">
+<code class="descname">buildDBSort</code><span class="sig-paren">(</span><em>name</em>, <em>skel</em>, <em>dbFilter</em>, <em>rawFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.randomSliceBone.randomSliceBone.buildDBSort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as buildDBFilter, but this time its not about filtering
+the results, but by sorting them.
+Again: rawFilter is controlled by the client, so you <em>must</em> expect and safely handle
+malformed data!</p>
+<p>This function is somewhat special as it doesn&#8217;t just change in which order the selected
+Elements are being returned - but also changes <em>which</em> Elements are beeing returned (=&gt;
+a random selection)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The property-name this bone has in its Skeleton (not the description!)</li>
+<li><strong>skel</strong> (<a class="reference internal" href="../skeletons.html#server.skeleton.Skeleton" title="server.skeleton.Skeleton"><code class="xref py py-class docutils literal"><span class="pre">server.skeleton.Skeleton</span></code></a>) &#8211; The <a class="reference internal" href="../skeletons.html#server.skeleton.Skeleton" title="server.skeleton.Skeleton"><code class="xref py py-class docutils literal"><span class="pre">server.skeleton.Skeleton</span></code></a> instance this bone is part of</li>
+<li><strong>dbFilter</strong> (<a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a>) &#8211; The current <a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a> instance the filters should be applied to</li>
+<li><strong>rawFilter</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; The dictionary of filters the client wants to have applied</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The modified <a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.randomSliceBone.randomSliceBone.calculateInternalMultiQueryAmount">
+<code class="descname">calculateInternalMultiQueryAmount</code><span class="sig-paren">(</span><em>targetAmount</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.randomSliceBone.randomSliceBone.calculateInternalMultiQueryAmount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tells <a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a> How much entries should be fetched in each subquery.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>targetAmount</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; How many entries shall be returned from db.Query</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The amount of elements db.Query should fetch on each subquery</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)">int</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.randomSliceBone.randomSliceBone.customMultiQueryMerge">
+<code class="descname">customMultiQueryMerge</code><span class="sig-paren">(</span><em>dbFilter</em>, <em>result</em>, <em>targetAmount</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.randomSliceBone.randomSliceBone.customMultiQueryMerge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomly returns &#8216;targetAmount&#8217; elements from &#8216;result&#8217;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dbFilter</strong> &#8211; The db.Query calling this function</li>
+<li><strong>result</strong> (list of list of <a class="reference internal" href="../server_api.html#server.db.Entity" title="server.db.Entity"><code class="xref py py-class docutils literal"><span class="pre">server.db.Entity</span></code></a>) &#8211; The list of results for each subquery we&#8217;ve run</li>
+<li><strong>targetAmount</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; How many results should be returned from db.Query</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><p class="first">dbFilter: server.db.Query</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of elements which should be returned from db.Query</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of <a class="reference internal" href="../server_api.html#server.db.Entity" title="server.db.Entity"><code class="xref py py-class docutils literal"><span class="pre">server.db.Entity</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.randomSliceBone.randomSliceBone.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>name</em>, <em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.randomSliceBone.randomSliceBone.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serializes this bone into something we
+can write into the datastore.</p>
+<p>This time, we just ignore whatever is set on this bone and write a randomly chosen
+float [0..1) as value for this bone.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>String</em>) &#8211; The property-name this bone has in its Skeleton (not the description!)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.randomSliceBone.randomSliceBone.type">
+<code class="descname">type</code><em class="property"> = 'randomslice'</em><a class="headerlink" href="#server.bones.randomSliceBone.randomSliceBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-server.bones.spatialBone"></span><dl class="function">
+<dt id="server.bones.spatialBone.haversine">
+<code class="descclassname">server.bones.spatialBone.</code><code class="descname">haversine</code><span class="sig-paren">(</span><em>lat1</em>, <em>lng1</em>, <em>lat2</em>, <em>lng2</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.spatialBone.haversine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the distance between two points on Earth given by (lat1,lng1) and (lat2, lng2) in Meter.
+See <a class="reference external" href="https://en.wikipedia.org/wiki/Haversine_formula">https://en.wikipedia.org/wiki/Haversine_formula</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Distance in Meter</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="server.bones.spatialBone.spatialBone">
+<em class="property">class </em><code class="descclassname">server.bones.spatialBone.</code><code class="descname">spatialBone</code><span class="sig-paren">(</span><em>boundsLat</em>, <em>boundsLng</em>, <em>gridDimensions</em>, <em>indexed=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.spatialBone.spatialBone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#server.bones.bone.baseBone" title="server.bones.bone.baseBone"><code class="xref py py-class docutils literal"><span class="pre">server.bones.bone.baseBone</span></code></a></p>
+<p>Allows to query by Elements close to a given position.
+Prior to use, you must specify for which region of the map the index should be build.
+This region should be as small as possible for best accuracy. You cannot use the whole world, as
+no boundary wraps are been performed.
+GridDimensions specifies into how many sub-regions the map will be split. Results further away than the
+size of these sub-regions won&#8217;t be considered within a search by this algorithm.</p>
+<dl class="docutils">
+<dt>Example:</dt>
+<dd>If you use this bone to query your data for the nearest pubs, you might want to this algorithm
+to consider results up to 100km distance, but not results that are 500km away.
+Setting the size of these sub-regions to roughly 100km width/height allows this algorithm
+to exclude results further than 200km away on database-query-level, therefore drastically
+improving performance and reducing costs per query.</dd>
+</dl>
+<p>Example region: Germany: boundsLat=(46.988, 55.022), boundsLng=(4.997, 15.148)</p>
+<dl class="method">
+<dt id="server.bones.spatialBone.spatialBone.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>boundsLat</em>, <em>boundsLng</em>, <em>gridDimensions</em>, <em>indexed=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.spatialBone.spatialBone.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a new spatialBone.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>boundsLat</strong> (<em>(int, int)</em>) &#8211; Outer bounds (Latitude) of the region we will search in.</li>
+<li><strong>boundsLng</strong> (<em>(int, int)</em>) &#8211; Outer bounds (Latitude) of the region we will search in.</li>
+<li><strong>gridDimensions</strong> (<em>(int, int)</em>) &#8211; Number of sub-regions the map will be divided in</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.spatialBone.spatialBone.__module__">
+<code class="descname">__module__</code><em class="property"> = 'server.bones.spatialBone'</em><a class="headerlink" href="#server.bones.spatialBone.spatialBone.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.spatialBone.spatialBone.buildDBFilter">
+<code class="descname">buildDBFilter</code><span class="sig-paren">(</span><em>name</em>, <em>skel</em>, <em>dbFilter</em>, <em>rawFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.spatialBone.spatialBone.buildDBFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the searchfilter a client specified in his Request into
+something understood by the datastore.
+This function must:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Ignore all filters not targeting this bone</p>
+</li>
+<li><dl class="first docutils">
+<dt>Safely handle malformed data in rawFilter</dt>
+<dd><p class="first last">(this parameter is directly controlled by the client)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>For detailed information, how this geo-spatial search works, see the ViUR documentation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The property-name this bone has in its Skeleton (not the description!)</li>
+<li><strong>skel</strong> (<a class="reference internal" href="../skeletons.html#server.skeleton.Skeleton" title="server.skeleton.Skeleton"><code class="xref py py-class docutils literal"><span class="pre">server.skeleton.Skeleton</span></code></a>) &#8211; The <a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a> this bone is part of</li>
+<li><strong>dbFilter</strong> (<a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a>) &#8211; The current <a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a> instance the filters should be applied to</li>
+<li><strong>rawFilter</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; The dictionary of filters the client wants to have applied</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The modified <a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.spatialBone.spatialBone.calculateInternalMultiQueryAmount">
+<code class="descname">calculateInternalMultiQueryAmount</code><span class="sig-paren">(</span><em>targetAmount</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.spatialBone.spatialBone.calculateInternalMultiQueryAmount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tells <a class="reference internal" href="../server_api.html#server.db.Query" title="server.db.Query"><code class="xref py py-class docutils literal"><span class="pre">server.db.Query</span></code></a> How much entries should be fetched in each subquery.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>targetAmount</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; How many entries shall be returned from db.Query</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The amount of elements db.Query should fetch on each subquery</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)">int</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.spatialBone.spatialBone.customMultiQueryMerge">
+<code class="descname">customMultiQueryMerge</code><span class="sig-paren">(</span><em>name</em>, <em>lat</em>, <em>lng</em>, <em>dbFilter</em>, <em>result</em>, <em>targetAmount</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.spatialBone.spatialBone.customMultiQueryMerge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomly returns &#8216;targetAmount&#8217; elements from &#8216;result&#8217;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dbFilter</strong> &#8211; The db.Query calling this function</li>
+<li><strong>result</strong> (list of list of <a class="reference internal" href="../server_api.html#server.db.Entity" title="server.db.Entity"><code class="xref py py-class docutils literal"><span class="pre">server.db.Entity</span></code></a>) &#8211; The list of results for each subquery we&#8217;ve run</li>
+<li><strong>targetAmount</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; How many results should be returned from db.Query</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><p class="first">dbFilter: server.db.Query</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of elements which should be returned from db.Query</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of <a class="reference internal" href="../server_api.html#server.db.Entity" title="server.db.Entity"><code class="xref py py-class docutils literal"><span class="pre">server.db.Entity</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.spatialBone.spatialBone.getGridSize">
+<code class="descname">getGridSize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.spatialBone.spatialBone.getGridSize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the size of our sub-regions in (fractions-of-latitude, fractions-of-longitude)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(float, flot)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.spatialBone.spatialBone.isInvalid">
+<code class="descname">isInvalid</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.spatialBone.spatialBone.isInvalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests, if the point given by &#8216;value&#8217; is inside our boundaries.
+We&#8217;ll reject all values outside that region.
+:param value: (latitude, longitude) of the location of this entry.
+:type value: (float, float)
+:return: An error-description or False if the value is valid
+:rtype: str | False</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="server.bones.spatialBone.spatialBone.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>name</em>, <em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.spatialBone.spatialBone.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serializes this bone into something we
+can write into the datastore.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>String</em>) &#8211; The property-name this bone has in its Skeleton (not the description!)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="server.bones.spatialBone.spatialBone.type">
+<code class="descname">type</code><em class="property"> = 'spatial'</em><a class="headerlink" href="#server.bones.spatialBone.spatialBone.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="server.bones.spatialBone.spatialBone.unserialize">
+<code class="descname">unserialize</code><span class="sig-paren">(</span><em>name</em>, <em>expando</em><span class="sig-paren">)</span><a class="headerlink" href="#server.bones.spatialBone.spatialBone.unserialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse of serialize. Evaluates whats
+read from the datastore and populates
+this bone accordingly.
+:param name: The property-name this bone has in its Skeleton (not the description!)
+:type name: String
+:param expando: An instance of the dictionary-like db.Entity class
+:type expando: db.Entity
+:returns: bool</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/viur.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Bones</a><ul>
+<li><a class="reference internal" href="#datatypes">Datatypes</a></li>
+<li><a class="reference internal" href="#module-server.bones.bone">Base bone</a></li>
+<li><a class="reference internal" href="#module-server.bones.numericBone">numericBone</a></li>
+<li><a class="reference internal" href="#module-server.bones.booleanBone">booleanBone</a></li>
+<li><a class="reference internal" href="#string-based-bones">String-based bones</a><ul>
+<li><a class="reference internal" href="#module-server.bones.stringBone">stringBone</a></li>
+<li><a class="reference internal" href="#module-server.bones.textBone">textBone</a></li>
+<li><a class="reference internal" href="#module-server.bones.emailBone">emailBone</a></li>
+<li><a class="reference internal" href="#module-server.bones.passwordBone">passwordBone</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#selectional-bones">Selectional bones</a><ul>
+<li><a class="reference internal" href="#selectonebone">selectOneBone</a></li>
+<li><a class="reference internal" href="#selectmultibone">selectMultiBone</a></li>
+<li><a class="reference internal" href="#selectcountrybone">selectCountryBone</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-server.bones.hierarchyBone">Hierarchical bones</a></li>
+<li><a class="reference internal" href="#relational-bones">Relational bones</a></li>
+<li><a class="reference internal" href="#module-server.bones.captchaBone">Miscellaneous bones</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../quickstart.html" title="previous chapter">Getting started</a></li>
+      <li>Next: <a href="../skeletons.html" title="next chapter">Skeletons</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/bones/bones_api.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <script>
+        
+    $(document).ready(function() {
+        $('#popuplogin').click(function(e) {
+               e.stopPropagation();
+        });
+    });
+    
+    
+        $(document).ready(function () {
+            $('#hamburgericon').click(function () {
+                $(".sphinxsidebarwrapper").fadeIn(100);
+                $("#fcside").fadeIn(100);
+                $("body").css({ overflow: 'hidden' });
+            });
+        });
+    
+        $(document).ready(function () {
+            $('#fcside').click(function () {
+                $("body").css({ overflow: 'inherit' });
+                $(".sphinxsidebarwrapper").fadeOut(100);
+                $("#fcside").fadeOut(100);
+            });
+        });
+        
+            
+        var thescroll=0;
+        var scrolling =false;
+
+    function scrolleventhandler (e) {
+
+        if( thescroll > $(window).scrollTop()){
+            scrolldir=-1;
+        }else{
+            scrolldir=1;
+        }
+        thescroll=$(window).scrollTop();
+        wh=parseInt($("body").css("height").replace("px", ""))
+
+        if (scrolldir>0) {
+            $('.logo').addClass("is-scrolled");
+            $('.is2').addClass("is-scrolled2");
+            $('.is3').addClass("is-scrolled3");
+            $('.is4').addClass("is-scrolled4");
+            $('.is5').addClass("is-scrolled5");
+            $('.viur').addClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').addClass("is-scrolled7");
+            
+        } else {
+            $('.logo').removeClass("is-scrolled");
+            $('.is2').removeClass("is-scrolled2");
+            $('.is3').removeClass("is-scrolled3");
+            $('.is4').removeClass("is-scrolled4");
+            $('.is5').removeClass("is-scrolled5");
+            $('.viur').removeClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').removeClass("is-scrolled7");
+            
+        }
+
+    }
+    
+	$(window).scroll(scrolleventhandler);
+	$(window).resize(scrolleventhandler);
+    </script>
+    
+    
+<header class="is2">
+	<div class="binding">
+
+		<div class="logo">
+			<a href="#">
+				<img class="is7" src="_static/viur.png" title="ViUR - Information System">
+			</a>
+			<h3 class="is3">Information System</h3>
+		</div>
+
+		<div class="topnav  no-mobil">
+			<ul class="topnavlist is2">
+				<li>
+					<a class="viur is2 is4" href="#">
+						<h2 class="is5">Download</h2>
+						<span class="is3">Win | Mac | Linux</span>
+					</a>
+				</li>
+				<li>
+					<a class="community is2 is4" href="#">
+						<h2 class="is5">Community</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+				<li>
+					<a class="develop is2 is4" href="#">
+						<h2 class="is5">Development</h2>
+						<span class="is3">Source Code | GIT</span>
+					</a>
+				</li>
+				<li>
+					<a class="docu is2 is4" href="#">
+						<h2 class="not-mobile is5">Documentation</h2>
+						<h2 class="not-desktop is5">Docs</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+	</div>
+</header>
+    
+    <div id="fcside"></div>
+    <div class="footer">
+      &copy;2015, Mausbrand Informationssysteme GmbH.
+      
+      | <a href="/impressum">Impressum</a> |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4a0+</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="../_sources/bones/bones_api.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

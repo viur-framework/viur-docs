@@ -1,0 +1,388 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Storing Data &mdash; ViUR Server 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/mbtemplate.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ViUR Server 1.1.0 documentation" href="index.html" />
+    <link rel="next" title="Indexes" href="indexes.html" />
+    <link rel="prev" title="Configuration" href="config.html" />
+   
+  
+  <link rel="icon" href="_static/favicon.png" type="image/png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="storing-data">
+<h1>Storing Data<a class="headerlink" href="#storing-data" title="Permalink to this headline">¶</a></h1>
+<p>ViUR comes with its own, unique data model access API.</p>
+<p>The concept behind these models is similar to the one used within the Google AppEngine™ in general.</p>
+<p>However, ViURs implementation of the data model layer is much more powerful:</p>
+<ul class="simple">
+<li>It also stores meta data (descriptions for each field, help and error texts, visible and editable to/by the use etc.)</li>
+<li>More fine-grained. E.g. Numeric Bones allows specification of min and max values and its precision</li>
+<li>Complex types: relations, captchas, text documents</li>
+<li>Allows multiple models per kind</li>
+</ul>
+<p>And best of all: Its entirely extensible! If you need a complex type that is not part of the system, its easy to add it on your own.
+The application developer has two ways accessing the database: Low and highlevel.</p>
+<p>The lowlevel approach is provided by server.db. This allows querying and storing data without the need to define models
+first. Its a thin proxy to the object-storage provided by the datastore. If low-level access is needed, the application
+<em>must</em> use this modul. Its not valid to use the ext.db or ext.ndb modules supplied by the appengine directly. To
+enhance the speed and lower the costs of database queries, ViUR uses the memcache to efficiently serve requests where possible.
+Altering data directly through one of these APIs will lead to cache-inconsistency and might result in stale data being delivered
+to clients. The highlevel API allows querying along a defined model. This allows easy access to complex queries (i.e. filtering by
+an relational property), which are not directly possible on the datastore.</p>
+<div class="section" id="lowlevel-api">
+<h2>Lowlevel API<a class="headerlink" href="#lowlevel-api" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="creating-an-entity">
+<h3>Creating an Entity<a class="headerlink" href="#creating-an-entity" title="Permalink to this headline">¶</a></h3>
+<p>To store a new entity in the datastore, first create an instance of db.Entity.
+An kind must be specified. This is the collection (think of an SQL-Tablename) for that entity.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dbObj</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Entity</span><span class="p">(</span> <span class="s2">&quot;person&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Then its possible to add Data to this entity.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dbObj</span><span class="p">[</span> <span class="s2">&quot;name&quot;</span> <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Alice&quot;</span>
+<span class="n">dbObj</span><span class="p">[</span> <span class="s2">&quot;age&quot;</span> <span class="p">]</span> <span class="o">=</span> <span class="mi">42</span>
+</pre></div>
+</div>
+<p>Finally save that entry to the datastore.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">db</span><span class="o">.</span><span class="n">Put</span><span class="p">(</span> <span class="n">dbObj</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>After saving the entity, its valid to call dbObj.key() to retrieve the key under which it has been saved.</p>
+</div>
+<div class="section" id="querying-data">
+<h3>Querying Data<a class="headerlink" href="#querying-data" title="Permalink to this headline">¶</a></h3>
+<p>To start a query, create a instance of db.Query.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">query</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Query</span><span class="p">(</span> <span class="s2">&quot;person&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>After creating a query for a given kind, its possible to filter / sort the results.
+.. Warning:</p>
+<div class="highlight-python"><div class="highlight"><pre>The low-level API does \emph{not} prevent you from running invalid queries.
+Filtering and ordering works only for indexed properties. Its possible to create a query sorting or filtering the result-set by
+non-indexed or non-existing properties, but such a query cant return any result, and the API wont warn you in such a case.
+</pre></div>
+</div>
+<p>The following will only include results with age greater then 20; and sort these results from Z to a.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">query</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span> <span class="s2">&quot;age &gt;&quot;</span><span class="p">,</span> <span class="mi">20</span> <span class="p">)</span><span class="o">.</span><span class="n">order</span><span class="p">(</span> <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span><span class="n">query</span><span class="o">.</span><span class="n">DESCENDING</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>To fetch these results, use query.run(). If you only need one result (the first one if there are more), use query.get().
+Query.run() will always return an iterator yielding db.Entity, query.get() will return one db.Entity if there is at least one result,
+None otherwise.</p>
+<p>If an Entity is not needed anymore, you can delete it using db.Delete()</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">db</span><span class="o">.</span><span class="n">Delete</span><span class="p">(</span> <span class="n">entity</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>ViURs database API provides more functions than these basic ones; see the API reference for more details.</p>
+</div>
+</div>
+<div class="section" id="highlevel-api">
+<h2>Highlevel API<a class="headerlink" href="#highlevel-api" title="Permalink to this headline">¶</a></h2>
+<p>The highlevel-api operates on our bones/skeleton system. This allows complex queries (ie. relations) and provides a safety net regarding invalid queries.</p>
+<div class="section" id="defining-the-model">
+<h3>Defining the Model<a class="headerlink" href="#defining-the-model" title="Permalink to this headline">¶</a></h3>
+<p>As the highlevel API operates on a datamodel, its required to define such a model first.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Person</span><span class="p">(</span> <span class="n">Skeleton</span> <span class="p">):</span>
+    <span class="n">kindName</span> <span class="o">=</span> <span class="s2">&quot;person&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">stringBone</span><span class="p">(</span> <span class="n">descr</span><span class="o">=</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">indexed</span><span class="o">=</span><span class="bp">True</span> <span class="p">)</span>
+    <span class="n">age</span> <span class="o">=</span> <span class="n">numericBone</span><span class="p">(</span> <span class="n">descr</span><span class="o">=</span><span class="s2">&quot;Age&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">indexed</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                       <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">0</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>This will define a Model called Person with two properties (name and age). Both properties are required (ie. the user is forced to supply valid
+data for these properties before he&#8217;s able to save it), and all entities are saved as kind <a href="#id1"><span class="problematic" id="id2">``</span></a>person&#8217;&#8216;.
+For stringBones, required=True means a non-empty string; for the numericBone a value between min and max (inclusive).
+Detailed information about all included bones, and their possible parameters can be found in ref{server:bones:api}.</p>
+</div>
+<div class="section" id="id3">
+<h3>Storing data<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>You create an entity by calling its corresponding skeleton-class.
+Unlike the lowlevel API, its only possible to store data according to the defined datamodel.
+Its possible (but not recommend, as its possible to assign invalid data) to directly set the data of individual bones.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">skel</span> <span class="o">=</span> <span class="n">Person</span><span class="p">()</span>
+<span class="n">skel</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;Alice&quot;</span>
+<span class="n">skel</span><span class="o">.</span><span class="n">age</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">42</span>
+</pre></div>
+</div>
+<p>The recommended method is calling <a class="reference internal" href="skeletons.html#server.skeleton.Skeleton.fromClient" title="server.skeleton.Skeleton.fromClient"><code class="xref py py-func docutils literal"><span class="pre">server.skeleton.Skeleton.fromClient()</span></code></a> on the skeleton.
+This tries to parse the data according its model, and returns True on success (meaning the given data was successful parsed for this model), False otherwise.
+Even if this function returns False, all bones are guaranteed to be in a valid state; the ones which have been read correctly contain their data,
+the other ones are set back to a safe default (None in most cases).
+So its possible to call save() afterwards even if reading data fromClient failed (through this might violates the assumed consistency-model!).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This function might alter the data which is saved to the db (But never the dictionary passed to this function). Its safe to supply user-provieded data
+to this function.</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">skel</span> <span class="o">=</span> <span class="n">Person</span><span class="p">()</span>
+<span class="n">success</span> <span class="o">=</span> <span class="n">skel</span><span class="o">.</span><span class="n">fromClient</span><span class="p">(</span> <span class="p">{</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">42</span> <span class="p">}</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>After providing data according to the model, safe its data using skel.toDB()</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nb">id</span> <span class="o">=</span> <span class="n">skel</span><span class="o">.</span><span class="n">toDB</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This function returns the key (as string) the entity has been saved as.
+If you want to update an existing entity, just provide its id to this function.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">skel</span><span class="o">.</span><span class="n">toDB</span><span class="p">(</span> <span class="nb">id</span> <span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Its possible to have different models for the same kind, or store additional Data along with this entity by using
+the lowlevel API to modify an existing entity in the datastore. Updating an existing entity using skel.toDB updates
+<em>only</em> the properties defined in the used model. Any other properties not mentioned in the current model are
+left unchanged.</p>
+</div>
+</div>
+<div class="section" id="querying">
+<h3>Querying<a class="headerlink" href="#querying" title="Permalink to this headline">¶</a></h3>
+<p>First, create an query object calling <a class="reference internal" href="skeletons.html#server.skeleton.Skeleton.all" title="server.skeleton.Skeleton.all"><code class="xref py py-func docutils literal"><span class="pre">server.skeleton.Skeleton.all()</span></code></a> on a skeleton.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">query</span> <span class="o">=</span> <span class="n">Person</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This returns a db.Query instance, bound to this model.
+All functions mentioned in the lowlevel API are valid on this object, too. However, there are additional Methods available.
+<code class="xref py py-func docutils literal"><span class="pre">server.db.mergeExternalFilter()</span></code> allows querying along the datamodel.
+This function is aware of our extended syntax, allowing querying relations. This syntax is equal to the syntax used in
+HTTP-Requests.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">query</span><span class="o">.</span><span class="n">mergeExternalFilter</span><span class="p">(</span> <span class="p">{</span><span class="s2">&quot;age$gt&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;orderby&quot;</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;orderdir&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span> <span class="p">}</span> <span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Its safe to use client-supplied data in this function, as invalid parameters are ignored.
+This function also warns you if an unsatisfiable query is supplied.</p>
+</div>
+<p>After all filters and orders are applied, the results can be fetched using <a class="reference internal" href="server_api.html#server.db.Query.run" title="server.db.Query.run"><code class="xref py py-func docutils literal"><span class="pre">server.db.Query.run()</span></code></a> or <a class="reference internal" href="server_api.html#server.db.Query.get" title="server.db.Query.get"><code class="xref py py-func docutils literal"><span class="pre">server.db.Query.get()</span></code></a>.
+If you need a skeleton (or a skellist) instead of the raw db.Entities, call query.getSkel() or query.fetch().</p>
+<p>If not needed any more, delete an entity by calling <a class="reference internal" href="skeletons.html#server.skeleton.Skeleton.delete" title="server.skeleton.Skeleton.delete"><code class="xref py py-func docutils literal"><span class="pre">server.skeleton.Skeleton.delete()</span></code></a> on a model.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Person</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span> <span class="nb">id</span> <span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If an Entity has been created/modified using the highlevel API, always delete it using the highlevel-API.
+Otherwise, garbage might be left in the datastore.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/viur.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Storing Data</a><ul>
+<li><a class="reference internal" href="#lowlevel-api">Lowlevel API</a><ul>
+<li><a class="reference internal" href="#creating-an-entity">Creating an Entity</a></li>
+<li><a class="reference internal" href="#querying-data">Querying Data</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#highlevel-api">Highlevel API</a><ul>
+<li><a class="reference internal" href="#defining-the-model">Defining the Model</a></li>
+<li><a class="reference internal" href="#id3">Storing data</a></li>
+<li><a class="reference internal" href="#querying">Querying</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="config.html" title="previous chapter">Configuration</a></li>
+      <li>Next: <a href="indexes.html" title="next chapter">Indexes</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/db.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <script>
+        
+    $(document).ready(function() {
+        $('#popuplogin').click(function(e) {
+               e.stopPropagation();
+        });
+    });
+    
+    
+        $(document).ready(function () {
+            $('#hamburgericon').click(function () {
+                $(".sphinxsidebarwrapper").fadeIn(100);
+                $("#fcside").fadeIn(100);
+                $("body").css({ overflow: 'hidden' });
+            });
+        });
+    
+        $(document).ready(function () {
+            $('#fcside').click(function () {
+                $("body").css({ overflow: 'inherit' });
+                $(".sphinxsidebarwrapper").fadeOut(100);
+                $("#fcside").fadeOut(100);
+            });
+        });
+        
+            
+        var thescroll=0;
+        var scrolling =false;
+
+    function scrolleventhandler (e) {
+
+        if( thescroll > $(window).scrollTop()){
+            scrolldir=-1;
+        }else{
+            scrolldir=1;
+        }
+        thescroll=$(window).scrollTop();
+        wh=parseInt($("body").css("height").replace("px", ""))
+
+        if (scrolldir>0) {
+            $('.logo').addClass("is-scrolled");
+            $('.is2').addClass("is-scrolled2");
+            $('.is3').addClass("is-scrolled3");
+            $('.is4').addClass("is-scrolled4");
+            $('.is5').addClass("is-scrolled5");
+            $('.viur').addClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').addClass("is-scrolled7");
+            
+        } else {
+            $('.logo').removeClass("is-scrolled");
+            $('.is2').removeClass("is-scrolled2");
+            $('.is3').removeClass("is-scrolled3");
+            $('.is4').removeClass("is-scrolled4");
+            $('.is5').removeClass("is-scrolled5");
+            $('.viur').removeClass("is-scrolled6");
+            $('.sphinxsidebarwrapper').removeClass("is-scrolled7");
+            
+        }
+
+    }
+    
+	$(window).scroll(scrolleventhandler);
+	$(window).resize(scrolleventhandler);
+    </script>
+    
+    
+<header class="is2">
+	<div class="binding">
+
+		<div class="logo">
+			<a href="#">
+				<img class="is7" src="_static/viur.png" title="ViUR - Information System">
+			</a>
+			<h3 class="is3">Information System</h3>
+		</div>
+
+		<div class="topnav  no-mobil">
+			<ul class="topnavlist is2">
+				<li>
+					<a class="viur is2 is4" href="#">
+						<h2 class="is5">Download</h2>
+						<span class="is3">Win | Mac | Linux</span>
+					</a>
+				</li>
+				<li>
+					<a class="community is2 is4" href="#">
+						<h2 class="is5">Community</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+				<li>
+					<a class="develop is2 is4" href="#">
+						<h2 class="is5">Development</h2>
+						<span class="is3">Source Code | GIT</span>
+					</a>
+				</li>
+				<li>
+					<a class="docu is2 is4" href="#">
+						<h2 class="not-mobile is5">Documentation</h2>
+						<h2 class="not-desktop is5">Docs</h2>
+						<span class="is3">Start | Help | API</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+	</div>
+</header>
+    
+    <div id="fcside"></div>
+    <div class="footer">
+      &copy;2015, Mausbrand Informationssysteme GmbH.
+      
+      | <a href="/impressum">Impressum</a> |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4a0+</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/db.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
