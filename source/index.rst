@@ -6,14 +6,12 @@ Table of Contents
 	:maxdepth: 2
 
 	intro
-	consistency
 	quickstart
 
 	bones/bones_api
 	skeletons
 	applications
 	server_api
-
 
 
 	cache
@@ -27,6 +25,7 @@ Table of Contents
 	renders
 	session
 	tasks
+	consistency
 	implementationdetails
 
 Indices and tables

@@ -21,13 +21,13 @@ extended from other ones. Data structures can be defined, extended and changed
 during the development workflow. Input masks and data management interfaces
 are dynamically created within the administration tools.
 
-ViUR currently exists of three parts:
+ViUR currently consists of three parts:
 
 - The **server** is the core of a ViUR application.
 
   It provides the server-parts
   of the web-application, a library of pre-defined data-models, modules, tools
-  and libraries for data management, and several renderers for different types of output.
+  and libraries for data management, and several renders for different types of output.
 
 - The **admin** is the client-based administration backend used to
   manage a ViUR application.
@@ -66,21 +66,21 @@ Terminology
 
 ViUR introduces some special terminology also used in this documentation.
 
-- **Application**
+- **Prototypes**
 
   A core set of functionality of the server, defining semantic relations between different entries of a
   module. An application is always the base class used for a *module*.
 
 - **Module**
 
-  A set of functionality usually built on top of an application.
+  A set of functionality usually built on top of an Prototype.
 
   ViUR ships some predefined modules (like a user-module) and developers are encouraged to build
   custom modules for their particular projects.
 
-- **Renderer**
+- **Render**
 
-  The final element in the output pipe. The renderer receives the data which should be rendered in
+  The final element in the output pipe. The render receives the data which should be rendered in
   the current request and wraps it into the desired output format (HTML, JSON, XML and other).
 
 - **Kind**
@@ -88,8 +88,7 @@ ViUR introduces some special terminology also used in this documentation.
   A *kind* roughly equals to the term of a table in SQL, or a collection in mongoDB.
 
   A kind is the name of an information group the AppEngine stores data in.
-  But a kind is not bound to the restrictions known from an SQL-Table; its possible to
-  have multiple models utilizing one kind, even with different attributes or conflicting types.
+  But a kind is not bound to the restrictions known from an SQL-Table.
 
 - **Skeleton**
 
@@ -100,7 +99,7 @@ ViUR introduces some special terminology also used in this documentation.
 
 - **Bone**
 
-  A bone stores the type, value and meta data of one attribute in a skeleton.
+  A bone stores the type, value and metadata of one attribute in a skeleton.
 
-  The meta data is additional information (descriptions, help text, etc.)
+  The metadata is additional information (descriptions, help text, etc.)
   used to automatically create input masks for user interaction.

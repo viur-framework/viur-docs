@@ -26,7 +26,7 @@ The following data-types are provided by ViUR (in lexical order).
 |                        |                                         |      (eg. password).                                    |
 |                        |                                         | - indexed (False): Include its value in the searchindex.|
 |                        |                                         |      Whats exactly included is determined by the        |
-|                        |                                         |        subclass.                                        |
+|                        |                                         |      actual subclass.                                   |
 |                        |                                         | - vfunc (None): Function, which checks if a given       |
 |                        |                                         |      value is valid. Subclasses can override isInvalid  |
 |                        |                                         |      instead. If multiple values are allowed, this is   |
@@ -38,6 +38,14 @@ The following data-types are provided by ViUR (in lexical order).
 |                        |                                         | - visible (True): If false, this bone wont show up in   |
 |                        |                                         |      add/edit forms. Nevertheless its possible for the  |
 |                        |                                         |      template to expose its value in list/view.         |
+|                        |                                         | - unique (False): If set, prevent that two different    |
+|                        |                                         |      entries can have the same value set for that       |
+|                        |                                         |      property. Used f.e. within the user-module to      |
+|                        |                                         |      ensure that the user-names are unique.             |
+|                        |                                         |      Currently only supported on bones that have a      |
+|                        |                                         |      string or an numeric value. The empty string and   |
+|                        |                                         |      numeric zero are exempted from these check so that |
+|                        |                                         |      you can use this also on non required bone too     |
 |                        |                                         |                                                         |
 +------------------------+-----------------------------------------+---------------------------------------------------------+
 | booleanBone            | Stores a Yes/No choice.                 | *(no additional parameters)*                            |
@@ -78,8 +86,8 @@ The following data-types are provided by ViUR (in lexical order).
 |                        | you will find inside ViUR).             |                                                         |
 |                        | If a user deletes a file from his       |                                                         |
 |                        | file-repository it vanishes there, but  |                                                         |
-|                        | the file is kept as ong as an entity    |                                                         |
-|                        | references that file.                   |                                                         |
+|                        | the file is kept as long as there is an |                                                         |
+|                        | entity that references that file.       |                                                         |
 +------------------------+-----------------------------------------+---------------------------------------------------------+
 | hierarchyBone          | Stores a reference to an entity inside  | *(no additional parameters)*                            |
 |                        | an hierarchy-application                |                                                         |
@@ -158,6 +166,14 @@ The following data-types are provided by ViUR (in lexical order).
 |                        |                                         |        every time the entity is modified. Saves None    |
 |                        |                                         |        if the entity is created by a guest.             |
 +------------------------+-----------------------------------------+---------------------------------------------------------+
+
+.. Warning::
+        You can have more than one bone enforcing the unique restriction. However for each such bone you'll get two(!)
+        entity-groups counting toward the total limit of currently 25 groups that can be updated within one transaction.
+        As the system also needs some resources to update the entry itself as well as some internal data-structures, you
+        should not have more than five of these in one skeleton (Constructing subskels doesn't help here!) to be on the
+        safe side. (The current technical limit is eleven per skeleton, but that hard limit may drop to a lower value
+        in the future!)
 
 
 Base bone

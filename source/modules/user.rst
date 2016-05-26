@@ -1,74 +1,95 @@
 User
 =====
 
-ViUR offers two different user modules.
-One utilizes the users-api provided by the gae, the other provides a custom user database.
-The users api depended module allows easy login by users already having an google account,
-and is the easiest way of setting up a small application as users having access to the admin-console of
-the gae automatically gain admin rights.
-Just deploy your application and directly log in using the admin and your google account.
+ViUR comes with a module for managing and authenicating users. It has a unified user database and supports different
+authenication and verification providers. An authenication provider is always the first step within the authentication
+flow as these can tell the module *which* user tries to log in. Currently, we provide a one for username/password and
+one for google accounts. An verification-provider is the second (optional) step within the authentication flow. It gets
+the information from the user-module which user tries to log in and challenges him to verify him self using a second
+factor. For this second factor we currently provide support for time based on-time passwords as they're generated
+from the various hardware tokens available.
 
-The other module provides a custom, google independent authentication.
-This is useful if you don't want to require your users having/creating an google account or
-you need to import an existing user database. Both modules share the same API and can substitute each other.
-All components in ViUR adapt automatically to the chosen usermodule. However, once the application is deployed and used,
-you should not change the underlying usermodule - you would lose all relations to existing users.
-Both modules support extending the userSkel to store additional data along with the user.
-Also both modules support editing an user, as well as logging in and out.
-Adding an user is only supported by the custom user module; for the google-users-api depended module a user has to login once,
-then its entry will be created. Deleting an user is also possible on both modules, but has limited effect on
-the users-api depended module, as a new entry *with the same key* will be created the next time he logs in.
-Only the additional data stored along with this user will not be restored.
-
-+----------+-----------------------------------+-----------------------------------+-----------------------------------+
-| Action   | Description                       | Google User                       | Custom User                       |
-|          |                                   |                                   |                                   |
-+==========+===================================+===================================+===================================+
-| login    | Starts the login-process for      | Fully supported. If the user has  | Fully supported.                  |
-|          | the current session.              | already given permission to this  |                                   |
-|          |                                   | app, this falls directly thorough |                                   |
-|          |                                   | to login\_succeeded.              |                                   |
-+----------+-----------------------------------+-----------------------------------+-----------------------------------+
-| logout   | Ends the current session.         | Fully supported.                  | Fully supported.                  |
-|          | (Needs an SecurityKey)            |                                   |                                   |
-+----------+-----------------------------------+-----------------------------------+-----------------------------------+
-| add      | Creates a new user                | Not supported. A new user         | Fully supported.                  |
-|          |                                   | must login once first.            |                                   |
-+----------+-----------------------------------+-----------------------------------+-----------------------------------+
-| edit     | Edits an user                     | Fully supported.                  | Fully supported.                  |
-+----------+-----------------------------------+-----------------------------------+-----------------------------------+
-| delete   | Removes an user from the system.  | Supported, but limited            | Fully supported.                  |
-|          |                                   | consequences, as the entry        |                                   |
-|          |                                   | will be recreated if the user     |                                   |
-|          |                                   | logs in again.                    |                                   |
-+----------+-----------------------------------+-----------------------------------+-----------------------------------+
-| view     | Displays information's about an   | Fully supported.                  | Fully supported.                  |
-|          | user. If the user-id is omitted,  |                                   |                                   |
-|          | it displays the current user.     |                                   |                                   |
-+----------+-----------------------------------+-----------------------------------+-----------------------------------+
-| pwrecover| Starts the password-reset for the | Not supported. The user must use  | Fully supported.                  |
-|          | given user                        | the Google account recovery       |                                   |
-|          |                                   | instead.                          |                                   |
-+----------+-----------------------------------+-----------------------------------+-----------------------------------+
-| verify   | Verifies the users email.         | Not supported.                    | Fully supported.                  |
-|          | (If verification has been enabled)|                                   |                                   |
-+----------+-----------------------------------+-----------------------------------+-----------------------------------+
+If the usermodule is used, you can always call module-independent function :py:function:`server.utils.getCurrentUser` to
+retrieve the currently logged in user (if any). From jinja2, there's a global function with the same name available.
 
 
-The custom user-module allows specifying if guests are allowed to register an account on this application and if,
-under what conditions.
+Configuring the usermodule
+--------------------------
+There are 3 core properties on the usermodule that should be set.
+*authenticationProviders* is the list of classes that can act as an authentication-provider
+*secondFactorProviders* is the list of classes that can act as an additional verification provider
+*validAuthenticationMethods* is the list of all valid pairs of authenticationProviders and secondFactorProviders
+
+To enable users to login, at least one pair of an authentication and verification must be configured. If no secondFactor
+verification is needed, the second parameter in that tuple can be None. The pairs are tried in the order they're listed.
+When a user wants to login and there are multiple authentication-providers configured, he must be given the choice which
+way he wants to authenticate him self (Username/Password or using his Google-account). Of course his account must be
+configured to match that provider (ie it must have an username+password if that's chosen). After succefull authentication,
+the verification providers are tried in order. The first one claiming it can verify that account is selected. If for the
+authenticationProvider used a tuple with None as the secondFactorProvider is reached, the login process completes without
+requiring an second factor. If a secondFactor is required all the times and none if it is properly configured for that
+account, login is denied.
+
+.. Note:
+        All authentication and verification-providers are instantiated and made available under auth_<classname> and
+        f2_<classname> properties. So if they have exposed functions there made reachable through this.
 
 
- - registrationEnabled:
-      If true, Guests are allowed to register. If False, new users have to be created by an admin.
- - registrationEmailVerificationReq:
-      If true, new users have to verify their email address first before the can log in.
-      Has no effect if an user is created by an admin.
- - registrationAdminVerificationRequired:
-    If true, new users must be approved by an admin.
-    If combined with EmailVerificationRequired, a user has to proove his email first,
-    and then be approved by an admin. No effect if the user is created by an admin.
+
+Configuring the UsernamePassword authentication
+-----------------------------------------------
+The UserPassword authentication can be configured to allow users to sign up (create their own account) by setting
+the class-variable *registrationEnabled* to True. By default its set to False which means only admins can create
+new accounts. If *registrationEmailVerificationRequired* is set to True (the default), new accounts aren't active until
+the user proves that he owns the email address used during registration. If set, an email is sent to that address
+containing a key the user has to enter on the site to prove he received that email. If *registrationAdminVerificationRequired*
+is set, newly created accounts are locked until being approved by an admin. If both verifications are active, the user
+has to prove his address first before the account enters the state of getting approved by an admin.
+
+.. Note:
+        Both properties have no effect if an user is created manually by an admin.
+
+This authprovider also offers a method for users to reset a lost password. A user can request to have a new password
+set for his account, and then gets an email with a code to verify that it was him who made the request and actually
+perform the password change.
+
+Configuring GoogleAccount authentication
+----------------------------------------
+For that provider there is currently no configuration available. If enabled, it works out of the box.
+
+.. Warning:
+        If this module is active users can **always** create new accounts in your application by just hitting login.
+        As it depends on an uid assigned by google only at login, it's not possible to create these accounts by hand.
+        *registrationAdminVerificationRequired* isn't supported by this module yet.
+
+Configuring timebased onetime password verification
+---------------------------------------------------
+The only configurable property for this module is the *windowSize* parameter. As these hardware-token usually come with
+a very crappy clock that can't be adjusted there's a high probability that the clock in such a token drifts away
+from the time the server uses to calculate the valid keys from. With the defaultValue of 5, we accept all tokens within
+a ten minute window (five minutes ahead and also five back in time). A larger value means greater tolerance for tokens
+with bad clocks but also means reduced security. We recommend leaving it set to its default as this module has code that
+detects and accommodates for this timedrift if the user logs in at least 3 to 4 times a year.
 
 
-To access information about the currently logged-in user, use the module-independent function
-:py:function:`server.utils.getCurrentUser`.
+
+
+.. autoclass:: server.modules.user.UserPassword
+   :show-inheritance:
+   :members:
+   :special-members:
+
+.. autoclass:: server.modules.user.GoogleAccount
+   :show-inheritance:
+   :members:
+   :special-members:
+
+.. autoclass:: server.modules.user.Otp2Factor
+   :show-inheritance:
+   :members:
+   :special-members:
+
+.. autoclass:: server.modules.user.User
+   :show-inheritance:
+   :members:
+   :special-members:
