@@ -1,7 +1,7 @@
 Implementation Details
 ======================
 
-.. include:: implementationdetails/relations.rst
-.. include:: implementationdetails/randomSliceBone.rst
-.. include:: implementationdetails/spatialBone.rst
+.. include:: implementation_relations.rst
+.. include:: implementation_randomSliceBone.rst
+.. include:: implementation_spatialBone.rst
 

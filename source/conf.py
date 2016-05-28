@@ -44,6 +44,8 @@ import server.indexes
 import server.request
 import server.securitykey
 import server.render
+from server.modules import order, order_paypal, order_sofort, user
+#import server.modules.order
 
 
 # -- General configuration ------------------------------------------------
@@ -78,7 +80,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'ViUR Server'
-copyright = u'2015, Mausbrand Informationssysteme GmbH'
+copyright = u'2012-2016, Mausbrand Informationssysteme GmbH'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -313,7 +315,7 @@ texinfo_documents = [
 epub_title = u'viur-server'
 epub_author = u'Mausbrand Informationssysteme GmbH'
 epub_publisher = u'Mausbrand Informationssysteme GmbH'
-epub_copyright = u'2015, Mausbrand Informationssysteme GmbH'
+epub_copyright = u'2012-2016, Mausbrand Informationssysteme GmbH'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'viur-server'

@@ -4,7 +4,7 @@ Getting started
 Before getting started with ViUR, there are some pitfalls we should clarify up front.
 First, ViUR is **not** a content management system. It offers you the *building blocks to build one* in no time.
 But again, it's not a ready to use cms. Second, you'll need to understand the basic principle of building applications
-with ViUR. With ViUR, you'll merge a model (a *skeleton* in ViURs language) and an application
+with ViUR. With ViUR, you'll merge a model (a *skeleton* in ViURs language) and an prototype
 (like list/tree/hierarchy/singleton) into a module. On this level access-rights and module-specific code are added and
 at least one output renderer is attached.
 
@@ -21,12 +21,12 @@ So whats happening here?
   Each entry will have a required *name* and an optional *descr* (description).
     This model *must* be defined in your 'models' folder and *should* be in a file called 'news.py'.
 
-  2\) We use the 'List' application to handle our data. So our news will be stored in a flat list with built-in filtering
+  2\) We use the 'List' prototype to handle our data. So our news will be stored in a flat list with built-in filtering
   and sorting possibilities.
 
   3\)/8\) We (explicitly) attach the jinja2 renderer to our module. As the jinja2 renderer is currently the default,
   there is no need to do this explicitly (ViUR will enable the admin and the jinja2 renderer by default. All other
-  renderers have to be named here!).
+  renders have to be named here!).
 
   4\) We define the actual module. It *must* be in your 'modules' folder and *should* be in a file called 'news.py'.
     We define a single class called 'News'. That name is used to determine which skeleton (model) should be attached to
@@ -76,7 +76,7 @@ Second step: Create the file 'news.py' inside the 'modules' folder of the applic
 
     # -*- coding: utf-8 -*-
 
-    from server.applications.list import List
+    from server.prototypes.list import List
 
 
 
@@ -139,7 +139,7 @@ The whole module should now look like this:
 ::
 
     # -*- coding: utf-8 -*-
-    from server.applications.list import List
+    from server.prototypes.list import List
 
     class News(List):
        viewTemplate = "news_view" #Name of the template which displayes *one* entry
@@ -230,13 +230,13 @@ Switching to hierarchical Data
 If a flat datastructure doesn't fit your needs anymore, its easy to switch to a hierarchical structure.
 The following code shows the modified module, which utilizes the hierarchy application to store its data.
 
-Update your skeleton to derive from server.applications.hierarchy.HierarchySkel
+Update your skeleton to derive from server.prototypes.hierarchy.HierarchySkel
 
 ::
 
  # -*- coding: utf-8 -*-
     from server.bones import *
-    from server.applications.hierarchy import HierarchySkel
+    from server.prototypes.hierarchy import HierarchySkel
 
 
     class NewsSkel( HierarchySkel ): #Datamodel for this modul:
@@ -247,14 +247,14 @@ Update your skeleton to derive from server.applications.hierarchy.HierarchySkel
 
 
 
-Then update your application to derive from server.applications.hierarchy.Hierarchy and override the corresponding
+Then update your application to derive from server.prototypes.hierarchy.Hierarchy and override the corresponding
 canAccess methods:
 
 ::
 
 
     # -*- coding: utf-8 -*-
-    from server.applications.hierarchy import Hierarchy, HierarchySkel
+    from server.prototypes.hierarchy import Hierarchy, HierarchySkel
 
     class News(Hierarchy):
        viewTemplate = "news_view" #Name of the template which displayes *one* entry
@@ -291,7 +291,7 @@ are directly accessible from outside. So if you have something like
 ::
 
     # -*- coding: utf-8 -*-
-    from server.applications.list import List
+    from server.prototypes.list import List
     from server import exposed
 
     class News(List):

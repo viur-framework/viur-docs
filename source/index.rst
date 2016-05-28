@@ -8,7 +8,7 @@ Table of Contents
 	intro
 	quickstart
 
-	bones/bones_api
+	bones_api
 	skeletons
 	applications
 	server_api
@@ -18,9 +18,7 @@ Table of Contents
 	config
 	db
 	indexes
-	modules/index
-	modules/order
-	modules/user
+	modules_index
 	common-used
 	renders
 	session

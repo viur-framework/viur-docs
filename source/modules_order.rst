@@ -1,5 +1,5 @@
 Shop
-====
+----
 
 ViUR offers a order module, providing a step by step checkout process,
 integration of payment service providers like paypal or sofort.com and a simple state machine helping
@@ -14,12 +14,12 @@ Second, you must override the method :py:func:`server.modules.order.Order.getBil
 the given order-id. Its also recommended to override the :py:func:`server.modules.order.Order.getBillPdf` and
 :py:func:`server.modules.order.Order.getDeliverNotePdf` methods.
 If overridden, they must return the bill/deliverynote as a PDF bytestring.
-It also provides server hooks like :py:func:`server.modules.order.Order.sendOrderPayedEmai`},
+It also provides server hooks like :py:func:`server.modules.order.Order.sendOrderPayedEmail`,
 which can be used to trigger custom actions if an order reaches the corresponding state.
 If the default functionality isn't enough, it can be customized in several ways.
 
 
-The module-level property :py:attribute:`server.modules.order.Order.steps` describes the steps the user has to go through in order to complete the checkout process.
+The module-level property :py:attr:`server.modules.order.Order.steps` describes the steps the user has to go through in order to complete the checkout process.
 Each step usually consist of one skeleton presented to the user (fe. the bill or shipping address).
 If you need to query more or less data from the user during the checkout process, just add or remove
 skeletons from that steps property. The property *mainHander* always references a skeleton.
@@ -29,8 +29,8 @@ that skeleton and descr a human-readable descripton for that step.
 Its possible to hook additional logic to the checkout-process using *preHandler* and *postHandler*.
 Each can hold a callable (or a list of callables) executed either before the skeleton of that step
 is presented to the user (preHandler) or after the user submitted valid information's for that step (postHandler).
-Each handler can inject an html-page into the checkout process by raising the :py:exception:`server.modules.order.Order.ReturnHtml` exception.
-For preHandlers its also possible to skip the step they're executed in by raising :py:exception:`server.modules.order.Order.SkipStep`
+Each handler can inject an html-page into the checkout process by raising the :py:class:`server.modules.order.ReturnHtml` exception.
+For preHandlers its also possible to skip the step they're executed in by raising :py:class:`server.modules.order.SkipStep`
 (Note that this also skips any remaining pre/post Handlers of that step).
 If the default state-machine doesnt fit your needs, it can be extended by registering your own states
 (by overriding the states-property) and hooking the predefined set*State* methods.
@@ -81,3 +81,26 @@ Configure ViUR to use these newly created credentials.
                        "notificationpassword":"<notification password>"
                       }
 
+
+
+.. automodule:: server.modules.order
+   :show-inheritance:
+   :members:
+   :undoc-members:
+   :private-members:
+   :special-members:
+
+
+.. automodule:: server.modules.order_paypal
+   :show-inheritance:
+   :members:
+   :undoc-members:
+   :private-members:
+   :special-members:
+
+.. automodule:: server.modules.order_sofort
+   :show-inheritance:
+   :members:
+   :undoc-members:
+   :private-members:
+   :special-members:

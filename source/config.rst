@@ -1,9 +1,7 @@
 Configuration
 =============
-The module ``config`` provided by the ViUR server contains several configuration entries to change the
-servers behavior, access system-global parameters, or provide some kind of global variables within a
-ViUR project setup.
-
+The module ``config`` provided by the ViUR server contains several configuration entries to change the servers behavior,
+access system-global parameters, or provide some kind of global variables within a ViUR project setup.
 It simply can be imported into any server-side module with
 
 ::
@@ -12,12 +10,12 @@ It simply can be imported into any server-side module with
 
 All ViUR-specific parameters have the prefix **viur.**. Parameters that influence or extend information
 used by the Admin-tools start with the prefix **admin.** or more specialized with **admin.vi.**.
-
-If parameters are changed for configuration issues, this should be done on the server's main entry, which
-the Python source file that calls the ``server.run()`` function.
+If parameters are changed for configuration issues, this should be done on the server's main entry (i.e. that
+Python source file that calls ``server.run()``).
 
 This section gives an overview and detailed information about how to use ViURs pre-defined configuration
 parameters.
+
 
 Server configuration
 ********************
@@ -38,18 +36,16 @@ These entries can be enhanced in the application's main entry with
 
     conf["viur.accessRights"].append("myProjectFlag")
 
-
-*viur.accessRights* also contains entries for every module to specify the access rights for single modules
-per user. These flags are added later on when the server is started.
+Each module in your application will register the flags it supports during startup, so make sure you use *.append* to add
+your flags instead of (re)-setting this property
 
 
 viur.availableLanguages
 -----------------------
-Defines a list of valid language-codes. These are languages that are available on projects with
-multi-language setup.
-
-The language code defines the name of the language translation file in the *translations* folder of the
-project and is used to select the current display language, which can be done by several methods.
+Defines a list of valid language-codes. These are the languages that are available on projects with multi-language setup.
+Unless it's white-listed here, ViUR will refuse to serve requests in that language.
+The language code also defines the name of the language translation file in the *translations*
+folder of the project.
 
 Example configuration:
 ::
@@ -59,10 +55,15 @@ Example configuration:
 See also `viur.defaultLanguage`_, `viur.domainLanguageMapping`_, `viur.languageMethod`_
 and `viur.logMissingTranslations`_.
 
+.. Hint::
+    If translation is not working despite having *viur.availableLanguages* set, check that your *projects*-tranlation
+    module is importable and contains an translation table for that language. If your translation-module is not importable,
+    all i18n features are disabled!
+
 
 viur.cacheEnvironmentKey
 ------------------------
-Call this function for each cache-attempt.
+Call this function for each time we need to derive a key for caching.
 
 If the configuration parameter *viur.cacheEnvironmentKey* contains a callable, this function will be
 called for each cache-attempt and the result will be included in the computed cache-key. This allows you to
@@ -103,7 +104,7 @@ viur.debug.traceExternalCallRouting
 -----------------------------------
 Logging calls of any functions marked as exposed. It will write the called function name and it's parameter to the log.
 
-.. Warning:
+.. Warning::
 
     This might include sensitive data like unencrypted usernames and passwords in your log! Keep it off in production!
 
@@ -112,7 +113,7 @@ viur.debug.traceInternalCallRouting
 -----------------------------------
 Logging calls of any functions marked as internalExposed. It will write the called function name and it's parameter to the log.
 
-.. Warning:
+.. Warning::
 
     This might include sensitive data like unencrypted usernames and passwords in your log! Keep it off in production!
 
@@ -136,7 +137,13 @@ and `viur.logMissingTranslations`_.
 
 viur.disableCache
 -----------------
-If set True, the decorator @enableCache from server.cache has no effect.
+If set True, the decorator @enableCache from server.cache has no effect. Caching inside the jinja2 Render will also
+be disabled.
+
+.. Note::
+
+    This doesn't cause entries already in the cache to be evicted. If they're old entries they just won't be used and no
+    new entries will be added.
 
 
 viur.domainLanguageMapping
@@ -187,8 +194,8 @@ viur.errorHandler
 Defines a custom error handler. If set, ViUR calls this function instead of rendering the
 `viur.errorTemplate`_ in case of exception.
 
-The function must accept one argument (an instance of the Python exception object, or an instance of the
-`server.errors.HTTPException`_, in case that an HTTP-exception occurs).
+The function must accept one argument (an instance of the Python exception object (possibly an instance of
+`server.errors.HTTPException`_), in case that an HTTP-exception occurs).
 
 
 viur.errorTemplate
@@ -202,7 +209,7 @@ viur.exportPassword
 -------------------
 Activates the database export API if set.
 
-Must be exactly 32 chars. *Everyone* knowing this password can dump the entire database!
+Must be exactly 32 chars. *Everyone knowing this password can dump the entire database!*
 
 
 viur.forceSSL
@@ -221,7 +228,7 @@ viur.importPassword
 -------------------
 Activates the database import API if set.
 
-Must be exactly 32 chars. *Everyone* knowing this password can override the entire database!
+Must be exactly 32 chars. *Everyone knowing this password can overwrite the entire database!*
 
 
 viur.languageAliasMap
@@ -242,68 +249,62 @@ By default, this is configured to "session".
 viur.logMissingTranslations
 ---------------------------
 Silently log missing translations during application run.
-If True, ViUR will log missing translations in the datastore.
+If ViUR encounters an missing translation, it logs it by creating an entry in the *viur-missing-translations* kind.
 
 
 viur.mainApp
 ------------
-Holds a reference to the pre-build application-instance that exists
-after ``server.run()`` was called. **May not be overridden!**
+Holds a reference to the pre-build application-instance that's created by ``server.run()``.
+**May not be overridden, reassigned or modified!**
 
 
 viur.maxPasswordLength
 ----------------------
-Defines a maximum password length.
-
-This prevents denial of service attacks using large inputs for pbkdf2.
-
+Defines a maximum password length. This prevents denial of service attacks through large inputs for pbkdf2.
 The value defaults to 512.
 
 
 viur.maxPostParamsCount
 -----------------------
-Upper limit of the amount of parameters accepted per request.
-
-Prevents Hash-Collision-Attacks.
-
-The value defaults to 250.
+Upper limit of the amount of parameters accepted per request. Prevents Hash-Collision-Attacks. The value defaults to 250.
 
 
 viur.models
 -----------
-Holds a dictionary of all models. **May not be overridden!**
+Holds a dictionary of all models.
+**May not be overridden, reassigned or modified!**
 
 
 viur.noSSLCheckUrls
 -------------------
-Disable SSL checking for URL-prefixes.
+Disable the `viur.forceSSL`_ restriction for certain URLs (ie these URLs will be also accessible and served over
+unencrypted http). Add an asterisk to whitelist an entire prefix (exact match otherwise).
 
-This is a list of URLs for which `viur.forceSSL`_ will be ignored.
-It defaults to ``["/_tasks*", "/ah/*"]``.
+It defaults to ``["/_tasks*", "/ah/*"]`` as the task-queue doesn't call using https.
 
-Add an asterisk to mark that entry as a prefix (exact match otherwise).
 
 
 viur.requestPreprocessor
 ------------------------
-Definition of a request preprocessor.
+Attach a request preprocessor to the application.
 
-This allows the application to register a function that is called before the request gets routed.
-This function takes the original input path as parameter, and returns a different or rewritten path.
-
-The returned path with then be used by ViURs internal module handler logic.
+A preprocesser is a function receiving the original path from the URL requested and might rewrite it before its used
+by ViUR to determine which function in the application should be called. Can also be used to run custom code on each
+request before it's normally dispatched to your application.
 
 
 viur.salt
 ---------
 Default salt used for passwords.
 
-Don't change. It's deprecated and will be removed in a future version.
+**Don't change. It's deprecated and will be removed in a future version.**
 
 
 viur.searchValidChars
 ---------------------
-Characters valid for the internal search functionality (all other characters are ignored).
+Characters valid for the internal search functionality (all other characters are ignored). If changed you must rebuild
+all search-indexes for skeletons that don't use the search api provided by the appengine (ie all skeletons where
+*searchIndex* is None)
 
 
 viur.security.contentSecurityPolicy
@@ -331,7 +332,7 @@ viur.security.xFrameOptions
 ---------------------------
 If set, ViUR will emit a X-Frame-Options header.
 
-Use securityheaders.setPublicKeyPins to set this property
+Use securityheaders.setXFrameOptions to set this property.
 
 viur.security.xXssProtection
 ----------------------------
@@ -349,17 +350,17 @@ Use securityheaders.setXContentTypeNoSniff to set this property.
 
 viur.session.lifeTime
 ---------------------
-Specifies the lifetime of sessions.
+Specifies when sessions timeout.
 
-The value must be given in seconds.
-Default is 60 minutes lifetime for ViUR sessions.
+The value must be given in seconds. Defaults to 60 minutes.
+If no request is received within that window, the session is terminated and the user will have to login again.
 
 
 viur.session.persistentFieldsOnLogin
 ------------------------------------
-Hold session values on login.
+Preserve session values on login.
 
-The session is reset after login. Fields specified in this list will be kept on login.
+For security reasons, the session is reset when a user logs in. Only fields specified in this list will be kept on login.
 
 ::
 
@@ -373,9 +374,9 @@ The session is reset after login. Fields specified in this list will be kept on 
 
 viur.session.persistentFieldsOnLogout
 -------------------------------------
-Hold session values on logout.
+Preserve session values on logout.
 
-The session is reset after logout. Fields specified in this list will be kept on logout.
+For security reasons, the session is reset when a user logs out. Only fields specified in this list will be kept.
 
 For example, see `viur.session.persistentFieldsOnLogin`_.
 

@@ -7,6 +7,8 @@ also possible to implement custom bones on a per-project base.
 Datatypes
 ^^^^^^^^^
 
+.. _server-bones-datatypes:
+
 The following data-types are provided by ViUR (in lexical order).
 
 +------------------------+-----------------------------------------+---------------------------------------------------------+
@@ -58,7 +60,7 @@ The following data-types are provided by ViUR (in lexical order).
 |                        | but not validated).                     | - privateKey (None): Google's ReCaptcha - privateKey.   |
 |                        | Don't include this into entities        |       If None, its tried to read from                   |
 |                        | editable by the admin (or remove the    |       conf['viur.captcha.privateKey']                   |
-|                        |  Captcha from the skeleton if its build |                                                         |
+|                        | Captcha from the skeleton if its build  |                                                         |
 |                        | for an admin),as the admin is not       |                                                         |
 |                        | capable of displaying captchas.         |                                                         |
 +------------------------+-----------------------------------------+---------------------------------------------------------+
@@ -107,7 +109,8 @@ The following data-types are provided by ViUR (in lexical order).
 +------------------------+-----------------------------------------+---------------------------------------------------------+
 | randomSliceBone        | Implements orderby=random known from    | - slices (2): Amount of slices to fetch on each request |
 |                        | traditional relational databases.       | - sliceSize (0.5): What size does each slice have       |
-|                        | Does not store any user-supplied data   | See Chapter implementationdetails for more information  |
+|                        | Does not store any user-supplied data   |                                                         |
+|                        |                                         | See Chapter implementationdetails for more information  |
 +------------------------+-----------------------------------------+---------------------------------------------------------+
 | relationalBone         | Implements relations to other entities. | - type (None): Name of the entities to link to.         |
 |                        | (Usually in Lists, see treeItemBone,    |        Must match their kind-name.                      |

@@ -1,5 +1,5 @@
-User
-=====
+Users
+-----
 
 ViUR comes with a module for managing and authenicating users. It has a unified user database and supports different
 authenication and verification providers. An authenication provider is always the first step within the authentication
@@ -9,12 +9,12 @@ the information from the user-module which user tries to log in and challenges h
 factor. For this second factor we currently provide support for time based on-time passwords as they're generated
 from the various hardware tokens available.
 
-If the usermodule is used, you can always call module-independent function :py:function:`server.utils.getCurrentUser` to
+If the usermodule is used, you can always call module-independent function :py:func:`server.utils.getCurrentUser` to
 retrieve the currently logged in user (if any). From jinja2, there's a global function with the same name available.
 
 
 Configuring the usermodule
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 There are 3 core properties on the usermodule that should be set.
 *authenticationProviders* is the list of classes that can act as an authentication-provider
 *secondFactorProviders* is the list of classes that can act as an additional verification provider
@@ -30,14 +30,14 @@ authenticationProvider used a tuple with None as the secondFactorProvider is rea
 requiring an second factor. If a secondFactor is required all the times and none if it is properly configured for that
 account, login is denied.
 
-.. Note:
+.. Note::
         All authentication and verification-providers are instantiated and made available under auth_<classname> and
         f2_<classname> properties. So if they have exposed functions there made reachable through this.
 
 
 
 Configuring the UsernamePassword authentication
------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The UserPassword authentication can be configured to allow users to sign up (create their own account) by setting
 the class-variable *registrationEnabled* to True. By default its set to False which means only admins can create
 new accounts. If *registrationEmailVerificationRequired* is set to True (the default), new accounts aren't active until
@@ -46,7 +46,7 @@ containing a key the user has to enter on the site to prove he received that ema
 is set, newly created accounts are locked until being approved by an admin. If both verifications are active, the user
 has to prove his address first before the account enters the state of getting approved by an admin.
 
-.. Note:
+.. Note::
         Both properties have no effect if an user is created manually by an admin.
 
 This authprovider also offers a method for users to reset a lost password. A user can request to have a new password
@@ -54,16 +54,16 @@ set for his account, and then gets an email with a code to verify that it was hi
 perform the password change.
 
 Configuring GoogleAccount authentication
-----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 For that provider there is currently no configuration available. If enabled, it works out of the box.
 
-.. Warning:
+.. Warning::
         If this module is active users can **always** create new accounts in your application by just hitting login.
         As it depends on an uid assigned by google only at login, it's not possible to create these accounts by hand.
         *registrationAdminVerificationRequired* isn't supported by this module yet.
 
 Configuring timebased onetime password verification
----------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The only configurable property for this module is the *windowSize* parameter. As these hardware-token usually come with
 a very crappy clock that can't be adjusted there's a high probability that the clock in such a token drifts away
 from the time the server uses to calculate the valid keys from. With the defaultValue of 5, we accept all tokens within
@@ -72,6 +72,11 @@ with bad clocks but also means reduced security. We recommend leaving it set to 
 detects and accommodates for this timedrift if the user logs in at least 3 to 4 times a year.
 
 
+
+.. autoclass:: server.modules.user.User
+   :show-inheritance:
+   :members:
+   :special-members:
 
 
 .. autoclass:: server.modules.user.UserPassword
@@ -85,11 +90,6 @@ detects and accommodates for this timedrift if the user logs in at least 3 to 4 
    :special-members:
 
 .. autoclass:: server.modules.user.Otp2Factor
-   :show-inheritance:
-   :members:
-   :special-members:
-
-.. autoclass:: server.modules.user.User
    :show-inheritance:
    :members:
    :special-members:

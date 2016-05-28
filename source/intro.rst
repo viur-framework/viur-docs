@@ -4,7 +4,7 @@ Introduction
 cloud-based information systems implemented on top of the `Google AppEngine™`_ (GAE).
 
 ViUR is designed to enable applications which are simple, clear, flexible,
-extendible, versatile, high-scalable and easy-to-use. To fit the
+extensible, versatile, high-scalable and easy-to-use. To fit the
 requirements of modern agile software development workflows, ViUR is entirely
 written in the `Python programming language`_.
 
@@ -14,7 +14,7 @@ system, because it goes beyond the limitations of a content-management-system
 or other kinds of specialized web-application software.
 
 ViUR helps to manage any kind of information. It comes with a set of four
-pre-defined application types which can be used to build modules for any
+pre-defined prototypes which can be used to build modules for any
 desired tasks. Pre-defined modules can easily be adapted for particular goals.
 New modules are simply created or
 extended from other ones. Data structures can be defined, extended and changed
@@ -69,7 +69,7 @@ ViUR introduces some special terminology also used in this documentation.
 - **Prototypes**
 
   A core set of functionality of the server, defining semantic relations between different entries of a
-  module. An application is always the base class used for a *module*.
+  module. An prototype is always the base class used for a *module*.
 
 - **Module**
 
