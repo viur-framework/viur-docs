@@ -26,6 +26,8 @@ Table of Contents
 	consistency
 	implementationdetails
 
+	tipsandtricks
+
 Indices and tables
 ==================
 
