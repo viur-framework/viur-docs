@@ -297,7 +297,7 @@ div.body p, div.body dd, div.body li {
 
 div.admonition {
     margin: 20px 0px;
-    padding: 10px 30px;
+    padding: 30px 30px;
     background-color: {{ theme_warn_bg }};
     border: 1px solid {{ theme_warn_border }};
 }
@@ -900,7 +900,11 @@ header li {
     }
 
 
-
+.figure p.caption {
+    margin-top: 5px;
+    color: rgba(0,0,0,0.55);
+    font-size: 0.9em;
+}
 
 
 

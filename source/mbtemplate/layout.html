@@ -21,23 +21,50 @@
         $('#popuplogin').click(function(e) {
                e.stopPropagation();
         });
-    });
     
-    
-        $(document).ready(function () {
             $('#hamburgericon').click(function () {
                 $(".sphinxsidebarwrapper").fadeIn(100);
                 $("#fcside").fadeIn(100);
                 $("body").css({ overflow: 'hidden' });
             });
-        });
-    
-        $(document).ready(function () {
+            
             $('#fcside').click(function () {
                 $("body").css({ overflow: 'inherit' });
                 $(".sphinxsidebarwrapper").fadeOut(100);
                 $("#fcside").fadeOut(100);
             });
+            
+            $.fn.autoScoll= function(activate){
+                if ($.isNumeric(activate) || activate==true){
+                    var offset = 0
+                    if ($.isNumeric(activate)){
+                        offset = activate
+                    }
+                    $(this.selector+" a[href^='#']").click(function(event){
+                        
+                        normalscroll=true;
+                        event.preventDefault();
+                        var place = $($(this).attr('href'))
+                        if(!(place && place.offset() && place.offset().top)){
+                            return
+                        }
+                        $('html,body').clearQueue()
+                        $('html,body').stop()
+                        if(activate==true){
+                            offset =$(window).height()/2-place.parent("div").height()/2
+                        }
+                        $('html,body').animate({
+                            scrollTop: place.offset().top - offset //auf Nullinie Scrollen
+                        },1000,
+                            function(){
+                            setTimeout(function(){normalscroll=false},500);
+                            }
+                        );
+                    })
+                }
+            };
+
+            $("body").autoScoll(100);
         });
         
             
@@ -78,7 +105,9 @@
     
 	$(window).scroll(scrolleventhandler);
 	$(window).resize(scrolleventhandler);
+    
     </script>
+    
     
     
 <header class="is2">
