@@ -874,6 +874,11 @@ ul.borderlist li a:hover {
 
 .topnav ul.topnavlist li:first-child a:hover {
     height: 160px;
+    background-color: #e12013;
+}
+
+.topnav ul.topnavlist li:first-child {
+    background-color: #be1a22;
 }
 
 .blocker {
