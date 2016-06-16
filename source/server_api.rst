@@ -1,8 +1,4 @@
-server
-------
 
-
-.. autofunction:: server.setup
 
 lang support
 ^^^^^^^^^^^^
@@ -46,33 +42,6 @@ This module allows configuring security related http-headers. The use is highly 
    :special-members:
    :inherited-members:
 
-server.db - Database access tools
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autofunction:: server.db.Get
-
-.. autofunction:: server.db.GetAsync
-
-.. autofunction:: server.db.GetOrInsert
-
-.. autofunction:: server.db.Put
-
-.. autofunction:: server.db.PutAsync
-
-.. autofunction:: server.db.Delete
-
-.. autofunction:: server.db.DeleteAsync
-
-.. autoclass:: server.db.Entity
-   :show-inheritance:
-   :members:
-   :special-members:
-
-
-.. autoclass:: server.db.Query
-   :show-inheritance:
-   :members:
-   :special-members:
 
 
 server.errors - Map Python Exceptions to HTTP Error-Codes

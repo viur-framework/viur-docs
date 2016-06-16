@@ -1,0 +1,4 @@
+server
+------
+
+.. autofunction:: server.setup

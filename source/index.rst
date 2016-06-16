@@ -7,25 +7,8 @@ Table of Contents
 
 	intro
 	quickstart
-
-	bones_api
-	skeletons
-	applications
-	server_api
-
-
-	cache
-	config
-	db
-	indexes
-	modules_index
-	common-used
-	renders
-	session
-	tasks
-	consistency
-	implementationdetails
-
+	guide/guide
+	api/api
 	tipsandtricks
 
 Indices and tables
@@ -34,5 +17,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-
