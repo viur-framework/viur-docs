@@ -3,13 +3,17 @@ Table of Contents
 =================
 
 .. toctree::
-	:maxdepth: 2
+	:maxdepth: 3
 
 	intro
-	quickstart
-	guide/guide
-	api/api
-	tipsandtricks
+	start
+	basics
+	training
+	extended
+	details
+	reference
+	appendix
+
 
 Indices and tables
 ==================
