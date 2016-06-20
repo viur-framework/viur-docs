@@ -1,17 +1,14 @@
 Introduction
 ############
 
-What is ViUR?
-=============
-
-`ViUR`_ is a free software development framework for the `Google AppEngine™`_ (GAE).
+`ViUR`_ is a free software development framework for the `Google App Engine™`_.
 
 It provides a clear concept for implementing agile data management software that runs on top of the Google cloud platform. It is written in the `Python™ programming language`_ for a maximum flexibility and easy-to-manage code. Its underlying database is Googles `Cloud Datastore`_, which is a scalable document database.
 
 The framework targets to the implementation of *information systems*, which are integrated, web-based applications or services performing data management and deployment operations of any kind. Therefore, ViUR is explicitly not claimed to be a content management system, although content management can be a part of a ViUR information system.
 
 .. _ViUR: http://www.viur.is
-.. _Google AppEngine™: https://cloud.google.com/appengine/docs/python/
+.. _Google App Engine™: https://cloud.google.com/appengine/docs/python/
 .. _Python™ programming language: https://www.python.org/
 .. _Cloud Datastore: https://cloud.google.com/datastore/docs/concepts/overview
 
