@@ -192,6 +192,14 @@ div.sphinxsidebar ul li.toctree-l2 > a {
     font-size: 110%;
 }
 
+li.toctree-l3 a {
+    padding-left: 40px !important;
+}
+
+li.toctree-l3 a:hover {
+    padding-left: 60px !important;
+}
+
 div.sphinxsidebar input {
     border: 1px solid {{ theme_sidebar_search_button }};
     font-family: {{ theme_font_family }};
@@ -608,6 +616,9 @@ div.sphinxsidebarwrapper ul li a.reference.internal {
     padding: 8px 25px;
     transition: all 0.5 ease;
     border-bottom: 1px solid #d8d8d8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 div.sphinxsidebarwrapper ul li a.reference.internal:hover {
