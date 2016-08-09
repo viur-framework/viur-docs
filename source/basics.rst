@@ -133,24 +133,11 @@ Modules are the controllers of a ViUR application, and implement the application
 
 To implement modules, ViUR provides four basic prototypes. These are :class:`~server.prototypes.list.List`, :class:`~server.prototypes.singleton.Singleton`, :class:`~server.prototypes.hierarchy.Hierarchy` and :class:`~server.prototypes.tree.Tree`.
 
-List
-----
-The most commonly used prototype is the :class:`~server.prototypes.list.List`. It implement a flat collection of datasets of the same kind, which can be granulated using filters to particular selections. This prototype is used in most cases, and can be seen like a database table in a relational database management system.
+- The most commonly used prototype is the :class:`~server.prototypes.list.List`. It implement a flat collection of datasets of the same kind, which can be granulated using filters to particular selections. This prototype is used in most cases, and can be seen like a database table in a relational database management system.
+- :class:`~server.prototypes.singleton.Singleton` is a prototype for implementing modules that hold only one single dataset entry. It can be used for modules that allow for application-global settings or configurations.
+- :class:`~server.prototypes.hierarchy.Hierarchy` is a prototype for a module that stores its data in a hierarchical structure, where every dataset can be a child of another dataset or can have its own children.
+- In addition, the :class:`~server.prototypes.tree.Tree` prototype is for implementing modules that store their data in a hierarchy, but differ between nodes and children. The most common usage is the :class:`~server.modules.file.File` module, where nodes and leafs are distinguished.
 
-Singleton
----------
-:class:`~server.prototypes.singleton.Singleton` is a prototype for implementing modules that hold only one single dataset entry. It can be used for modules that allow for application-global settings or configurations.
-
-Hierarchy
----------
-:class:`~server.prototypes.hierarchy.Hierarchy` is a prototype for a module that stores its data in a hierarchical structure, where every dataset can be a child of another dataset or can have its own children.
-
-Tree
-----
-In addition, the :class:`~server.prototypes.tree.Tree` prototype is for implementing modules that store their data in a hierarchy, but differ between nodes and children. The most common usage is the :class:`~server.modules.file.File` module, where nodes and leafs are distinguished.
-
-Build-in modules
-----------------
 ViUR comes with some build-in modules for different application cases:
 
 - :class:`~server.modules.file.File` implements a file management module
