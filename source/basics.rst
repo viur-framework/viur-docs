@@ -102,8 +102,8 @@ vi/             Contains the Vi.
 =============   =================================================================================
 
 
-About skeletons and bones
-=========================
+Skeletons and bones
+===================
 
 Skeletons are the data models of a ViUR application.
 
@@ -126,17 +126,40 @@ By default, ViUR provides the following base classes of bones that can be immedi
 
 There are also some more specialized, pre-defined bones that can be used. Please refer the :ref:`bones API reference <reference_bones>` for all provided classes and options.
 
-About prototypes and modules
-============================
+Prototypes and modules
+======================
 
 Modules are the controllers of a ViUR application, and implement the application logic.
 
 To implement modules, ViUR provides four basic prototypes. These are :class:`~server.prototypes.list.List`, :class:`~server.prototypes.singleton.Singleton`, :class:`~server.prototypes.hierarchy.Hierarchy` and :class:`~server.prototypes.tree.Tree`.
 
-- The most commonly used prototype is the :class:`~server.prototypes.list.List`. It implement a flat collection of datasets of the same kind, which can be granulated using filters to particular selections. This prototype is used in most cases, and can be seen like a database table in a relational database management system.
-- :class:`~server.prototypes.singleton.Singleton` is a prototype for implementing modules that hold only one single dataset entry. It can be used for modules that allow for application-global settings or configurations.
-- :class:`~server.prototypes.hierarchy.Hierarchy` is a prototype for a module that stores its data in a hierarchical structure, where every dataset can be a child of another dataset or can have its own children.
-- In addition, the :class:`~server.prototypes.tree.Tree` prototype is for implementing modules that store their data in a hierarchy, but differ between nodes and children. The most common usage is the :class:`~server.modules.file.File` module, where nodes and leafs are distinguished.
+
+.. |icon_list| image:: images/list.svg
+   :width: 45px
+   :height: 45px
+
+.. |icon_singleton| image:: images/singleton.svg
+   :width: 45px
+   :height: 45px
+
+.. |icon_hierarchy| image:: images/hierarchy.svg
+   :width: 45px
+   :height: 45px
+
+.. |icon_tree| image:: images/tree.svg
+   :width: 45px
+   :height: 45px
+
+.. rst-class:: icon-table
+==================  ===============================================================================
+|icon_list|         :class:`~server.prototypes.list.List` is the most commonly used prototype. It implement a flat collection of datasets of the same kind, which can be granulated using filters to particular selections. This prototype is used in most cases, and can be seen like a database table in a relational database management system.
+
+|icon_singleton|    :class:`~server.prototypes.singleton.Singleton` is a prototype for implementing modules that hold only one single dataset entry. It can be used for modules that allow for application-global settings or configurations.
+
+|icon_hierarchy|    :class:`~server.prototypes.hierarchy.Hierarchy` is a prototype for a module that stores its data in a hierarchical structure, where every dataset can be a child of another dataset or can have its own children.
+
+|icon_tree|         :class:`~server.prototypes.tree.Tree` is used for implementing modules that store their data in a hierarchy, but differ between nodes and children. The most common usage is the :class:`~server.modules.file.File` module, where nodes and leafs are distinguished.
+==================  ===============================================================================
 
 ViUR comes with some build-in modules for different application cases:
 
@@ -147,8 +170,8 @@ ViUR comes with some build-in modules for different application cases:
 
 By subclassing these modules, custom modifications and extensions can be implemented for any use-case. In most cases, applications make use of custom modules which base on one of the prototypes as described above.
 
-About the renderers
-===================
+Renderers
+=========
 
-todo
+The renderers
 
