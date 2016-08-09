@@ -218,17 +218,9 @@ div.sphinxsidebar hr {
     width: 50%;
 }
 
-
-
-
-
-
-
-
-
-
-
-
+.section img {
+	padding: 25px 0;
+}
 
 
 /* -- body styles ----------------------------------------------------------- */

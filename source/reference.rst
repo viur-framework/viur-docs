@@ -13,6 +13,7 @@ Main server entry.
 
 bones
 =====
+.. _reference_bones:
 
 .. automodule:: server.bones.bone
    :show-inheritance:
@@ -306,6 +307,34 @@ An efficient index manager.
 
 .. autoclass:: server.indexes.IndexMannager
     :members: __init__, keyFromQuery, cursorForQuery, getPages, refreshIndex
+
+prototypes
+==========
+
+Basic
+-----
+.. autoclass:: server.prototypes.basic.BasicApplication
+   :members:
+
+Hierarchy
+---------
+.. autoclass:: server.prototypes.hierarchy.Hierarchy
+   :members:
+
+List
+----
+.. autoclass:: server.prototypes.list.List
+   :members:
+
+Singleton
+---------
+.. autoclass:: server.prototypes.singleton.Singleton
+   :members:
+
+Tree
+----
+.. autoclass:: server.prototypes.tree.Tree
+   :members:
 
 securitykey
 ===========
