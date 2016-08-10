@@ -336,6 +336,21 @@ Tree
 .. autoclass:: server.prototypes.tree.Tree
    :members:
 
+
+renderers
+=========
+
+jinja2
+------
+.. autoclass:: server.render.jinja2.default.Render
+   :members:
+
+json
+----
+.. autoclass:: server.render.json.default.Render
+   :members:
+
+
 securitykey
 ===========
 One-time tokens.

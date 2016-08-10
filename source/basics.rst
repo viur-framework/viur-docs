@@ -173,5 +173,15 @@ By subclassing these modules, custom modifications and extensions can be impleme
 Renderers
 =========
 
-The renderers
+The renderers are the viewer part of a ViUR application.
+
+ViUR provides various build-in renderers, but they can also be extended, sub-classed or entirely rewritten, based on the demands of the project.
+
+- ``jinja2`` is the default frontend renderer, and makes use of the `Jinja2 template engine <http://jinja.pocoo.org/>`_. Therefore, this renderer is used to generate any HTML-output from ViUR modules, and acts as the default renderer for ViUR.
+- ``json`` is a renderer that uses the JSON data format as its output. It implements a clear protocol which is used by several tools, e.g. the ViUR admin tools, to fetch data from the ViUR application. Therefore, the renderers ``vi`` and ``admin`` are subclassed from the json renderer, and are used for the communication between these clients and the server.
+- ``xml`` is a renderer that generates XML output. It can be compared to the json renderer, but with much more markup overload.
+
+There are also some more renderers, e.g. for PDF and RSS, which are not right now.
+
+The renderer in which data should be processes can be selected over the path of the URL, except the default renderer (HTML). The modules can be configured in a way which renderers are supported for every module.
 

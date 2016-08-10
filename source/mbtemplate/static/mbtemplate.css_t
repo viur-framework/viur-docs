@@ -121,8 +121,8 @@ div.sphinxsidebarwrapper {
 }
 
 div.section {
-    margin-top: 130px;
-    font-size: 16px;
+    font-size: 1.1em;
+    margin-bottom: 50px;
 }
 
 div.sphinxsidebarwrapper p.logo {
@@ -289,7 +289,7 @@ div.sphinxsidebar ul {
     margin-top: 0px;
 }
 
-div.body h1 { margin-top: 0; padding-top: 0; font-size: 240%; }
+div.body h1 { margin-top: 110px; padding-top: 0; font-size: 240%; }
 div.body h2 { font-size: 180%; }
 div.body h3 { font-size: 150%; }
 div.body h4 { font-size: 130%; }
