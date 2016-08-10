@@ -35,21 +35,41 @@ The way described here only provides a basic stub for a fresh ViUR project to st
 
 6. Confirm the installation when the correct folder is prompted. The setup utility then will write all necessary files.
 
-You're done! The app can now be locally run with ``dev_appserver.py .`` from the terminal (Linux, Mac OS) or from the *Google App Engine Launcher* (Windows, Mac OS). By default, the app runs on port 8080 (`<http://localhost:8080>`_), or with the port provided by the *Google App Engine Launcher*.
+Then, you're done! The app can now be locally run with ``dev_appserver.py .`` from the terminal (Linux, Mac OS) or from the *Google App Engine Launcher* (Windows, Mac OS). By default, the app runs on port 8080 (`<http://localhost:8080>`_), or with the port provided by the *Google App Engine Launcher*.
 
-When you see a friendly "Hello World"-message showing up, your app is running!
+Below is an example for a few commands on a Linux terminal to setup a clean ViUR project from scratch:
+
+::
+
+	$ mkdir hello-viur                                                       # Setup project folder
+	$ cd hello-viur                                                          # Change into this folder
+	$ wget -qO server.tar.gz http://viur.is/package/download/server/latest   # Download latest server
+	$ tar xfz server.tar.gz                                                  # Unpack the server
+	$ rm server.tar.gz                                                       # Remove server package
+	$ python server/setup.py                                                 # Run ViUR setup tool
+	$ dev_appserver.py .                                                     # Start Google App Engine
+
+
+When you see a friendly "Hello World" welcoming you in your browser, your app is running!
 
 Installing the Vi interface
 ---------------------------
 
-To access the system's backend, we recommend to use the Vi.
+To access the system's backend, we recommend to use the Vi. Vi stands for Visual Interface, and is a HTML5 web-app that allows to administrate and manage information in a ViUR application.
 
 Download the Vi in its latest tarball from `<http://viur.is/package/download/vi/latest>`_ or as zipfile from `<http://viur.is/package/download/vi/latest/zip>`_.
 
 Then, unpack it into your project folder right on the same level as the ``server`` package previously extracted.
 
-After that, the Vi can be access at `<http://localhost:8080/vi>`_, or under your particular port.
+On a Linux terminal again, this is simply done with
 
+::
+
+	$ wget -qO vi.tar.gz http://viur.is/package/download/vi/latest
+	$ tar xfz vi.tar.gz
+	$ rm vi.tar.gz
+
+After that, the Vi can be access at `<http://localhost:8080/vi>`_, or under your particular port.
 
 Logging into the new system
 ---------------------------
