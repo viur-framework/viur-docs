@@ -1,4 +1,4 @@
 Training guide
 ##############
 
-
+Coming soon!
