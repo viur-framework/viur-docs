@@ -186,7 +186,7 @@ ViUR comes with some build-in modules for different application cases:
 
 By subclassing these modules, custom modifications and extensions can be implemented for any use-case. In most cases, applications make use of custom modules which base on one of the prototypes as described above.
 
-To connect the Skeleton ``Person`` defined above with a module implementing a list, the following few lines of code are necessary.
+To connect the Skeleton ``personSkel`` defined above with a module implementing a list, the following few lines of code are necessary.
 
 .. code-block:: python
 
