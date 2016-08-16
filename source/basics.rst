@@ -8,7 +8,7 @@ Overview
 
 On the first view, ViUR is a modern implementation of the traditional Model-View-Controller (MVC) design pattern. But ViUR is also much more. It helps to quickly implement new, even complex data models using pre-defined but highly customizable controllers and viewers.
 
-.. image:: images/viur-overview.png
+.. image:: images/basics-overview.png
    :scale: 60%
    :alt: This is a picture of the ViUR MVC architecture.
 
@@ -105,13 +105,31 @@ vi/             Contains the Vi.
 Skeletons and bones
 ===================
 
-Skeletons are the data models of a ViUR application.
+Skeletons are the data models of a ViUR application. They describe, how and in which ways information in the database is stored and loaded. Skeletons are derived from the class :class:`~server.skeleton.Skeleton`.
 
-They form an high-level abstraction layer that runs on top of the low-level database API served by ViUR, which again bases directly on `Google Datastore functions API <https://cloud.google.com/appengine/docs/python/datastore/api-overview>`_.
+The skeletons are made of bones. A bone is the instance of a bone class and references to a data field in the resulting data document. It performs data validity checks, serialization to and deserialization from the database and reading data from the clients.
 
-Skeletons are made of bones. A bone is the instance of a bone class and references to a data field in the resulting dataset. It performs data validity checks, serialization to and deserialization from the database and reading data from the clients.
+.. image:: images/basics-skeleton.png
+   :scale: 60%
+   :alt: A picture showing how Skeletons work.
 
-Skeletons are derived from the class :class:`~server.skeleton.Skeleton`. They automatically provide the bone ``key``, which is an instance of the class :class:`~server.bones.bone.baseBone` and holds the value of the unique entity key. The pre-defined bones ``creationdate`` and ``changedate`` of each skeleton store the date and time when the dataset was created or changed.
+The skeleton shown in the graphic above is defined in a file ``person.py`` which is stored in the ``skeletons/`` folder of the project.
+
+.. code-block:: python
+
+   #-*- coding: utf-8 -*-
+   from server.skeleton import Skeleton
+   from server.bones import *
+
+   class personSkel(Skeleton):
+      kindName = "person"
+
+      name = stringBone(descr="Name")
+      age = numericBone(descr="Age")
+
+That's it. When this Skeleton is connected to a module later on, ViUR's admin tools like the Vi automatically provide an auto-generated input mask on it.
+
+A Skeleton does automatically provide the bone ``key`` also, which is an instance of the class :class:`~server.bones.bone.baseBone`. This bone holds the value of the unique entity key, that is required to uniquely identify a dataset within the database. The pre-defined bones ``creationdate`` and ``changedate`` of each skeleton store the date and time when the dataset was created or changed.
 
 By default, ViUR provides the following base classes of bones that can be immediately used:
 
@@ -124,15 +142,13 @@ By default, ViUR provides the following base classes of bones that can be immedi
 - :class:`~server.bones.stringBone.stringBone` for strings or list of strings,
 - :class:`~server.bones.textBone.textBone` for HTML-formatted content.
 
-There are also some more specialized, pre-defined bones that can be used. Please refer the :ref:`bones API reference <reference_bones>` for all provided classes and options.
+This is only a list of the most commonly used bones. There are much more specialized, pre-defined bones that can be used.
+Please refer the :ref:`bones API reference <reference_bones>` for all provided classes and options.
 
 Prototypes and modules
 ======================
 
-Modules are the controllers of a ViUR application, and implement the application logic.
-
-To implement modules, ViUR provides four basic prototypes. These are :class:`~server.prototypes.list.List`, :class:`~server.prototypes.singleton.Singleton`, :class:`~server.prototypes.hierarchy.Hierarchy` and :class:`~server.prototypes.tree.Tree`.
-
+Modules are the controllers of a ViUR application, and implement the application logic. To implement modules, ViUR provides four basic prototypes. These are :class:`~server.prototypes.list.List`, :class:`~server.prototypes.singleton.Singleton`, :class:`~server.prototypes.hierarchy.Hierarchy` and :class:`~server.prototypes.tree.Tree`.
 
 .. |icon_list| image:: images/list.svg
    :width: 45px
@@ -169,6 +185,18 @@ ViUR comes with some build-in modules for different application cases:
 - :class:`~server.modules.page.Page` implements a simple content management module.
 
 By subclassing these modules, custom modifications and extensions can be implemented for any use-case. In most cases, applications make use of custom modules which base on one of the prototypes as described above.
+
+To connect the Skeleton ``Person`` defined above with a module implementing a list, the following few lines of code are necessary.
+
+.. code-block:: python
+
+   #-*- coding: utf-8 -*-
+   from server.prototypes import List
+
+   class Person(List):
+      pass
+
+Putting this into a file ``person.py`` in the ``modules/`` folder of the project is all what is required to load or save information using the Vi.
 
 Renderers
 =========

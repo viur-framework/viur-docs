@@ -41,13 +41,13 @@ Below is an example for a few commands on a Linux terminal to setup a clean ViUR
 
 ::
 
-	$ mkdir hello-viur                                                       # Setup project folder
-	$ cd hello-viur                                                          # Change into this folder
-	$ wget -qO server.tar.gz http://viur.is/package/download/server/latest   # Download latest server
-	$ tar xfz server.tar.gz                                                  # Unpack the server
-	$ rm server.tar.gz                                                       # Remove server package
-	$ python server/setup.py                                                 # Run ViUR setup tool
-	$ dev_appserver.py .                                                     # Start Google App Engine
+	mkdir hello-viur                                                       # Setup project folder
+	cd hello-viur                                                          # Change into this folder
+	wget -qO server.tar.gz http://viur.is/package/download/server/latest   # Download latest server
+	tar xfz server.tar.gz                                                  # Unpack the server
+	rm server.tar.gz                                                       # Remove server package
+	python server/setup.py                                                 # Run ViUR setup tool
+	dev_appserver.py .                                                     # Start Google App Engine
 
 
 When you see a friendly "Hello World" welcoming you in your browser, your app is running!
@@ -65,9 +65,9 @@ On a Linux terminal again, this is simply done with
 
 ::
 
-	$ wget -qO vi.tar.gz http://viur.is/package/download/vi/latest
-	$ tar xfz vi.tar.gz
-	$ rm vi.tar.gz
+	wget -qO vi.tar.gz http://viur.is/package/download/vi/latest
+	tar xfz vi.tar.gz
+	rm vi.tar.gz
 
 After that, the Vi can be access at `<http://localhost:8080/vi>`_, or under your particular port.
 
