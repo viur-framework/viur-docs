@@ -71,6 +71,10 @@ On a Linux terminal again, this is simply done with
 
 After that, the Vi can be access at `<http://localhost:8080/vi>`_, or under your particular port.
 
+.. image:: images/start-vi.png
+   :scale: 60%
+   :alt: The Vi after setting up a scratch project.
+
 Logging into the new system
 ---------------------------
 

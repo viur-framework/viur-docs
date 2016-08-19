@@ -196,20 +196,62 @@ To connect the Skeleton ``personSkel`` defined above with a module implementing 
    class Person(List):
       pass
 
-Putting this into a file ``person.py`` in the ``modules/`` folder of the project is all what is required to load or save information using the Vi.
+Putting this into a file ``person.py`` in the ``modules/`` folder of the project is all what is required to load or save information using the Vi. The screenshots below demonstrate, that datasets are shown using the list module...
+
+.. image:: images/basics-vi.png
+   :scale: 60%
+   :alt: The Vi in action: Showing a list module.
+
+...and the input mask is then generated from the skeleton, on editing or adding actions.
+
+.. image:: images/basics-vi2.png
+   :scale: 60%
+   :alt: The Vi in action: Editing an entry.
 
 Renderers
 =========
 
-The renderers are the viewer part of a ViUR application.
+The renderers are the viewer parts of ViUR's MVC concept.
 
-ViUR provides various build-in renderers, but they can also be extended, sub-classed or entirely rewritten, based on the demands of the project.
+ViUR provides various build-in renderers, but they can also be extended, sub-classed or entirely rewritten, based on the demands of the project. The modules are connected
 
-- ``jinja2`` is the default frontend renderer, and makes use of the `Jinja2 template engine <http://jinja.pocoo.org/>`_. Therefore, this renderer is used to generate any HTML-output from ViUR modules, and acts as the default renderer for ViUR.
-- ``json`` is a renderer that uses the JSON data format as its output. It implements a clear protocol which is used by several tools, e.g. the ViUR admin tools, to fetch data from the ViUR application. Therefore, the renderers ``vi`` and ``admin`` are subclassed from the json renderer, and are used for the communication between these clients and the server.
-- ``xml`` is a renderer that generates XML output. It can be compared to the json renderer, but with much more markup overload.
+The most widely used renderer in ViUR is ``jinja2``, which is a binding to the powerful `Jinja2 template engine <http://jinja.pocoo.org/>`_. This renderer is used to create frontends in HTML, and has a powerful inheritance mechanism, build-in control structures and can easily be extended to custom functions. Anything related to the jinja2 renderer is located in the ``html/`` folder of the project structure.
 
-There are also some more renderers, e.g. for PDF and RSS, which are not right now.
+Let's create a simple template to print out the name of our skeleton for storing a person's data. This template is stored as ``person_list.html`` into the HTML directory.
 
-The renderer in which data should be processes can be selected over the path of the URL, except the default renderer (HTML). The modules can be configured in a way which renderers are supported for every module.
+.. code-block:: html
 
+   <!DOCTYPE html>
+   <html>
+       <body>
+           <ul>
+           {% for skel in skellist %}
+               <li>{{skel.name}} is {{skel.age}} year{{"s" if skel.age != 1 }} old.</li>
+           {% endfor %}
+           </ul>
+       </body>
+   </html>
+
+To connect the ``Person`` module from above to our template, it needs to be configured so:
+
+.. code-block:: python
+
+   #-*- coding: utf-8 -*-
+   from server.prototypes import List
+
+   class Person(List):
+      viewTemplate = "person_view" # Name of the template to view one entry
+      listTemplate = "person_list" # Name of the template to list entries
+
+      def listFilter(self, filter):
+         return filter #no module filtering!
+
+      def canView(self, skel):
+         return True # everyone can view everything!
+
+But how to call this template now from the frontend? Requests to a ViUR application are performed by a clear URL calling convention, which is
+
+..
+   / [renderer /] module / action / [arg1 / [arg2 /...]]
+
+So opening `http://localhost:8080/person/list`_ in a local development version will display the listing template from above.
