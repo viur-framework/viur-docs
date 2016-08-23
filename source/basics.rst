@@ -211,28 +211,28 @@ Putting this into a file ``person.py`` in the ``modules/`` folder of the project
 Renderers
 =========
 
-The renderers are the viewer parts of ViUR's MVC concept.
+The renderers are the viewer part of ViUR's MVC concept.
 
-ViUR provides various build-in renderers, but they can also be extended, sub-classed or entirely rewritten, based on the demands of the project. The modules are connected
+ViUR provides various build-in renderers, but they can also be extended, sub-classed or entirely rewritten, based on the demands of the project.
 
-The most widely used renderer in ViUR is ``jinja2``, which is a binding to the powerful `Jinja2 template engine <http://jinja.pocoo.org/>`_. This renderer is used to create frontends in HTML, and has a powerful inheritance mechanism, build-in control structures and can easily be extended to custom functions. Anything related to the jinja2 renderer is located in the ``html/`` folder of the project structure.
+The default renderer in ViUR is ``jinja2``, which is a binding to the powerful `Jinja2 template engine <http://jinja.pocoo.org/>`_ to generate HTML output. Jinja2 is used because it has a powerful inheritance mechanism, build-in control structures and can easily be extended to custom functions. Please refer to the Jinja2 documentation to get an overview about its features and handling. Any template files related to the jinja2 renderer are located in the folder ``html/`` within the project structure.
 
-Let's create a simple template to print out the name of our skeleton for storing a person's data. This template is stored as ``person_list.html`` into the HTML directory.
+Let's put a simple template to render the list of the person's data from above data model in a HTML view.
+This template is stored as ``person_list.html`` into the ``html/``-folder.
 
 .. code-block:: html
 
-   <!DOCTYPE html>
-   <html>
-       <body>
-           <ul>
-           {% for skel in skellist %}
-               <li>{{skel.name}} is {{skel.age}} year{{"s" if skel.age != 1 }} old.</li>
-           {% endfor %}
-           </ul>
-       </body>
-   </html>
+   {% extends "index.html" %}
 
-To connect the ``Person`` module from above to our template, it needs to be configured so:
+   {% block content %}
+       <ul>
+       {% for skel in skellist %}
+           <li>{{skel.name}} is {{skel.age}} year{{"s" if skel.age != 1 }} old.</li>
+       {% endfor %}
+       </ul>
+   {% endblock %}
+
+To connect the ``Person`` module from above to our template, it needs to be configured this way:
 
 .. code-block:: python
 
@@ -249,9 +249,13 @@ To connect the ``Person`` module from above to our template, it needs to be conf
       def canView(self, skel):
          return True # everyone can view everything!
 
-But how to call this template now from the frontend? Requests to a ViUR application are performed by a clear URL calling convention, which is
+   Person.json = True #grant module access to json renderer also
 
-..
-   / [renderer /] module / action / [arg1 / [arg2 /...]]
+But how to call this template now from the frontend? Requests to a ViUR application are performed by a clear and persistent format of how the resulting URLs are made up. By requesting http://hello-viur.appspot.com/person/list on a ViUR system, for example, the contents from the database are fetched by the ``Person`` module, and rendered using the listing template from above.
 
-So opening `http://localhost:8080/person/list`_ in a local development version will display the listing template from above.
+[screenshot follows]
+
+So what happens here? By calling ``/person/list`` on the server, ViUR first selects the module ``person`` (all in lower-case order) from its imported modules and then calls the function :meth:`~server.prototypes.list.List.list`, which is a build-in function of the :class:`~server.prototypes.list.List` prototype. Because no explicit renderer was specified, the HTML-renderer ``jinja2`` is automatically selected, and renders the template specified by the ``listTemplate`` attribute assigned within the module.
+
+Because we granted module access also for the ``json`` renderer above, the same list can also be rendered as a well-formed JSON data structure by calling  http://hello-viur.appspot.com/json/person/list. The ``json`` as the first selector in the path selects the different renderer that should be used.
+
