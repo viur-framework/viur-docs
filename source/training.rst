@@ -1,7 +1,7 @@
 Training guide
 ##############
 
-This part of the documentation guides deeper into fundamental parts of the ViUR system. It serves as a training guide to get familar with all ViUR-related parts that are used recently.
+This part of the documentation guides deeper into fundamental parts of the ViUR system. It serves as a training guide to get familar with all ViUR-related features that are used consistently.
 
 Data management
 ===============
@@ -32,10 +32,10 @@ Bones can be marked to be required for data integrity. To do so, the ``required`
 
 	name = stringBone(descr="Name", required=True)
 
-After that, entities with this skeleton can only be stored if all required fields are set.
+After that, entities with this skeleton can only be stored when at least the name field is not empty.
 
-Adding, editing and deleting
-----------------------------
+Adding, updating and deleting
+-----------------------------
 
 To add a data entity with the above skeleton, it first needs to be instantiated. Values are then set by using the skeleton like a dict, except that unknown keys (=bones) are raising an exception.
 
@@ -57,11 +57,11 @@ To add a data entity with the above skeleton, it first needs to be instantiated.
 
 For storing an entity to the database, the function :meth:`~server.skeleton.Skeleton.toDB` is used. If a skeleton was not previously loaded from the datastore using :meth:`~server.skeleton.Skeleton.fromDB`, a new key is automatically assigned.
 
-To load an entity directly from the datastore, its key must be known. To do so, the function :meth:`~server.skeleton.Skeleton.fromDB` is used. The following code snippet loads the previously stored entity again, changes the age, and stores it back to the datastore.
+To read an entity directly from the datastore, its key must be known. To do so, the function :meth:`~server.skeleton.Skeleton.fromDB` is used. The following code snippet loads the previously stored entity again, changes the age, and stores it back to the datastore.
 
 .. code-block:: python
 
-	# load skeleton
+	# read entity into skeleton
 	if not skel.fromDB(myKey):
 		#some error handling.
 		logging.error("The entity does not exist")
@@ -71,7 +71,7 @@ To load an entity directly from the datastore, its key must be known. To do so, 
 	logging.info("Current age of %s is %d" % (skel["name"], skel["age"])
 	skel["age"] = 33
 
-	# write it back again
+	# write entity back again
 	skel.toDB()
 
 That's it. To delete an entity, just :meth:`~server.skeleton.Skeleton.delete` needs to be called on a previously fetched skeleton.
@@ -104,14 +104,13 @@ To make bones usable within a query, the ``indexed`` attribute of the particular
       name = stringBone(descr="Name", required=True, indexed=True)
       age = numericBone(descr="Age", indexed=True)
 
-A query can be created from a skeleton using the :meth:`~server.skeleton.Skeleton.all` function. This default query is a selection of all entities of the given skeleton. To granulate the result of this default query, the function :meth:`~server.db.Query.filter` is used. It provides ways to also filter not on equality, but also on greater or lower conditions. The function :meth:`~server.db.Query.order` allows to add an order to the result.
+A query can be created from a skeleton using the :meth:`~server.skeleton.Skeleton.all` function. This default query is a selection of all entities of the given skeleton. To granulate the result of this default query, the function :meth:`~server.db.Query.filter` is used. It provides ways to also filter not on equality, but also on greater or lower conditions.
 
 .. code-block:: python
 
 	# create the query
 	query = personSkel().all()
 	query.filter("age >", 30)
-	query.order("name")
 
 	# how many result are expected?
 	logging.info("%d entities in query" % query.count())
@@ -120,11 +119,35 @@ A query can be created from a skeleton using the :meth:`~server.skeleton.Skeleto
 	for skel in query.fetch():
 		logging.info("%s is %d years old" % (skel["name"], skel["age"]))
 
-An alternative to :meth:`~server.db.Query.filter` is , which applies multiple filters from a dict within one function call.
+Indexes
+~~~~~~~
 
-Using complex queries causes the datastore to work on index tables to find the correct entities. These index tables must be explicitly described and managed in the ``index.yaml`` file of the project. In a local development system, index definitions are automatically generated into this file when a query needs an index, and not definition for this index exists.
+Using complex queries causes the datastore to work on index tables to find the correct entities. These index tables must be explicitly described and managed in the ``index.yaml`` file of the project. In a local development system, index definitions are automatically generated into this file when a query needs an index, and no definition for this index exists.
 
-In web applications, queries underlie some restrictions, which are technically not a problem, but may cause timeout problems on http requests. Therefore, the use of cursors is required, and queries sometimes need to be split in deferred tasks or requested asynchronously to decrease request latency. ViUR limits its maxium request limit for dataset fetches to 99 entities. This means, that not more than 99 entities can be fetched per query. The query can be continued later on using a cursor.
+Doing so in the following snippet:
+
+.. code-block:: python
+
+	query = personSkel().all().order("name", "age")
+
+	for skel in query.fetch():
+		logging.info("%s is %d years old" % (skel["name"].value, skel["age"].value))
+
+When executed, this yields in the following index definition in the ``index.yaml`` file. The function :meth:`~server.db.Query.order` allows to add an order to a query.
+
+.. code-block:: yaml
+
+	- kind: person
+	  properties:
+	  - name: name
+	  - name: age
+
+When running a query requiring an index which does not exist causes an error. It also takes some time until new indexes are built in the cloud. Checking out the logs in the `Google Cloud Console <https://console.cloud.google.com>`_ gives help when index definitions are missing.
+
+Cursors
+~~~~~~~
+
+In web applications, queries underlie some restrictions, which are technically not a problem, but may cause timeout problems on http requests. Therefore, the use of cursors is required, and queries sometimes need to be split in deferred tasks or requested asynchronously to decrease request latency. ViUR limits its maximum request limit for dataset fetches to 99 entities. This means, that not more than 99 entities can be fetched per query. The query can be continued later on using a cursor.
 
 To obtain a cursor, the :meth:`~server.db.Query.getCursor` function returns a proper cursor object. This can be set to the same query (means: having the same filtering and ordering) using the function :meth:`~server.db.Query.cursor`.
 
@@ -133,9 +156,9 @@ The following piece of code is an example for a function that works exactly on t
 .. code-block:: python
 
 	@callDeferred
-	def fetchAllPersons(cursor = None)
+	def fetchAllPersons(cursor = None):
 		# create the query
-		query = personSkel().all().filter("age >", 30).order("name").cursor(cursor)
+		query = personSkel().all().filter("age >", 30).cursor(cursor)
 
 		# fetch the skeletons
 		for skel in query.fetch():

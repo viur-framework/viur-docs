@@ -74,7 +74,7 @@ emails/         Template folder for emails. Not necessary for now.
 
 html/           Template folder for the HTML-templates rendered by the Jinja2 template engine.
 
-index.yaml      This is an (mostly) automatically managed configuration file for the Google datastore database describing compound indexes for several document kinds in the database. These indexes are required for querying data, but will also be discussed later.
+index.yaml      This is an (mostly) automatically managed configuration file for the Google Datastore describing compound indexes for entity kinds in the database. These indexes are required for more complex queries on data, but will also be discussed later.
 
 modules/        This is the folder where the applications modules code remains.
 
@@ -129,9 +129,9 @@ The skeleton shown in the graphic above is defined in a file ``person.py`` which
 
 That's it. When this Skeleton is connected to a module later on, ViUR's admin tools like the Vi automatically provide an auto-generated input mask on it.
 
-A Skeleton does automatically provide the bone ``key`` also, which is an instance of the class :class:`~server.bones.bone.baseBone`. This bone holds the value of the unique entity key, that is required to uniquely identify a dataset within the database. The pre-defined bones ``creationdate`` and ``changedate`` of each skeleton store the date and time when the dataset was created or changed.
+A Skeleton does automatically provide the bone ``key`` also, which is an instance of the class :class:`~server.bones.bone.baseBone`. This bone holds the value of the unique entity key, that is required to uniquely identify an entity within the database. The pre-defined bones ``creationdate`` and ``changedate`` of each skeleton store the date and time when the entity was created or changed. In terms of ViUR, an entity is a document or dataset in the datastore, that stores information.
 
-By default, ViUR provides the following base classes of bones that can be immediately used:
+By default, ViUR provides the following base classes of bones that can be used immediately:
 
 - :class:`~server.bones.booleanBone.booleanBone` for ``bool`` values,
 - :class:`~server.bones.dateBone.dateBone` for :class:`~datetime.date`, :class:`~datetime.time` and :class:`~datetime.datetime` values,
