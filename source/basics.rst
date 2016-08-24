@@ -1,7 +1,7 @@
 Basic concepts
 ##############
 
-This part of the documentation targets to the basic architecture behind ViUR, and describes how the system is made up and how things work together.
+This part of the documentation targets to the basic architecture behind ViUR, and describes how the system is made up and how things work together. Those who are new to ViUR and want to write applications with it, should start here.
 
 Overview
 ========
@@ -23,7 +23,7 @@ Let's section these three parts of the MVC-concept and explain them in the terms
 
   They form a callable module of the application, which focuses a specific data kind or task.
 
-  To implement modules, ViUR provides four generic *prototypes*: List, hierarchy, tree and singleton. There are many pre-built modules delivered with the ViUR server that implement e.g. a user-module, including login and registration logics, or a file-module, which is a tree (like a filesystem) to store files in the cloud.
+  To implement modules, ViUR provides four generic *prototypes*: List, hierarchy, tree and singleton. There are many pre-built modules delivered with the ViUR server that implement standard use-cases, e.g. a user-module, including login and registration logics, or a file-module, which is a tree (like a filesystem) to store files in the cloud.
 
 - The *views* are called **renderers**.
 
@@ -78,7 +78,7 @@ index.yaml      This is an (mostly) automatically managed configuration file for
 
 modules/        This is the folder where the applications modules code remains.
 
-                Usually, every module is separated into one single Python file here, but it can also be split or merged, depending on the implementation. Every module that should be made available to the system must be imported in the ``__init__.py`` in order to Pythons typical packaging logic.
+                Usually, every module is separated into one single Python file here, but it can also be split or merged, depending on the implementation.
 
 server/         This is the ViUR server as downloaded from `<http://viur.is>`_.
 
@@ -88,7 +88,7 @@ server/         This is the ViUR server as downloaded from `<http://viur.is>`_.
 
 skeletons/      Like the modules folder, this is the place where the skeletons for the data models are put.
 
-                Usually, one Python file for every skeleton, but this is also only an advise. ``__init__.py`` must also be extended when new skeletons are created.
+                Usually, one Python file for every skeleton, but this is also only an advise.
 
 static/         This folder is used for static files that are served by the applications when providing a HTML-frontend. CSS, images, JavaScripts, meta-files and fonts are stored here.
 
