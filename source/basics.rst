@@ -122,8 +122,6 @@ The skeleton shown in the graphic above is defined in a file ``person.py`` which
    from server.bones import *
 
    class personSkel(Skeleton):
-      kindName = "person"
-
       name = stringBone(descr="Name")
       age = numericBone(descr="Age")
 

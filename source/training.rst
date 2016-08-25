@@ -14,15 +14,11 @@ Let's start again with the skeleton storing personal data, introduced in the pre
 
 .. code-block:: python
 
-   class personSkel(Skeleton):
-      kindName = "person"
-
-      name = stringBone(descr="Name")
-      age = numericBone(descr="Age")
+    class personSkel(Skeleton):
+        name = stringBone(descr="Name")
+        age = numericBone(descr="Age")
 
 In ViUR, skeletons should be named after modules or usages they are used for. To easily connect a skeleton class with a module, the naming-convention with the preceding *Skel*, like above, should be used, so this is done automatically by the system. Under some circumstances, the name may differ, and can be referenced from the module otherwise, but this is not covered here right now.
-
-In the above class definition, the *kindName* property specifies the name of the data kind in the Google Datastore. It should be uniquely set within each individual skeleton class to prevent data corruption, except it is wanted. This concept is mostly used when working with sub-skeletons, but this will also be covered later.
 
 The two bone assignments define the schema of the skeleton, which is extended to the pre-defined bones *key*, *creationdate* and *changedate*. In special cases, these bones can be removed by assigning ``None`` to them.
 
@@ -30,30 +26,30 @@ Bones can be marked to be required for data integrity. To do so, the ``required`
 
 .. code-block:: python
 
-	name = stringBone(descr="Name", required=True)
+    name = stringBone(descr="Name", required=True)
 
 After that, entities with this skeleton can only be stored when at least the name field is not empty.
 
 Adding, updating and deleting
 -----------------------------
 
-To add a data entity with the above skeleton, it first needs to be instantiated. Values are then set by using the skeleton like a dict, except that unknown keys (=bones) are raising an exception.
+To add a data entity with the above skeleton, it first needs to be instantiated. Values are then set by using the skeleton like a :class:`~dict`, except that unknown keys (=bones) are raising an exception.
 
 .. code-block:: python
 
-	# get instance
-	skel = personSkel()
+    # get instance
+    skel = personSkel()
 
-	# set values
-	skel["name"] = "Vicky"
-	skel["age"] = 32
+    # set values
+    skel["name"] = "Vicky"
+    skel["age"] = 32
 
-	# write it!
-	skel.toDB()
+    # write it!
+    skel.toDB()
 
-	# getting the key
-	myKey = skel["key"]
-	logging.info("Entity stored as %s" % str(myKey))
+    # getting the key
+    myKey = skel["key"]
+    logging.info("Entity stored as %s" % str(myKey))
 
 For storing an entity to the database, the function :meth:`~server.skeleton.Skeleton.toDB` is used. If a skeleton was not previously loaded from the datastore using :meth:`~server.skeleton.Skeleton.fromDB`, a new key is automatically assigned.
 
@@ -61,26 +57,25 @@ To read an entity directly from the datastore, its key must be known. To do so, 
 
 .. code-block:: python
 
-	# read entity into skeleton
-	if not skel.fromDB(myKey):
-		#some error handling.
-		logging.error("The entity does not exist")
-		return
+    # read entity into skeleton
+    if not skel.fromDB(myKey):
+        #some error handling.
+        logging.error("The entity does not exist")
+        return
 
-	# change something
-	logging.info("Current age of %s is %d" % (skel["name"], skel["age"])
-	skel["age"] = 33
+    # change something
+    logging.info("Current age of %s is %d" % (skel["name"], skel["age"])
+    skel["age"] = 33
 
-	# write entity back again
-	skel.toDB()
+    # write entity back again
+    skel.toDB()
 
 That's it. To delete an entity, just :meth:`~server.skeleton.Skeleton.delete` needs to be called on a previously fetched skeleton.
 
 .. code-block:: python
 
-	# delete it
-	skel.delete()
-
+    # delete it
+    skel.delete()
 
 The functions used so far:
 
@@ -88,13 +83,12 @@ The functions used so far:
 - :meth:`server.skeleton.Skeleton.fromDB` reads an entity from the datastore,
 - :meth:`server.skeleton.Skeleton.delete` deletes the entity from the datastore.
 
-
 Queries and cursors
 -------------------
 
 ViUR provides powerful tools to quickly query entities, even over relations.
 
-To make bones usable within a query, the ``indexed`` attribute of the particular bones must be set in the skeleton. This is also required for attributes involved into the order.
+To make bones usable within a query, the ``indexed`` attribute of the particular bones must be set in the skeleton. This is also required for attributes involved into an ordering.
 
 .. code-block:: python
 
@@ -108,16 +102,16 @@ A query can be created from a skeleton using the :meth:`~server.skeleton.Skeleto
 
 .. code-block:: python
 
-	# create the query
-	query = personSkel().all()
-	query.filter("age >", 30)
+    # create the query
+    query = personSkel().all()
+    query.filter("age >", 30)
 
-	# how many result are expected?
-	logging.info("%d entities in query" % query.count())
+    # how many result are expected?
+    logging.info("%d entities in query" % query.count())
 
-	# fetch the skeletons
-	for skel in query.fetch():
-		logging.info("%s is %d years old" % (skel["name"], skel["age"]))
+    # fetch the skeletons
+    for skel in query.fetch():
+        logging.info("%s is %d years old" % (skel["name"], skel["age"]))
 
 Indexes
 ~~~~~~~
@@ -128,19 +122,19 @@ Doing so in the following snippet:
 
 .. code-block:: python
 
-	query = personSkel().all().order("name", "age")
+    query = personSkel().all().order("name", "age")
 
-	for skel in query.fetch():
-		logging.info("%s is %d years old" % (skel["name"].value, skel["age"].value))
+    for skel in query.fetch():
+        logging.info("%s is %d years old" % (skel["name"].value, skel["age"].value))
 
 When executed, this yields in the following index definition in the ``index.yaml`` file. The function :meth:`~server.db.Query.order` allows to add an order to a query.
 
-.. code-block:: yaml
+.. code-block::
 
-	- kind: person
-	  properties:
-	  - name: name
-	  - name: age
+    - kind: person
+      properties:
+      - name: name
+      - name: age
 
 When running a query requiring an index which does not exist causes an error. It also takes some time until new indexes are built in the cloud. Checking out the logs in the `Google Cloud Console <https://console.cloud.google.com>`_ gives help when index definitions are missing.
 
@@ -155,18 +149,18 @@ The following piece of code is an example for a function that works exactly on t
 
 .. code-block:: python
 
-	@callDeferred
-	def fetchAllPersons(cursor = None):
-		# create the query
-		query = personSkel().all().filter("age >", 30).cursor(cursor)
+    @callDeferred
+    def fetchAllPersons(cursor = None):
+        # create the query
+        query = personSkel().all().filter("age >", 30).cursor(cursor)
 
-		# fetch the skeletons
-		for skel in query.fetch():
-			logging.info("%s is %d years old" % (skel["name"], skel["age"]))
+        # fetch the skeletons
+        for skel in query.fetch():
+            logging.info("%s is %d years old" % (skel["name"], skel["age"]))
 
-		# if entities where fetched, take the next chunk
-		if query.count():
-			fetchAllPersons(query.getCursor().urlsafe()))
+        # if entities where fetched, take the next chunk
+        if query.count():
+            fetchAllPersons(query.getCursor().urlsafe()))
 
 Important functions used for querying:
 
@@ -188,19 +182,15 @@ Let's connect the persons to companies, by introducing a new skeleton.
 
 .. code-block:: python
 
-   class companySkel(Skeleton):
-      kindName = "company"
-
-      name = stringBone(descr="Company name", required=True, indexed=True)
+    class companySkel(Skeleton):
+        name = stringBone(descr="Company name", required=True, indexed=True)
 
 Then, the entity kind is connected to the person.
 
 .. code-block:: python
 
-   class personSkel(Skeleton):
-      kindName = "person"
-
-      name = stringBone(descr="Name", required=True, indexed=True)
-      age = numericBone(descr="Age", indexed=True)
-      company = relationalBone(type="company", descr="Employed at", required=True)
+    class personSkel(Skeleton):
+        name = stringBone(descr="Name", required=True, indexed=True)
+        age = numericBone(descr="Age", indexed=True)
+        company = relationalBone(type="company", descr="Employed at", required=True)
 
