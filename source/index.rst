@@ -1,4 +1,4 @@
-
+=================
 Table of Contents
 =================
 
@@ -16,7 +16,7 @@ Table of Contents
 	reference
 	appendix
 
-
+==================
 Indices and tables
 ==================
 

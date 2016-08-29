@@ -1,3 +1,4 @@
+####################
 Server API Reference
 ####################
 
@@ -11,9 +12,14 @@ Main server entry.
 
 .. autofunction:: server.translate
 
+=====
 bones
 =====
 .. _reference_bones:
+
+--------
+baseBone
+--------
 
 .. automodule:: server.bones.bone
    :show-inheritance:
@@ -22,6 +28,7 @@ bones
    :private-members:
    :special-members:
 
+-----------
 booleanBone
 -----------
 
@@ -32,6 +39,7 @@ booleanBone
    :private-members:
    :special-members:
 
+---------
 colorBone
 ---------
 
@@ -42,6 +50,7 @@ colorBone
    :private-members:
    :special-members:
 
+--------
 dateBone
 --------
 
@@ -52,6 +61,7 @@ dateBone
    :private-members:
    :special-members:
 
+---------
 emailBone
 ---------
 
@@ -62,6 +72,7 @@ emailBone
    :private-members:
    :special-members:
 
+--------
 fileBone
 --------
 
@@ -72,6 +83,7 @@ fileBone
     :private-members:
     :special-members:
 
+-------------
 hierarchyBone
 -------------
 
@@ -82,6 +94,7 @@ hierarchyBone
     :private-members:
     :special-members:
 
+-----------
 numericBone
 -----------
 
@@ -92,6 +105,7 @@ numericBone
     :private-members:
     :special-members:
 
+------------
 passwordBone
 ------------
 
@@ -102,6 +116,7 @@ passwordBone
    :private-members:
    :special-members:
 
+---------------
 randomSliceBone
 ---------------
 
@@ -112,6 +127,7 @@ randomSliceBone
    :private-members:
    :special-members:
 
+--------------
 relationalBone
 --------------
 
@@ -122,6 +138,7 @@ relationalBone
     :private-members:
     :special-members:
 
+-----------------
 selectCountryBone
 -----------------
 
@@ -132,6 +149,7 @@ selectCountryBone
     :private-members:
     :special-members:
 
+---------------
 selectMultiBone
 ---------------
 
@@ -142,6 +160,7 @@ selectMultiBone
     :private-members:
     :special-members:
 
+-------------
 selectOneBone
 -------------
 
@@ -152,6 +171,7 @@ selectOneBone
     :private-members:
     :special-members:
 
+-----------
 spatialBone
 -----------
 
@@ -162,6 +182,7 @@ spatialBone
    :private-members:
    :special-members:
 
+----------
 stringBone
 ----------
 
@@ -172,6 +193,7 @@ stringBone
     :private-members:
     :special-members:
 
+--------
 textBone
 --------
 
@@ -182,6 +204,7 @@ textBone
    :private-members:
    :special-members:
 
+-----------
 treeDirBone
 -----------
 
@@ -192,6 +215,7 @@ treeDirBone
     :private-members:
     :special-members:
 
+------------
 treeItemBone
 ------------
 
@@ -202,6 +226,7 @@ treeItemBone
     :private-members:
     :special-members:
 
+--------
 userBone
 --------
 
@@ -212,6 +237,7 @@ userBone
    :private-members:
    :special-members:
 
+==
 db
 ==
 Low-level database API and data query layer.
@@ -240,6 +266,7 @@ Low-level database API and data query layer.
    :members:
    :special-members:
 
+======
 errors
 ======
 Map Python exceptions to HTTP error codes.
@@ -301,6 +328,7 @@ Map Python exceptions to HTTP error codes.
 .. autoclass:: server.errors.ReadFromClientError
     :members: = __init__
 
+=======
 indexes
 =======
 An efficient index manager.
@@ -308,49 +336,59 @@ An efficient index manager.
 .. autoclass:: server.indexes.IndexMannager
     :members: __init__, keyFromQuery, cursorForQuery, getPages, refreshIndex
 
+==========
 prototypes
 ==========
 
+-----
 Basic
 -----
 .. autoclass:: server.prototypes.basic.BasicApplication
    :members:
 
+---------
 Hierarchy
 ---------
 .. autoclass:: server.prototypes.hierarchy.Hierarchy
    :members:
 
+----
 List
 ----
 .. autoclass:: server.prototypes.list.List
    :members:
 
+---------
 Singleton
 ---------
 .. autoclass:: server.prototypes.singleton.Singleton
    :members:
 
+----
 Tree
 ----
 .. autoclass:: server.prototypes.tree.Tree
    :members:
 
 
+=========
 renderers
 =========
 
+------
 jinja2
 ------
 .. autoclass:: server.render.jinja2.default.Render
    :members:
 
+----
 json
 ----
 .. autoclass:: server.render.json.default.Render
    :members:
 
 
+===========
 securitykey
 ===========
 One-time tokens.
@@ -358,6 +396,7 @@ One-time tokens.
 .. automodule:: server.securitykey
     :members:
 
+========
 skeleton
 ========
 High-level database API.
@@ -377,6 +416,7 @@ High-level database API.
    :members:
    :special-members:
 
+=====
 utils
 =====
 Utility functions.

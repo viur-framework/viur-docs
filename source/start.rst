@@ -1,8 +1,10 @@
+###############
 Getting started
 ###############
 
 This part of the documentation provides a first steps guide for quickly setting up an application with ViUR. The following chapters will go much deeper into ViUR, its architecture and how it is used. The Google App Engine™ is only introduced shortly here. Knowledge on what it is, how it works and how an application is registered there is required, before continuing.
 
+=============
 Prerequisites
 =============
 
@@ -16,6 +18,7 @@ There are two ways to get the SDK run on your machine:
 
 2. If you are familiar with Docker, we also offer several *ViUR docker recipes* to quickly set up a dedicated, Linux-based build-environment, with all prerequisites installed. To make use of these, just visit `<https://hub.docker.com/u/viur/>`_.
 
+======================================
 Setting up a ViUR project from scratch
 ======================================
 
@@ -52,6 +55,7 @@ Below is an example for a few commands on a Linux terminal to setup a clean ViUR
 
 When you see a friendly "Hello World" welcoming you in your browser, your app is running!
 
+---------------------------
 Installing the Vi interface
 ---------------------------
 
@@ -71,10 +75,13 @@ On a Linux terminal again, this is simply done with
 
 After that, the Vi can be access at `<http://localhost:8080/vi>`_, or under your particular port.
 
-.. image:: images/start-vi.png
+.. figure:: images/start-vi.png
    :scale: 60%
    :alt: The Vi after setting up a scratch project.
 
+   The Vi after setting up a scratch project.
+
+---------------------------
 Logging into the new system
 ---------------------------
 
@@ -89,7 +96,7 @@ When the system is started in the cloud for the first time, an e-mail with this 
 
 Alternatively, you can login with a simulated Google user. Both login forms are provided by the default server and can be done using the Vi.
 
-
+===========================
 Setting up the demo project
 ===========================
 

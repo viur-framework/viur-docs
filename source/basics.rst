@@ -1,16 +1,20 @@
+##############
 Basic concepts
 ##############
 
 This part of the documentation targets to the basic architecture behind ViUR, and describes how the system is made up and how things work together. Those who are new to ViUR and want to write applications with it, should start here.
 
+========
 Overview
 ========
 
 On the first view, ViUR is a modern implementation of the traditional Model-View-Controller (MVC) design pattern. But ViUR is also much more. It helps to quickly implement new, even complex data models using pre-defined but highly customizable controllers and viewers.
 
-.. image:: images/basics-overview.png
+.. figure:: images/basics-overview.png
    :scale: 60%
    :alt: This is a picture of the ViUR MVC architecture.
+
+   The model-view-controller concept of ViUR.
 
 The graphic above shows the different parts of the MVC-concept and their relation to each other.
 Let's section these three parts of the MVC-concept and explain them in the terms of ViUR.
@@ -31,6 +35,7 @@ Let's section these three parts of the MVC-concept and explain them in the terms
 
 These are the fundamental basics of the ViUR information system. It is now necessary to get deeper into these topics and arrange these three parts to get working results.
 
+================
 Folder structure
 ================
 
@@ -101,7 +106,7 @@ vi/             Contains the Vi.
                 Vi is an HTML5-based administration interface to access the ViUR system's modules and its data. The Vi is some kind of backend for ViUR, but it could also be the front-end of the application - this all depends on what the ViUR system implements in its particular application.
 =============   =================================================================================
 
-
+===================
 Skeletons and bones
 ===================
 
@@ -109,13 +114,16 @@ Skeletons are the data models of a ViUR application. They describe, how and in w
 
 The skeletons are made of bones. A bone is the instance of a bone class and references to a data field in the resulting data document. It performs data validity checks, serialization to and deserialization from the database and reading data from the clients.
 
-.. image:: images/basics-skeleton.png
+.. figure:: images/basics-skeleton.png
    :scale: 60%
    :alt: A picture showing how Skeletons work.
+
+   Skeletons and their binding to the datastore entity and the user interface.
 
 The skeleton shown in the graphic above is defined in a file ``person.py`` which is stored in the ``skeletons/`` folder of the project.
 
 .. code-block:: python
+   :caption: skeletons/person.py
 
    #-*- coding: utf-8 -*-
    from server.skeleton import Skeleton
@@ -143,6 +151,7 @@ By default, ViUR provides the following base classes of bones that can be used i
 This is only a list of the most commonly used bones. There are much more specialized, pre-defined bones that can be used.
 Please refer the :ref:`bones API reference <reference_bones>` for all provided classes and options.
 
+======================
 Prototypes and modules
 ======================
 
@@ -187,6 +196,7 @@ By subclassing these modules, custom modifications and extensions can be impleme
 To connect the Skeleton ``personSkel`` defined above with a module implementing a list, the following few lines of code are necessary.
 
 .. code-block:: python
+   :caption: modules/person.py
 
    #-*- coding: utf-8 -*-
    from server.prototypes import List
@@ -206,6 +216,7 @@ Putting this into a file ``person.py`` in the ``modules/`` folder of the project
    :scale: 60%
    :alt: The Vi in action: Editing an entry.
 
+=========
 Renderers
 =========
 
@@ -215,24 +226,42 @@ ViUR provides various build-in renderers, but they can also be extended, sub-cla
 
 The default renderer in ViUR is ``jinja2``, which is a binding to the powerful `Jinja2 template engine <http://jinja.pocoo.org/>`_ to generate HTML output. Jinja2 is used because it has a powerful inheritance mechanism, build-in control structures and can easily be extended to custom functions. Please refer to the Jinja2 documentation to get an overview about its features and handling. Any template files related to the jinja2 renderer are located in the folder ``html/`` within the project structure.
 
-Let's put a simple template to render the list of the person's data from above data model in a HTML view.
-This template is stored as ``person_list.html`` into the ``html/``-folder.
+Let's create two simple HTML templates to render the list of persons and to show one person entry. First, the listing template is stored as ``person_list.html`` into the ``html/``-folder.
 
 .. code-block:: html
+   :caption: html/person_list.html
 
    {% extends "index.html" %}
 
    {% block content %}
        <ul>
        {% for skel in skellist %}
-           <li>{{skel.name}} is {{skel.age}} year{{"s" if skel.age != 1 }} old.</li>
+           <li>
+               <a href="/person/view/{{skel.key}}">{{skel.name}}</a> is {{skel.age}} year{{"s" if skel.age != 1 }} old
+           </li>
        {% endfor %}
        </ul>
    {% endblock %}
 
-To connect the ``Person`` module from above to our template, it needs to be configured this way:
+Then, the single entry viewing template is stored as ``person_view.html`` into the ``html/``-folder.
+
+.. code-block:: html
+   :caption: html/person_view.html
+
+   {% extends "index.html" %}
+
+   {% block content %}
+       <h1>{{skel.name}}</h1>
+       <strong>Entity:</strong> {{skel.key}}<br>
+       <strong>Age:</strong> {{skel.age}}<br>
+       <strong>Created at: </strong> {{skel.creationdate.strftime("%Y-%m-%d %H:%M")}}<br>
+       <strong>Modified at: </strong> {{skel.changedate.strftime("%Y-%m-%d %H:%M")}}
+   {% endblock %}
+
+To connect the ``Person`` module from above with these templates, it needs to be configured this way:
 
 .. code-block:: python
+   :caption: modules/person.py
 
    #-*- coding: utf-8 -*-
    from server.prototypes import List
@@ -249,11 +278,12 @@ To connect the ``Person`` module from above to our template, it needs to be conf
 
    Person.json = True #grant module access to json renderer also
 
-But how to call this template now from the frontend? Requests to a ViUR application are performed by a clear and persistent format of how the resulting URLs are made up. By requesting http://hello-viur.appspot.com/person/list on a ViUR system, for example, the contents from the database are fetched by the ``Person`` module, and rendered using the listing template from above.
+But how to call these templates now from the frontend? Requests to a ViUR application are performed by a clear and persistent format of how the resulting URLs are made up. By requesting http://hello-viur.appspot.com/person/list on a ViUR system, for example, the contents from the database are fetched by the ``Person`` module, and rendered using the listing template from above. This template then links to the URLs of the template that displays a single person entry, with additional information.
 
 [screenshot follows]
 
-So what happens here? By calling ``/person/list`` on the server, ViUR first selects the module ``person`` (all in lower-case order) from its imported modules and then calls the function :meth:`~server.prototypes.list.List.list`, which is a build-in function of the :class:`~server.prototypes.list.List` prototype. Because no explicit renderer was specified, the HTML-renderer ``jinja2`` is automatically selected, and renders the template specified by the ``listTemplate`` attribute assigned within the module.
+So what happens here? By calling ``/person/list`` on the server, ViUR first selects the module ``person`` (all in lower-case order) from its imported modules and then calls the function :meth:`~server.prototypes.list.List.list`, which is a build-in function of the :class:`~server.prototypes.list.List` module prototype. Because no explicit renderer was specified, the HTML-renderer ``jinja2`` is automatically selected, and renders the template specified by the ``listTemplate`` attribute assigned within the module. Same as with the viewing  function for a single entry: ViUR first selects the ``person`` module and then calls the build-in function :meth:`~server.prototypes.list.List.view`. The :meth:`~server.prototypes.list.List.view` function has one required parameter, which is the unique entity key of the entry requested.
 
 Because we granted module access also for the ``json`` renderer above, the same list can also be rendered as a well-formed JSON data structure by calling  http://hello-viur.appspot.com/json/person/list. The ``json`` as the first selector in the path selects the different renderer that should be used.
 
+ViUR has a build-in access control management. By default, only users with the "root" access right or corresponding module access rights are allowed to view or modify any data. In the module above, this default behavior is canceled by overriding the functions :meth:`~server.prototypes.list.List.listFilter` and :meth:`~server.prototypes.list.List.canView`. :meth:`~server.prototypes.list.List.listFilter` filters the selection within a call of the :meth:`~server.prototypes.list.List.list` function, while :meth:`~server.prototypes.list.List.canView` checks the per-entry access right, e.g. within the :meth:`~server.prototypes.list.List.view` function. So information of this module can be both listed or viewed by everyone. Any other operations, like creating, editing or deleting entries, is still only granted to users with corresponding access rights.

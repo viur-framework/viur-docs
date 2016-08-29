@@ -1,8 +1,10 @@
+##############
 Training guide
 ##############
 
 This part of the documentation guides deeper into fundamental parts of the ViUR system. It serves as a training guide to get familar with all ViUR-related features that are used consistently.
 
+===============
 Data management
 ===============
 
@@ -18,11 +20,17 @@ Let's start again with the skeleton storing personal data, introduced in the pre
         name = stringBone(descr="Name")
         age = numericBone(descr="Age")
 
-In ViUR, skeletons should be named after modules or usages they are used for. To easily connect a skeleton class with a module, the naming-convention with the preceding *Skel*, like above, should be used, so this is done automatically by the system. Under some circumstances, the name may differ, and can be referenced from the module otherwise, but this is not covered here right now.
+In ViUR, skeletons should be named after modules or usages they are used for. To easily connect a skeleton class with a module, the naming-convention with the trailing "Skel" - like above - should be used, so this is done automatically by the system. Under some circumstances, the name may differ, and can be referenced from the module otherwise, but this is not covered here right now.
 
-The two bone assignments define the schema of the skeleton, which is extended to the pre-defined bones *key*, *creationdate* and *changedate*. In special cases, these bones can be removed by assigning ``None`` to them.
+The two bone assignments define the schema of the skeleton, which is extended to the pre-defined bones *key*, *creationdate* and *changedate*. Under some circumstances, these bones can be removed again from the skeleton by overriding ``None`` to them.
 
-Bones can be marked to be required for data integrity. To do so, the ``required`` attribute must be set.
+.. figure:: images/training-dm-skeleton.png
+   :scale: 60%
+   :alt: The Entity to Skeleton abstraction in ViUR.
+
+   How values and keys of an entity connect to the skeleton and bones in ViUR.
+
+Since bones are used to define the data model structure, they can also be marked to be filled for data integrity reasons. To do so, the ``required`` attribute must be set.
 
 .. code-block:: python
 
@@ -30,6 +38,7 @@ Bones can be marked to be required for data integrity. To do so, the ``required`
 
 After that, entities with this skeleton can only be stored when at least the name field is not empty.
 
+-----------------------------
 Adding, updating and deleting
 -----------------------------
 
@@ -51,7 +60,7 @@ To add a data entity with the above skeleton, it first needs to be instantiated.
     myKey = skel["key"]
     logging.info("Entity stored as %s" % str(myKey))
 
-For storing an entity to the database, the function :meth:`~server.skeleton.Skeleton.toDB` is used. If a skeleton was not previously loaded from the datastore using :meth:`~server.skeleton.Skeleton.fromDB`, a new key is automatically assigned.
+For storing an entity to the database, the function :meth:`~server.skeleton.Skeleton.toDB` is used. If a skeleton was not previously filled with data from the datastore using :meth:`~server.skeleton.Skeleton.fromDB`, a new key is automatically assigned.
 
 To read an entity directly from the datastore, its key must be known. To do so, the function :meth:`~server.skeleton.Skeleton.fromDB` is used. The following code snippet loads the previously stored entity again, changes the age, and stores it back to the datastore.
 
@@ -70,7 +79,7 @@ To read an entity directly from the datastore, its key must be known. To do so, 
     # write entity back again
     skel.toDB()
 
-That's it. To delete an entity, just :meth:`~server.skeleton.Skeleton.delete` needs to be called on a previously fetched skeleton.
+That's it. To delete an entity, just :meth:`~server.skeleton.Skeleton.delete` needs to be called on a previously fetched skeleton, and it'll be removed permanently.
 
 .. code-block:: python
 
@@ -83,18 +92,18 @@ The functions used so far:
 - :meth:`server.skeleton.Skeleton.fromDB` reads an entity from the datastore,
 - :meth:`server.skeleton.Skeleton.delete` deletes the entity from the datastore.
 
+-------------------
 Queries and cursors
 -------------------
 
-ViUR provides powerful tools to quickly query entities, even over relations.
+ViUR provides powerful tools to easily query entities, even over relations.
 
 To make bones usable within a query, the ``indexed`` attribute of the particular bones must be set in the skeleton. This is also required for attributes involved into an ordering.
 
 .. code-block:: python
+   :caption: skeletons/company.py
 
    class personSkel(Skeleton):
-      kindName = "person"
-
       name = stringBone(descr="Name", required=True, indexed=True)
       age = numericBone(descr="Age", indexed=True)
 
@@ -113,6 +122,7 @@ A query can be created from a skeleton using the :meth:`~server.skeleton.Skeleto
     for skel in query.fetch():
         logging.info("%s is %d years old" % (skel["name"], skel["age"]))
 
+~~~~~~~
 Indexes
 ~~~~~~~
 
@@ -138,6 +148,7 @@ When executed, this yields in the following index definition in the ``index.yaml
 
 When running a query requiring an index which does not exist causes an error. It also takes some time until new indexes are built in the cloud. Checking out the logs in the `Google Cloud Console <https://console.cloud.google.com>`_ gives help when index definitions are missing.
 
+~~~~~~~
 Cursors
 ~~~~~~~
 
@@ -171,6 +182,7 @@ Important functions used for querying:
 - :meth:`server.db.Query.mergeExternalFilter` can be used as a safer alternative to apply multiple filters with an ordering from a dict with just one function call,
 - :meth:`server.db.Query.getCursor` returns the next cursor of a query.
 
+---------
 Relations
 ---------
 
@@ -181,16 +193,37 @@ The :class:`~server.bones.relationalBone.relationalBone` is used to construct 1:
 Let's connect the persons to companies, by introducing a new skeleton.
 
 .. code-block:: python
+   :caption: skeletons/company.py
 
     class companySkel(Skeleton):
         name = stringBone(descr="Company name", required=True, indexed=True)
 
+To administrate companies also with ViUR, a new module-stub needs to be created.
+
 Then, the entity kind is connected to the person.
 
 .. code-block:: python
+   :caption: skeletons/person.py
 
     class personSkel(Skeleton):
         name = stringBone(descr="Name", required=True, indexed=True)
         age = numericBone(descr="Age", indexed=True)
         company = relationalBone(type="company", descr="Employed at", required=True)
+
+Editing a person entry then again in the Vi offers a method for selecting a company and assigning it to the person.
+
+[...more content here to come when ViUR features finish.]
+
+[screenshot missing]
+
+Althought the datastore is non-relational, offering relations is a fairly complex task. To maintain quick response times, ViUR doesn't search and update relations when an entry is updated. Instead, a deferred executed task is kicked off on data changing, which updates all of these relations in the background. Through depending on the current load of the web application, these tasks usually catches up within a few seconds. Within this time, a search by such a relation might return stale results.
+
+=================
+Module management
+=================
+
+In ViUR, any custom modules are established on one of the four module prototypes.
+
+By far, the most commonly used module prototype is :class:`~server.prototypes.list.List`, which provides a flat list of database entries with the same entity kind.
+
 
