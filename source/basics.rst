@@ -186,7 +186,7 @@ Modules are the controllers of a ViUR application, and implement the application
 
 ViUR comes with some build-in modules for different application cases:
 
-- :class:`~server.modules.file.File` implements a file management module
+- :class:`~server.modules.file.File` implements a file management module,
 - :class:`~server.modules.user.User` implements a user login, authentication and management module,
 - :class:`~server.modules.cart.Cart` and :class:`~server.modules.order.Order` implement modules for submitting and managing orders in a web-shop,
 - :class:`~server.modules.page.Page` implements a simple content management module.
