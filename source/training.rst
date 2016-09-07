@@ -2,15 +2,15 @@
 Training guide
 ##############
 
-This part of the documentation guides deeper into fundamental parts of the ViUR system. It serves as a training guide to get familar with all ViUR-related features that are used consistently.
+This part of the documentation guides deeper into fundamental parts of the ViUR system. It serves as a training guide to get familar with all ViUR-related features that are used frequently.
 
 ===============
 Data management
 ===============
 
-As described previously, data models in ViUR are represented by inherited classes of :class:`~server.skeleton.Skeleton`, which are extended to bones. The bones provide a higher abstraction layer of the data values stored in the database. This part of the training guide should introduce to the Skeletons API and how to use these data models without the modules logic. This is sometimes necessary and later integrates into the ways on how data entities are handled inside the modules.
+As described previously, data models in ViUR are represented by subclasses of :class:`~server.skeleton.Skeleton`, which are extended with bones. The bones provide a higher abstraction layer of the data values stored in the database. This part of the training guide will introduce you to the Skeletons API and how to use these data models without the modules logic. This is sometimes necessary and later integrates into the ways on how data entities are handled inside your modules.
 
-ViUR uses the Google Datastore as the underlying database. Google Datastore is a document-oriented, scalable, transactional "NoSQL"-database. Entities are stored schema-less, and are only specified by a data kind name and a unique key, which can also be calculated with an individual encoding. This key is also the unique property used throughout the entire ViUR system to identify and reference individual data objects uniquely.
+ViUR uses the Google Datastore as the underlying database. Google Datastore is a document-oriented, scalable, transactional "NoSQL"-database. Entities are stored schema-less, and are only identified by a unique key. This key is also the unique property used throughout the entire ViUR system to identify and reference individual data objects uniquely.
 
 Let's start again with the skeleton storing personal data, introduced in the previous chapter.
 
@@ -22,7 +22,7 @@ Let's start again with the skeleton storing personal data, introduced in the pre
 
 In ViUR, skeletons should be named after modules or usages they are used for. To easily connect a skeleton class with a module, the naming-convention with the trailing "Skel" - like above - should be used, so this is done automatically by the system. Under some circumstances, the name may differ, and can be referenced from the module otherwise, but this is not covered here right now.
 
-The two bone assignments define the schema of the skeleton, which is extended to the pre-defined bones *key*, *creationdate* and *changedate*. Under some circumstances, these bones can be removed again from the skeleton by overriding ``None`` to them.
+The two bone assignments define the schema of the skeleton, which is extended to the pre-defined bones *key*, *creationdate* and *changedate*. Under some circumstances, *creationdate* and *changedate* can be removed again from the skeleton by overriding ``None`` to them.
 
 .. figure:: images/training-dm-skeleton.png
    :scale: 60%
@@ -36,7 +36,8 @@ Since bones are used to define the data model structure, they can also be marked
 
     name = stringBone(descr="Name", required=True)
 
-After that, entities with this skeleton can only be stored when at least the name field is not empty.
+After that, users will only be able to add/save entities with this skeleton if name is set. The developer however can
+still decide to ignore these constrains.
 
 ------------------------------
 Adding, modifying and deleting
@@ -65,6 +66,9 @@ For storing an entity to the database, the function :meth:`~server.skeleton.Skel
 To read an entity directly from the datastore, its key must be known. To do so, the function :meth:`~server.skeleton.Skeleton.fromDB` is used. The following code snippet loads the previously stored entity again, changes the age, and stores it back to the datastore.
 
 .. code-block:: python
+
+    # get instance
+    skel = personSkel()
 
     # read entity into skeleton
     if not skel.fromDB(myKey):
@@ -152,7 +156,7 @@ Indexes are lookup-tables, managed by the datastore. They are updated just in ti
 Cursors
 ~~~~~~~
 
-In web applications, queries underlie some restrictions, which are technically not a problem, but may cause timeout problems on HTTP requests. Therefore, the use of cursors is required, and queries sometimes need to be split in deferred tasks or requested asynchronously to decrease request latency. ViUR limits its maximum request limit for dataset fetches to a maximum of 99 entities. 30 entities is the default, if no other limitation was explicitly given. This means, that not more than entities than at least 99 can be fetched per query. The query can be continued later on using a cursor.
+In web applications, queries underlie some restrictions, which are technically not a problem, but may cause timeout problems on HTTP requests. Therefore, the use of cursors is required, and queries sometimes need to be split in deferred tasks or requested asynchronously to decrease request latency. ViUR limits its maximum request limit for dataset fetches to a maximum of 99 entities. 30 entities is the default, if no other limitation was explicitly given. This means, that not more than 99 entities can be fetched per query. The query can be continued later on using a cursor.
 
 To obtain a cursor, the :meth:`~server.db.Query.getCursor` function returns a proper cursor object. This can be set to the same query (means: having the same filtering and ordering) using the function :meth:`~server.db.Query.cursor`.
 
@@ -170,7 +174,7 @@ The following piece of code is an example for a function that works exactly on t
             logging.info("%s is %d years old" % (skel["name"], skel["age"]))
 
         # if entities where fetched, take the next chunk
-        if query.count():
+        if query.getCursor().urlsafe()!=cursor:
             fetchAllPersons(query.getCursor().urlsafe()))
 
 Important functions used for querying:
@@ -179,7 +183,7 @@ Important functions used for querying:
 - :meth:`server.db.Query.filter` sets a filtering to one attribute to a query,
 - :meth:`server.db.Query.order` sets an ordering to one or multiple attributes within a query,
 - :meth:`server.db.Query.cursor` sets a cursor on a query,
-- :meth:`server.db.Query.mergeExternalFilter` can be used as a safer alternative to apply multiple filters with an ordering from a dict with just one function call,
+- :meth:`server.db.Query.mergeExternalFilter` can be used as a safe alternative to apply multiple filters supplied by an untrusted source,
 - :meth:`server.db.Query.getCursor` returns the next cursor of a query.
 
 ---------
@@ -188,7 +192,7 @@ Relations
 
 In ViUR, the :class:`~server.bones.relationalBone.relationalBone` is the usual way to create relations between data entities.
 
-The :class:`~server.bones.relationalBone.relationalBone` is used to construct 1:1 or 1:N relations between entities directly, with an automatic module integration included into the admin tools. It is also possible to store additional data with each relation directly within the relation, so no extra allocation entity is required to store this information.
+The :class:`~server.bones.relationalBone.relationalBone` is used to construct 1:1 or 1:N relations between entities directly, with an automatic module integration included into the admin tools. It is also possible to store additional data with each relation.
 
 .. figure:: images/training-dm-relations.png
    :scale: 80%
@@ -220,7 +224,7 @@ This configures the data model to require for a company assignment, so that enti
 
 [screenshot missing]
 
-Althought the datastore is non-relational, offering relations is a fairly complex task. To maintain quick response times, ViUR doesn't immediatelly search and update relations when an entry is updated. Instead, a deferred executed task is kicked off on data changing, which updates all of these relations in the background. Through depending on the current load of the web application, these tasks usually catches up within a few seconds. Within this time, a search by such a relation might return stale results.
+As the datastore is non-relational, offering relations is a fairly complex task. To maintain quick response times, ViUR doesn't immediatelly search and update relations when an entry is updated. Instead, a deferred executed task is kicked off when data is changing, which updates all of these relations in the background. Through depending on the current load of the web application, these tasks usually catches up within a few seconds. Within this time, a search by such a relation might return stale results.
 
 =================
 Module management
@@ -228,7 +232,7 @@ Module management
 
 In ViUR, any custom modules are established on top of one of the four module prototypes. The modules are the linchpin of every ViUR application. They provide interfaces to securely add, edit, delete or view entries, to perform custom operations and tasks, to prepare output data or validate input data.
 
-The most commonly used module prototype is :class:`~server.prototypes.list.List`, which provides a flat list of database entries with the same entity kind. To become more familiar with the management of modules in general, the next sections are mostly using the :class:`~server.prototypes.list.List` module prototype again as its base. Moreover, the other module prototypes and their specialities are discussed later on, when the basics of the :class:`~server.prototypes.list.List` module are understood so far.
+The most commonly used module prototype is :class:`~server.prototypes.list.List`, which provides a flat list of database entries with the same entity kind. To become more familiar with the management of modules in general, the next sections are mostly using the :class:`~server.prototypes.list.List` module prototype as its base. Moreover, the other module prototypes and their specialities are discussed later on, when the basics of the :class:`~server.prototypes.list.List` module are understood so far.
 
 ----------------
 Creating modules
