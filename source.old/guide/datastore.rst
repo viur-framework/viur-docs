@@ -54,19 +54,7 @@ inconsistency cannot happen. Setting this value to '0' means no caching at all (
 
 Relations
 ---------
-Relations are a core feature offered by ViUR. But as the datastore is non-relational,
-offering relations on top of a non-relational datastore is a fairly complex task. To maintain quick response times,
-ViUR doesn't search and update relations when an entry is updated. Instead, a deferred task is kicked off
-which will update these releations in the background. Through depending on the current load of your application, these
-tasks usually catch up within a few seconds. Within this time, a search by such a relation might return stale results.
-Assume that you have a relation from user to the colored objects from the first example (e.g. a user liked that object).
-If that relation is part of the user skeleton, this problem arises.
-So if the color of an object is changed, the query ''all users who like a red object`` will still include that object
-until the background task finished updating the relations - though the object returned will already have blue as value
-for the color property.
-Note that this does not happen if the relation is part of that objects (i.e if the objects reference the user who liked it).
-Rule of thumb: Relations which are part of the kind which got updated are updated instantly.
-Relations referencing that kind from another kind are updated later.
+moved to current sources.
 
 Request cache
 -------------
@@ -77,8 +65,8 @@ Given our example this means that our recently changed object might appear in bo
 (or in no list at all)  for a short time-frame (again, usually less than a few seconds).
 
 
-Indexes
-=======
+Index manager
+=============
 
 The datastore doesn't provide a good and efficient method for pagination.
 In traditional relational (SQL) databases, it's common to implement pagination using skip - ignoring

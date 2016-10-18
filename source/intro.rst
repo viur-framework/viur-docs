@@ -1,3 +1,4 @@
+############
 Introduction
 ############
 
@@ -12,7 +13,7 @@ The framework targets to the implementation of *information systems*, which are 
 .. _Python™ programming language: https://www.python.org/
 .. _Cloud Datastore: https://cloud.google.com/datastore/docs/concepts/overview
 
-
+================
 Why to use ViUR?
 ================
 
@@ -22,7 +23,7 @@ It uses the well-known MVC design pattern to modularize the data model, the cont
 
 The plugin-enabled data administration tools provided by ViUR automatically generate input masks from the data models, so no data management frontend development is required. Therefore, in early development stages, the definition of the data model and some module stubs suffices to setup a system with a basic data recording functionality.
 
-
+====================
 Who should use ViUR?
 ====================
 
@@ -32,7 +33,7 @@ The system is not only intended to be used by developers. With the use of the `J
 
 .. _Jinja template engine: http://jinja.pocoo.org/
 
-
+=================
 Who created ViUR?
 =================
 
@@ -44,7 +45,7 @@ Help of any kind to extend, improve and enhance this project in any kind or way 
 
 .. _mausbrand Informationssysteme GmbH: https://www.mausbrand.de
 
-
+===============================
 Where to find more information?
 ===============================
 
