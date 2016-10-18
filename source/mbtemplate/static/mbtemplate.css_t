@@ -392,6 +392,34 @@ img.screenshot {
     box-shadow: 2px 2px 4px #eee;
 }
 
+img.rsb {
+    width: 70%;
+}
+
+code {
+    color: #000;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    -moz-tab-size: 4;
+    tab-size: 4;
+    -webkit-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+    background: hsla(0,0%,83%,.9);
+    padding: 3px;
+    border-radius: 3px;
+}
+
+code, pre {
+    font-family: Source Code Pro,Courier,monospace;
+}
+
+code:after, code:before {
+    letter-spacing: -.2em;
+    content: "\00a0";
+}
+
 table.docutils {
     border: 1px solid #888;
     -moz-box-shadow: 2px 2px 4px #eee;
@@ -465,7 +493,8 @@ ul, ol {
 }
 
 pre {
-    background: {{ theme_pre_bg }};
+    //background: {{ theme_pre_bg }};
+    background: hsla(0,0%,83%,.9);
     padding: 7px 30px;
     margin: 15px 0px;
     line-height: 1.3em;
@@ -482,13 +511,12 @@ dl dl pre {
 }
 
 tt, code {
-    background-color: #ecf0f3;
-    color: #222;
+    //color: #222;
     /* padding: 1px 2px; */
 }
 
 tt.xref, code.xref, a tt {
-    background-color: #FBFBFB;
+    //background-color: #FBFBFB;
 }
 
 a.reference {
@@ -952,6 +980,10 @@ header li {
 @media screen and (max-width: 830px) {
     
     
+
+    img.rsb {
+        width: 100%;
+    }
 
     div.sphinxsidebarwrapper {
         margin-top: 10px;
