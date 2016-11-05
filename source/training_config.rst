@@ -1,7 +1,8 @@
 Configuration
 =============
-The module ``config`` provided by the ViUR server contains several configuration entries to change the servers behavior,
-access system-global parameters, or provide some kind of global variables within a ViUR project setup.
+The module ``config`` provided by the ViUR server contains several configuration options which change the
+servers behavior, allowing you to access system-global parameters, or provide some kind of global variables
+within a ViUR project setup.
 It simply can be imported into any server-side module with
 
 ::
@@ -27,10 +28,10 @@ Defines a list of default user access rights. Defaults to ``["admin", "root"]``.
 This list can be extended to project-specific access rights that are made available to every user
 entity created by the user module. By default, there exists two entries which are
 
-- *admin* defines if the user has admin-access
-- *root* defines if the user is a root-admin (root admins are allowed to change every entity)
+- *admin* defines if the user has admin-access (ie. is allowed to access the admin and vi render)
+- *root* defines if the user is a super-admin (users having the root-flag are allowed to do anything by default)
 
-These entries can be enhanced in the application's main entry with
+These entries can be enriched in the application's main entry with
 
 ::
 
@@ -81,7 +82,7 @@ viur.contentSecurityPolicy
 --------------------------
 Emit Content-Security-Policy HTTP-header with each request.
 
-Use server.securityheaders to modify this property.
+Use :meth:`server.securityheaders.addCspRule` to modify this property.
 
 
 viur.db.caching
@@ -143,7 +144,8 @@ be disabled.
 .. Note::
 
     This doesn't cause entries already in the cache to be evicted. If they're old entries they just won't be used and no
-    new entries will be added.
+    new entries will be added. Once that property is set to false again, old entries in the cache will be served again
+    if they haven't expired yet.
 
 
 viur.domainLanguageMapping
@@ -228,7 +230,12 @@ viur.importPassword
 -------------------
 Activates the database import API if set.
 
-Must be exactly 32 chars. *Everyone knowing this password can overwrite the entire database!*
+Must be exactly 32 chars.
+
+.. Warning::
+    *Everyone knowing this password can overwrite the entire database!* Never use in a production environment.
+
+    ViUR will bug you repeatedly until you turn it off.
 
 
 viur.languageAliasMap
@@ -297,7 +304,8 @@ viur.salt
 ---------
 Default salt used for passwords.
 
-**Don't change. It's deprecated and will be removed in a future version.**
+.. deprecated:: 0.8 **Don't change.** Will be removed in a future version. Salts are now randomly
+    chosen for each password and stored along with the hash inside the datastore.
 
 
 viur.searchValidChars
@@ -311,41 +319,44 @@ viur.security.contentSecurityPolicy
 -----------------------------------
 If set, viur will emit a CSP http-header with each request.
 
-Use securityheaders.addCspRule to set this property.
+Use :meth:`server.securityheaders.addCspRule` to set this property.
 
 
 viur.security.strictTransportSecurity
 -------------------------------------
 If set, viur will emit a HSTS http-header with each request.
 
-Use securityheaders.enableStrictTransportSecurity to set this property. Only partially supported on the Appengine atm.
+Use :meth:`server.securityheaders.enableStrictTransportSecurity` to set this property. Only partially supported on the Appengine atm.
 
 
 viur.security.publicKeyPins
 ---------------------------
 If set, viur will emit a Public Key Pins http-header with each request.
 
-Use securityheaders.setPublicKeyPins to set this property. Currently not supported by the Appengine.
+Use :meth:`securityheaders.setPublicKeyPins` to set this property.
+
+.. Note:: This is reserved for further use. It's not yet supported on the appengine.
+
 
 
 viur.security.xFrameOptions
 ---------------------------
 If set, ViUR will emit a X-Frame-Options header.
 
-Use securityheaders.setXFrameOptions to set this property.
+Use :meth:`server.securityheaders.setXFrameOptions` to set this property.
 
 viur.security.xXssProtection
 ----------------------------
 ViUR will emit a X-XSS-Protection header if set (the default).
 
-Use securityheaders.setXXssProtection to set this property.
+Use :meth:`securityheaders.setXXssProtection` to set this property.
 
 
 viur.security.xContentTypeOptions
 ---------------------------------
 ViUR will emit *X-Content-Type-Options: nosniff* Header unless set to False.
 
-Use securityheaders.setXContentTypeNoSniff to set this property.
+Use :meth:`securityheaders.setXContentTypeNoSniff` to set this property.
 
 
 viur.session.lifeTime
@@ -403,9 +414,9 @@ This is done by choosing a prefix, which will be used to group the different mod
 
 ::
 
-	conf[ "admin.modulGroups" ] = [
+    conf[ "admin.modulGroups" ] = [
        {"prefix":"Tea: ", "name": "Tea", "icon": "icons/modules/produktdatenbank.png" },
-     ]
+    ]
 
 
 This example will add all modules, which descriptions starts with the prefix *Tea:* to the group *Tea*

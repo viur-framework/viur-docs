@@ -9,10 +9,18 @@ Time based
 ----------
 
 A common problem on the GAE is having certain functionality executed in a regular interval.
-ViUR simplifies this down to a decorator. Just wrap a function with .. :py:decorator::`server.tasks.PeriodicTask` and
+ViUR simplifies this down to a decorator. Just wrap a function with :meth:`server.tasks.PeriodicTask` and
 ViUR will call it in a regular interval.
-The decorator takes one argument - the interval.
+The decorator takes one argument - the interval in minutes.
 ViUR will not call your function faster than once in each interval-minutes.
+
+.. code-block:: python
+
+    from server.tasks import PeriodicTask
+
+    @PeriodicTask(24*60)
+    def mytask():  # Will be called roughly every 24 hours
+        logging.debug("Your deferred task was just called :)")
 
 .. Note::
     This is the *lower* bound. There is no guarantee that it will be called
@@ -23,7 +31,7 @@ ViUR will not call your function faster than once in each interval-minutes.
    Time-based tasks can be a bound or unbound Function. If a function is bound (defined
    in a class) it will be called once for each module derived from this class. If there is no instance
    of its class, it won't be called. If its unbound (defined at module-level) it will be called,
-   regardless if any Class in its module is used or not.
+   regardless if any Class in its module is used or not (but the module itself needs to be imported).
 
 .. Warning::
     There's currently only a main loop which calls all function scheduled for execution. It has a time-limit of 10 minutes.
@@ -34,11 +42,12 @@ Deferred
 --------
 
 Sometimes its necessary to delay the execution of some specific code, so it won't slow down the
-response of the current request. ViUR provides the :py:decorator:`server.tasks.callDefered` Decorator for such cases.
+response of the current request. ViUR provides the :meth:`server.tasks.callDefered` Decorator for such cases.
 A function decorated this way will never execute in the context of the current request. All calls to
 such a function are catched, its parameters serialized, and a task is created to call this function later.
 These calls are executed in a deferred task which can run up to 10 minutes. As these tasks run deferred, they run outside
 of the current context where they had been created. ViUR however will preserve the following two values:
+
  - The currently logged in user (if any). If the task was created in the context of a known user, calls to utils.getCurrentUser()
    will return the same values as it would have returned when the task had been created.
  - The language used for the request. Within the deferred task any calls to i18N functions provided by ViUR will yield
@@ -62,14 +71,14 @@ created by the old model, its necessary to update the searchindex, as it doesn't
 the contents of that bone yet.
 It would be a waste of resources if we rebuild each index frequently.
 So this task is only called on demand. If the developer has made changes to the datamodel,
-he calls that task once for the affected index.
+he calls that task once for each affected kind.
 Creating such a task is also easy, it's a Class derived from :py:class:`server.tasks.CallableTaskBase` and decorated with
-:py:decorator:`server.tasks.CallableTask`. The derived subclass must override the following properties and functions.
+:meth:`server.tasks.CallableTask`. The derived subclass must override the following properties and functions.
 
 +-------------+----------------------------+----------------------------------------------------------------------+
 | Name        | Type                       | Description                                                          |
 +=============+============================+======================================================================+
-| id          | Property (String)          | An unique identifier for this task.                                  |
+| key         | Property (String)          | An unique identifier for this task.                                  |
 +-------------+----------------------------+----------------------------------------------------------------------+
 | name        | Property (String)          | A short human-readable description                                   |
 +-------------+----------------------------+----------------------------------------------------------------------+
@@ -87,21 +96,17 @@ Creating such a task is also easy, it's a Class derived from :py:class:`server.t
 +-------------+----------------------------+----------------------------------------------------------------------+
 
 
+On instance startup
+-------------------
 
+The last hook you can use is the :meth:`server.tasks.StartupTask` decorator. This way you can have code being executed
+whenever a new instance starts up without slowing down the instance startup itself (The code will be called deferred
+shortly after an instance gets ready).
+Useful to ensure some database initialization or the like.
 
-.. autoclass:: server.tasks.CallableTaskBase
-   :show-inheritance:
-   :members:
-   :special-members:
-
-
-.. autofunction:: server.tasks.noRetry
-
-.. autofunction:: server.tasks.callDeferred
-
-.. autofunction:: server.tasks.PeriodicTask
-
-.. autofunction:: server.tasks.CallableTask
-
-.. autofunction:: server.tasks.StartupTask
+.. Warning::
+        There's absolutely **no** guarantee that the function will be called on the instance that started up. It can
+        be called any of the currently running instances. So it's possible that such a function is called
+        never, once or multiple times on the same instance. Do not put any code here required to correctly
+        setup your instances.
 
