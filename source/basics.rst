@@ -177,11 +177,11 @@ Modules are the controllers of a ViUR application, and implement the application
 ==================  ===============================================================================
 |icon_list|         :class:`~server.prototypes.list.List` is the most commonly used prototype. It implement a flat collection of datasets of the same kind, which can be granulated using filters to particular selections. This prototype is used in most cases, and can be seen like a database table in a relational database management system.
 
-|icon_singleton|    :class:`~server.prototypes.singleton.Singleton` is a prototype for implementing modules that hold only one single dataset entry. It can be used for modules that allow for application-global settings or configurations.
+|icon_singleton|    :class:`~server.prototypes.singleton.Singleton` is a prototype for implementing modules that hold only one single dataset entry. It can be used for modules that implement application-global settings or a per-user configuration.
 
 |icon_hierarchy|    :class:`~server.prototypes.hierarchy.Hierarchy` is a prototype for a module that stores its data in a hierarchical structure, where every dataset can be a child of another dataset or can have its own children.
 
-|icon_tree|         :class:`~server.prototypes.tree.Tree` is used for implementing modules that store their data in a hierarchy, but differ between nodes and children. The most common usage is the :class:`~server.modules.file.File` module, where nodes and leafs are distinguished.
+|icon_tree|         :class:`~server.prototypes.tree.Tree` is used for implementing modules that store their data in a hierarchy, but differ between nodes and children. The most common usage is the :class:`~server.modules.file.File` module, where nodes (Folders) and leafs (Files) are distinguished.
 ==================  ===============================================================================
 
 ViUR comes with some build-in modules for different application cases:
@@ -224,7 +224,7 @@ The renderers are the viewer part of ViUR's MVC concept.
 
 ViUR provides various build-in renderers, but they can also be extended, sub-classed or entirely rewritten, based on the demands of the project.
 
-The default renderer in ViUR is ``jinja2``, which is a binding to the powerful `Jinja2 template engine <http://jinja.pocoo.org/>`_ to generate HTML output. Jinja2 is used because it has a powerful inheritance mechanism, build-in control structures and can easily be extended to custom functions. Please refer to the Jinja2 documentation to get an overview about its features and handling. Any template files related to the jinja2 renderer are located in the folder ``html/`` within the project structure.
+The default renderer in ViUR is ``html``, which is a binding to the powerful `Jinja2 template engine <http://jinja.pocoo.org/>`_ to generate HTML output. Jinja2 is used because it has a powerful inheritance mechanism, build-in control structures and can easily be extended to custom functions. Please refer to the Jinja2 documentation to get an overview about its features and handling. Any template files related to the jinja2 renderer are located in the folder ``html/`` within the project structure.
 
 Let's create two simple HTML templates to render the list of persons and to show one person entry. First, the listing template is stored as ``person_list.html`` into the ``html/``-folder.
 
