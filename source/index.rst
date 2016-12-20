@@ -22,9 +22,10 @@ If you have any questions, please `contact us <http://www.viur.is/community>`_! 
 	basics
 	training
 	extended
-	details
+	implementation
 	reference
 	appendix
+	troubleshooting
 
 ==================
 Indices and tables

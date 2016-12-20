@@ -7,7 +7,7 @@ implemented, what are the limits of this implementation and how much overhead it
 Filtering by properties of the referenced object
 ................................................
 In ViUR, the actual implementation of relations depend on their type. For n:1 relations (i.e. an object is referring
-*one* other object, we can simply copy the id (and everything from `refKeys`) into the referring object.
+*one* other object, we can simply copy the key (and everything from `refKeys`) into the referring object.
 Assume we have a Skeleton "Product" consisting of a Name, Price and Category, with Categrory being a reference
 to separate Skeleton "Category".
 
@@ -19,7 +19,7 @@ to separate Skeleton "Category".
 
    Datamodel for this example of n:1 Relations
 
-Lets assume that *id*, *available* and *active* is in the refKeys for that relation, so we can filter by products which
+Lets assume that *key*, *available* and *active* is in the refKeys for that relation, so we can filter by products which
 are in a category, which is available in a given region and generally active.
 The final object written to the datastore for our product will be denormalized and look like the following
 

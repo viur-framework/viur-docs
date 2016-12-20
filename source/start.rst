@@ -30,7 +30,7 @@ The way described here only provides a basic stub for a fresh ViUR project to st
 
 2. Download the latest server as tarball from `<http://viur.is/package/download/server/latest>`_ or a zipfile from `<http://viur.is/package/download/server/latest/zip>`_.
 
-3. Unpack the server into your project directory as a subfolder ``server``. After that, the archive can be removed again or copied elsewhere.
+3. Unpack the server into your project directory as a subfolder ``server``. After that, the archive can be removed or copied elsewhere.
 
 4. Run ``python server/setup.py``. On Windows, just double-clicking the file ``setup.py`` should do the job.
 

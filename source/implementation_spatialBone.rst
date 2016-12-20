@@ -50,7 +50,7 @@ Lets assume we have a very sparse map, got a point somewhere inside and want to 
     :alt: Implemenation-Details for randomSliceBone
     :figclass: align-center
 
-    Final result after running all four sweepline. Processed points in green, Points that have been seen multiple
+    Final result after running all four sweeplines. Processed points in green, Points that have been seen multiple
     times in yellow.
 
 While this simple approach catches all points in the close surrounding, is also catches points far outside the
