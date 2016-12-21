@@ -1,6 +1,6 @@
-========
+--------
 Sessions
-========
+--------
 
 ViUR has a built-in session management system provided by :class:`server.session`.
 

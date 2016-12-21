@@ -1,13 +1,13 @@
 
-=================
+-----------------
 Module management
-=================
+-----------------
 
 In ViUR, any custom modules are established on top of one of the four module prototypes. The modules are the linchpin of every ViUR application. They provide interfaces to securely add, edit, delete or view entries, to perform custom operations and tasks, to prepare output data or validate input data.
 
 The most commonly used module prototype is :class:`~server.prototypes.list.List`, which provides a flat list of database entries with the same entity kind. To become more familiar with the management of modules in general, the next sections are mostly using the :class:`~server.prototypes.list.List` module prototype again as its base. Moreover, the other module prototypes and their specialities are discussed later on, when the basics of the :class:`~server.prototypes.list.List` module are understood so far.
 
-----------------
+
 Creating modules
 ----------------
 
@@ -33,7 +33,7 @@ The naming of the class has also two important purposes:
 
 2. If the default project setup has been done, the module is automatically imported in lower-case order (person) into the application, so it can be accessed by ``/person`` or ``/renderer/person`` as first part of the URL. This naming convention can be entirely changed by importing the module manually in the file ``modules/__init__.py``.
 
-----------------------------
+
 Data modification interfaces
 ----------------------------
 
@@ -48,7 +48,7 @@ These functions are:
 
 These functions are entirely working on the skeleton API as described above. Every module also provides more, module-specific functions for data management, but this is not covered here.
 
--------------------------
+
 Post-processing functions
 -------------------------
 
@@ -59,10 +59,8 @@ Usually, the standard data modification functions from above should not be overr
 - **onItemEdited** after an existing entry is updated (:meth:`List.onItemEdited() <server.prototypes.list.List.onItemEdited>`, :meth:`Singleton.onItemEdited() <server.prototypes.singleton.Singleton.onItemEdited>`, :meth:`Hierarchy.edit() <server.prototypes.hierarchy.Hierarchy.onItemEdited>`, :meth:`Tree.edit() <server.prototypes.tree.Tree.onItemEdited>`),
 - **onItemViewed** right before an existing entry is viewed (:meth:`List.onItemViewed() <server.prototypes.list.List.onItemViewed>`, :meth:`Singleton.onItemViewed() <server.prototypes.singleton.Singleton.onItemViewed>`, :meth:`Hierarchy.onItemViewed() <server.prototypes.hierarchy.Hierarchy.onItemViewed>`, :meth:`Tree.onItemViewed() <server.prototypes.tree.Tree.onItemViewed>`).
 
--------------
+
 Access rights
 -------------
 
-coming soon.
-
-
+TBD

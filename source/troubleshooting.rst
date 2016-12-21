@@ -74,5 +74,10 @@ module, it contains tables for the languages you'll need and that it's importabl
 server.config["viur.availableLanguages"] is filled (*after* server.setup() had been called).
 
 
+Still lost?
+-----------
+
+Feel free to join our IRC channel #viur on freenode `<http://webchat.freenode.net?channels=viur&uio=d4>`_ and ask your
+project-specific questions.
 
 

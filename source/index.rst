@@ -2,30 +2,23 @@
 Table of Contents
 =================
 
-.. container:: under-construction
+Welcome to ViUR, the application development framework for the `Google App Engine <http://appengine.google.com/>`_.
 
-   **!!! UNDER CONSTRUCTION !!!**
-
-Dear visitor!
-
-Thank you  for your interest into ViUR. Because ViUR is currently in a pre-release state, this documentation is under heavy development. It may also happen that the features and examples presented here are not compatible with the currently downloadable version of ViUR, and run with some features split into branches.
-
-If you have any questions, please `contact us <http://www.viur.is/community>`_! Otherwise, please stay tuned... :)
+If you have any questions, please `contact us <http://www.viur.is/community>`_!
 
 ----
 
 .. toctree::
-	:maxdepth: 3
+    :maxdepth: 3
 
-	intro
-	start
-	basics
-	training
-	extended
-	implementation
-	reference
-	appendix
-	troubleshooting
+    intro
+    start
+    basics
+    training
+    reference
+    implementation
+    troubleshooting
+    appendix
 
 ==================
 Indices and tables

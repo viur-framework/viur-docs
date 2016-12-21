@@ -2,4 +2,6 @@
 Appendix
 ########
 
-Coming soon!
+.. toctree::
+
+	appendix_changelog

@@ -1,6 +1,6 @@
-===============
+---------------
 Data management
-===============
+---------------
 
 As described previously, data models in ViUR are represented by inherited classes of :class:`~server.skeleton.Skeleton`, which are extended to bones. The bones provide a higher abstraction layer of the data values stored in the database. This part of the training guide should introduce to the Skeletons API and how to use these data models without the modules logic. This is sometimes necessary and later integrates into the ways on how data entities are handled inside the modules.
 
@@ -32,7 +32,7 @@ Since bones are used to define the data model structure, they can also be marked
 
 After that, entities with this skeleton can only be stored when at least the name field is not empty.
 
-------------------------------
+
 Adding, modifying and deleting
 ------------------------------
 
@@ -86,7 +86,7 @@ The functions used so far:
 - :meth:`server.skeleton.Skeleton.fromDB` reads an entity from the datastore,
 - :meth:`server.skeleton.Skeleton.delete` deletes the entity from the datastore.
 
--------------------
+
 Queries and cursors
 -------------------
 
@@ -116,9 +116,9 @@ A query can be created from a skeleton using the :meth:`~server.skeleton.Skeleto
     for skel in query.fetch():
         logging.info("%s is %d years old" % (skel["name"], skel["age"]))
 
-~~~~~~~
+
 Indexes
-~~~~~~~
+-------
 
 Using complex queries causes the datastore to work on index tables to find the correct entities. These index tables must be explicitly described and managed in the ``index.yaml`` file of the project. In a local development system, index definitions are automatically generated into this file when a query needs an index, and no definition for this index exists.
 
@@ -142,9 +142,9 @@ When executed, this yields in the following index definition in the ``index.yaml
 
 Indexes are lookup-tables, managed by the datastore. They are updated just in time when involved entities are changed, but need some time to be initially built. Therefore, an error is raised, when running a query requiring an index which does not exist or is currently established within an application running directly on the App Engine. So checking out the logs or the datastore index overview in the `Google Cloud Console <https://console.cloud.google.com>`_ gives help when index definitions are missing, or errors temporarily come up right after a web application with different query attributes was deployed.
 
-~~~~~~~
+
 Cursors
-~~~~~~~
+-------
 
 In web applications, queries underlie some restrictions, which are technically not a problem, but may cause timeout problems on HTTP requests. Therefore, the use of cursors is required, and queries sometimes need to be split in deferred tasks or requested asynchronously to decrease request latency. ViUR limits its maximum request limit for dataset fetches to a maximum of 99 entities. 30 entities is the default, if no other limitation was explicitly given. This means, that not more than entities than at least 99 can be fetched per query. The query can be continued later on using a cursor.
 
@@ -176,7 +176,7 @@ Important functions used for querying:
 - :meth:`server.db.Query.mergeExternalFilter` can be used as a safer alternative to apply multiple filters with an ordering from a dict with just one function call,
 - :meth:`server.db.Query.getCursor` returns the next cursor of a query.
 
----------
+
 Relations
 ---------
 
@@ -208,7 +208,7 @@ Then, the entity kind is connected to the person using a :class:`~server.bones.r
     class personSkel(Skeleton):
         name = stringBone(descr="Name", required=True, indexed=True)
         age = numericBone(descr="Age", indexed=True)
-        company = relationalBone(type="company", descr="Employed at", required=True)
+        company = relationalBone(kind="company", descr="Employed at", required=True)
 
 This configures the data model to require for a company assignment, so that entities without a company relation are invalid. Editing a person entry now again in the Vi offers a method for selecting a company and assigning it to the person.
 

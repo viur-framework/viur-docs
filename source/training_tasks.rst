@@ -1,5 +1,7 @@
+
+-----
 Tasks
-=====
+-----
 
 ViUR is shipped with a sophisticated interface for tasks, providing a standardized way of
 having a function called in a regular interval, providing an interface for tasks that
