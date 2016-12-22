@@ -12,8 +12,9 @@ The following guides will explain the basic usage of ViURs MVC-
 .. toctree::
 	:maxdepth: 1
 
-	training_datamng
 	training_modulemng
+	training_datamng
+
 
 
 After being familiar with the default workflows in ViUR, you'll learn how to utilize advanced functionality provided.

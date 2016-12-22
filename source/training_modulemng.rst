@@ -33,6 +33,11 @@ The naming of the class has also two important purposes:
 
 2. If the default project setup has been done, the module is automatically imported in lower-case order (person) into the application, so it can be accessed by ``/person`` or ``/renderer/person`` as first part of the URL. This naming convention can be entirely changed by importing the module manually in the file ``modules/__init__.py``.
 
+.. Note::
+
+    If you reload the Vi now, you'll already see the new module showing up.
+    But it is'nt usable yet as it has no model to work on.
+    See Basic concepts to learn how skeletons and modules interact.
 
 Data modification interfaces
 ----------------------------

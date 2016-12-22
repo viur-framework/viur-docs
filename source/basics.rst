@@ -271,12 +271,7 @@ To connect the ``Person`` module from above with these templates, it needs to be
       listTemplate = "person_list" # Name of the template to list entries
 
       def listFilter(self, filter):
-         return filter #no module filtering!
-
-      def canView(self, skel):
-         return True # everyone can view everything!
-
-   Person.json = True #grant module access to json renderer also
+         return filter # everyone can see everything!
 
 But how to call these templates now from the frontend? Requests to a ViUR application are performed by a clear and persistent format of how the resulting URLs are made up. By requesting http://hello-viur.appspot.com/person/list on a ViUR system, for example, the contents from the database are fetched by the ``Person`` module, and rendered using the listing template from above. This template then links to the URLs of the template that displays a single person entry, with additional information.
 
@@ -284,6 +279,29 @@ But how to call these templates now from the frontend? Requests to a ViUR applic
 
 So what happens here? By calling ``/person/list`` on the server, ViUR first selects the module ``person`` (all in lower-case order) from its imported modules and then calls the function :meth:`~server.prototypes.list.List.list`, which is a build-in function of the :class:`~server.prototypes.list.List` module prototype. Because no explicit renderer was specified, the HTML-renderer ``jinja2`` is automatically selected, and renders the template specified by the ``listTemplate`` attribute assigned within the module. Same as with the viewing  function for a single entry: ViUR first selects the ``person`` module and then calls the build-in function :meth:`~server.prototypes.list.List.view`. The :meth:`~server.prototypes.list.List.view` function has one required parameter, which is the unique entity key of the entry requested.
 
-Because we granted module access also for the ``json`` renderer above, the same list can also be rendered as a well-formed JSON data structure by calling  http://hello-viur.appspot.com/json/person/list. The ``json`` as the first selector in the path selects the different renderer that should be used.
+You can simply attach other renders to a module by whitelisting it.
 
-ViUR has a build-in access control management. By default, only users with the "root" access right or corresponding module access rights are allowed to view or modify any data. In the module above, this default behavior is canceled by overriding the functions :meth:`~server.prototypes.list.List.listFilter` and :meth:`~server.prototypes.list.List.canView`. :meth:`~server.prototypes.list.List.listFilter` filters the selection within a call of the :meth:`~server.prototypes.list.List.list` function, while :meth:`~server.prototypes.list.List.canView` checks the per-entry access right, e.g. within the :meth:`~server.prototypes.list.List.view` function. So information of this module can be both listed or viewed by everyone. Any other operations, like creating, editing or deleting entries, is still only granted to users with corresponding access rights.
+.. code-block:: python
+   :caption: modules/person.py
+
+   #-*- coding: utf-8 -*-
+   from server.prototypes import List
+
+   class Person(List):
+      viewTemplate = "person_view" # Name of the template to view one entry
+      listTemplate = "person_list" # Name of the template to list entries
+
+      def listFilter(self, filter):
+         return filter # everyone can see everything!
+
+   Person.json = True #grant module access to json renderer also
+
+If we granted module access also for the ``json`` renderer above, the same list can also be rendered as a well-formed JSON data structure by calling  http://hello-viur.appspot.com/json/person/list. The ``json`` as the first selector in the path selects the different renderer that should be used.
+
+ViUR has a build-in access control management. By default, only users with the "root" access right or corresponding module
+access rights are allowed to view or modify any data. In the module above, this default behavior is canceled by overriding
+the function :meth:`~server.prototypes.list.List.listFilter`.
+It returns a database filter for :meth:`~server.prototypes.list.List.list` function.
+If None is returned, access is denied completely. Otherwhise ViUR will only list entries matching that filter.
+As we just return the incoming filter object, information of this module can be seen by everyone.
+Any other operations, like creating, editing or deleting entries, is still only granted to users with corresponding access rights.
