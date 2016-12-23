@@ -101,8 +101,6 @@ translations/   When multi-language support is wanted, this folder contains simp
 
 vi/             Contains the Vi.
 
-                This folder is *not* created by the setup utility, but exists if the Vi was downloaded and installed from `<http://viur.is>`_, or a demo project is used.
-
                 Vi is an HTML5-based administration interface to access the ViUR system's modules and its data. The Vi is some kind of backend for ViUR, but it could also be the front-end of the application - this all depends on what the ViUR system implements in its particular application.
 =============   =================================================================================
 

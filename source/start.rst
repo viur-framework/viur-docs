@@ -28,7 +28,7 @@ The way described here only provides a basic stub for a fresh ViUR project to st
 
 1. Create an empty project folder of your choice in a location of your choice. Change into this location.
 
-2. Download the latest setup release from `<http://www.viur.is/package/download/setup/latest>`_.
+2. Download the latest setup.py script from `<http://www.viur.is/download>`_. It can be directly obtained by the link `<http://www.viur.is/package/download/setup/latest>`_.
 
 3. Run ``python setup.py``. On Windows, just double-clicking the file ``setup.py`` should do the job.
 
