@@ -793,6 +793,7 @@ header .binding {
     font-weight: 300;
     margin-left: 18px;
     transition: all .5s ease;
+    white-space: nowrap;
 }
 
 .topnav {
