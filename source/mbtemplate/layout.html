@@ -1,5 +1,7 @@
 {%- extends "basic/layout.html" %}
 
+{% set css_files = css_files + ['_static/viur.css'] %}
+
 {%- block extrahead %}
   {{ super() }}
   {% if theme_touch_icon %}
@@ -125,35 +127,34 @@
 
 		<div class="logo">
 			<a href="http://www.viur.is/">
-				<img class="is7" src="{{ pathto("_static/viur.png", 1) }}" title="ViUR - Information System">
+				<img class="is7" src="{{ pathto("_static/logo-viur.svg", 1) }}" title="ViUR® - Information System">
 			</a>
-			<h3 class="is3">Information System</h3>
+			<strong class="logo-descr is3">Information System</strong>
 		</div>
 
 		<div class="topnav  no-mobil">
 			<ul class="topnavlist is2">
 				<li>
-					<a class="viur is2 is4" href="http://www.viur.is/download">
-						<h2 class="is5">Download</h2>
+					<a class="viur is2 is4" href="https://www.viur.is/download">
+						<strong class="is5 topnav-title">Download</strong>
 						<span class="is3">Win | Mac | Linux</span>
 					</a>
 				</li>
 				<li>
-					<a class="community is2 is4" href="http://www.viur.is/community">
-						<h2 class="is5">Community</h2>
-						<span class="is3">Start | Help | API</span>
+					<a class="community is2 is4" href="https://www.viur.is/community">
+						<strong class="is5 topnav-title">Community</strong>
+						<span class="is3">Share and discuss!</span>
 					</a>
 				</li>
 				<li>
-					<a class="develop is2 is4" href="http://www.viur.is/development">
-						<h2 class="is5">Development</h2>
+					<a class="develop is2 is4" href="https://www.viur.is/development">
+						<strong class="is5 topnav-title">Development</strong>
 						<span class="is3">Source Code | GIT</span>
 					</a>
 				</li>
 				<li>
 					<a class="docu is2 is4" href="index.html">
-						<h2 class="not-mobile is5">Documentation</h2>
-						<h2 class="not-desktop is5">Docs</h2>
+						<strong class="not-mobile is5 topnav-title">Documentation</strong>
 						<span class="is3">Start | Help | API</span>
 					</a>
 				</li>

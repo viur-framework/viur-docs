@@ -103,10 +103,10 @@ div.sphinxsidebar {
 
 div.sphinxsidebarwrapper {
     padding: 0;
-    margin-top: 100px;
+    margin-top: 118px;
     padding-bottom:-50px;
     display: block;
-    z-index: 100;
+    /* z-index: 100; */
     background-color: #fff;
     height: 100%;
     width: {{ theme_sidebar_width }};
@@ -957,12 +957,28 @@ header li {
     }
 
 
+logo-descr {
+    margin-top: -5px;
+    font-size: 1.2em;
+    font-weight: 300;
+    margin-left: 18px;
+    transition: all .5s ease;
+    white-space: nowrap;
+}
+
+
+
+
+
+
+
+
+
 .figure p.caption {
     margin-top: 5px;
     color: rgba(0,0,0,0.55);
     font-size: 0.9em;
 }
-
 
 
 .under-construction
@@ -976,7 +992,7 @@ header li {
 
 
 
-    
+
     .not-desktop {
         display: none;
     }
@@ -987,8 +1003,8 @@ header li {
 
 
 @media screen and (max-width: 830px) {
-    
-    
+
+
 
     img.rsb {
         width: 100%;
