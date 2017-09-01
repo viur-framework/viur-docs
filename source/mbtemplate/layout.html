@@ -1,14 +1,19 @@
 {%- extends "basic/layout.html" %}
 
-{% set css_files = css_files + ['_static/viur.css'] %}
+{% set css_files = css_files + ['_static/viur.css', '_static/viur-docs.css'] %}
 
 {%- block extrahead %}
-  {{ super() }}
-  {% if theme_touch_icon %}
-    <link rel="apple-touch-icon" href="{{ pathto('_static/' ~ theme_touch_icon, 1) }}" />
-  {% endif %}
-  <link rel="icon" href="_static/favicon.png" type="image/png"/>
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+    {{ super() }}
+
+    {% if theme_touch_icon %}
+        <link rel="apple-touch-icon" href="{{ pathto('_static/' ~ theme_touch_icon, 1) }}" />
+    {% endif %}
+
+    <link rel="icon" href="_static/favicon.png" type="image/png"/>
+    <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+    <script src="_static/viur-google-analytics.js"></script>
+    <script src="_static/viur-docs.js"></script>
 {% endblock %}
 
 {# Disable base theme's top+bottom related navs; we have our own in sidebar #}
@@ -16,112 +21,6 @@
 {%- block relbar2 %}{% endblock %}
 
 {%- block footer %}
-
-    <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-89522446-1', 'auto');
-    ga('send', 'pageview');
-    </script>
-
-    <script>
-        
-    $(document).ready(function() {
-        $('#popuplogin').click(function(e) {
-               e.stopPropagation();
-        });
-    
-            $('#hamburgericon').click(function () {
-                $(".sphinxsidebarwrapper").fadeIn(100);
-                $("#fcside").fadeIn(100);
-                $("body").css({ overflow: 'hidden' });
-            });
-            
-            $('#fcside').click(function () {
-                $("body").css({ overflow: 'inherit' });
-                $(".sphinxsidebarwrapper").fadeOut(100);
-                $("#fcside").fadeOut(100);
-            });
-            
-            $.fn.autoScoll= function(activate){
-                if ($.isNumeric(activate) || activate==true){
-                    var offset = 0
-                    if ($.isNumeric(activate)){
-                        offset = activate
-                    }
-                    $(this.selector+" a[href^='#']").click(function(event){
-                        
-                        normalscroll=true;
-                        event.preventDefault();
-                        var place = $($(this).attr('href'))
-                        if(!(place && place.offset() && place.offset().top)){
-                            return
-                        }
-                        $('html,body').clearQueue()
-                        $('html,body').stop()
-                        if(activate==true){
-                            offset =$(window).height()/2-place.parent("div").height()/2
-                        }
-                        $('html,body').animate({
-                            scrollTop: place.offset().top - offset //auf Nullinie Scrollen
-                        },1000,
-                            function(){
-                            setTimeout(function(){normalscroll=false},500);
-                            }
-                        );
-                    })
-                }
-            };
-
-            $("body").autoScoll(100);
-        });
-        
-            
-        var thescroll=0;
-        var scrolling =false;
-
-    function scrolleventhandler (e) {
-
-        if( thescroll > $(window).scrollTop()){
-            scrolldir=-1;
-        }else{
-            scrolldir=1;
-        }
-        thescroll=$(window).scrollTop();
-        wh=parseInt($("body").css("height").replace("px", ""))
-
-        if (scrolldir>0) {
-            $('.logo').addClass("is-scrolled");
-            $('.is2').addClass("is-scrolled2");
-            $('.is3').addClass("is-scrolled3");
-            $('.is4').addClass("is-scrolled4");
-            $('.is5').addClass("is-scrolled5");
-            $('.viur').addClass("is-scrolled6");
-            $('.sphinxsidebarwrapper').addClass("is-scrolled7");
-            
-        } else {
-            $('.logo').removeClass("is-scrolled");
-            $('.is2').removeClass("is-scrolled2");
-            $('.is3').removeClass("is-scrolled3");
-            $('.is4').removeClass("is-scrolled4");
-            $('.is5').removeClass("is-scrolled5");
-            $('.viur').removeClass("is-scrolled6");
-            $('.sphinxsidebarwrapper').removeClass("is-scrolled7");
-            
-        }
-
-    }
-    
-	$(window).scroll(scrolleventhandler);
-	$(window).resize(scrolleventhandler);
-    
-    </script>
-    
-    
-    
 <header class="is2">
 	<div class="binding">
 
