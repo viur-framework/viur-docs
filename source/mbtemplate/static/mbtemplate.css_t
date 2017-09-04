@@ -269,7 +269,7 @@ div.body h6 {
 .sphinxsidebarwrapper h6 {
     font-family: {{ theme_head_font_family }};
     font-weight: normal;
-    margin: 40px 25px 10px 25px;
+    margin: 50px 25px 10px 25px;
     padding: 0;
     color: #000;
 }
@@ -1068,6 +1068,6 @@ table.docutils.citation, table.docutils.citation td, table.docutils.citation th 
             font-size: 1.0em;
     }
     .sphinxsidebarwrapper.is-scrolled7 {
-        margin-top: 10px;
+        margin-top: 28px;
     }
 }
