@@ -28,7 +28,7 @@ The way described here only provides a basic stub for a fresh ViUR project to st
 
 1. Create an empty project folder of your choice in a location of your choice. Change into this location.
 
-2. Download the latest setup.py script from `<http://www.viur.is/download>`_. It can be directly obtained by the link `<http://www.viur.is/package/download/setup/latest>`_.
+2. Download the latest setup.py script from `<https://www.viur.is/download>`_. It can be directly obtained by the link `<https://www.viur.is/package/download/setup/latest>`_.
 
 3. Run ``python setup.py``. On Windows, just double-clicking the file ``setup.py`` should do the job.
 
@@ -40,13 +40,13 @@ Then, you're done! The app can now be locally run with ``dev_appserver.py .`` fr
 
 Below is an example for a few commands on a Linux terminal to setup a clean ViUR project from scratch:
 
-::
+.. code-block:: bash
 
-	mkdir hello-viur                                                      # Setup project folder
-	cd hello-viur                                                         # Change into this folder
-	wget -qO setup.py http://www.viur.is/package/download/setup/latest    # Download latest setup
-	python setup.py                                                       # Run ViUR setup tool
-	dev_appserver.py .                                                    # Start Google App Engine
+   mkdir hello-viur                                                      # Setup project folder
+   cd hello-viur                                                         # Change into this folder
+   wget -qO setup.py https://www.viur.is/package/download/setup/latest   # Download latest setup
+   python setup.py                                                       # Run ViUR setup tool
+   dev_appserver.py -A hello-viur .                                      # Start Google App Engine
 
 
 When you see a friendly "Hello World" welcoming you in your browser, your app is running!
@@ -66,8 +66,7 @@ On the first startup, ViUR creates an new admin-user named ``admin@<your-app-id>
 
 Watch out for a line like this:
 ::
-
-	ViUR created a new admin-user for you! Username: admin@myapp.appspot.com, Password: SU7juUIb1F2aZ
+   ViUR created a new admin-user for you! Username: admin@myapp.appspot.com, Password: SU7juUIb1F2aZ
 
 When the system is started in the cloud for the first time, an e-mail with this password is sent to all application administrators.
 
