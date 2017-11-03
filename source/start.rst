@@ -36,7 +36,7 @@ The way described here only provides a basic stub for a fresh ViUR project to st
 
 5. Confirm the installation when the correct folder is prompted. The setup utility then will write all necessary files and download the current server and vi.
 
-Then, you're done! The app can now be locally run with ``dev_appserver.py .`` from the terminal (Linux, Mac OS) or from the *Google App Engine Launcher* (Windows, Mac OS). By default, the app runs on port 8080 (`<http://localhost:8080>`_), or with the port provided by the *Google App Engine Launcher*.
+Then, you're done! The app can now be locally run with ``dev_appserver.py -A <your-app-id> .`` from the terminal (Linux, Mac OS) or from the *Google App Engine Launcher* (Windows, Mac OS). By default, the app runs on port 8080 (`<http://localhost:8080>`_), or with the port provided by the *Google App Engine Launcher*.
 
 Below is an example for a few commands on a Linux terminal to setup a clean ViUR project from scratch:
 

@@ -2,8 +2,13 @@
 Changelog
 ---------
 
+Version 2.1
+-----------
 
-Version 2.0.0
+The newest changelogs can be obtained from GitHub, please visit https://github.com/viur-framework/server/blob/develop/CHANGELOG.md.
+
+
+Version 2.0
 -------------
 
 
@@ -27,7 +32,7 @@ Important changes:
 
 
 
-Version 1.1.0
+Version 1.1
 -------------
 
 New:
@@ -43,7 +48,7 @@ Important fixes:
 
 
 
-Version 1.0.0
+Version 1.0
 -------------
 
 Initial public release
