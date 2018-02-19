@@ -1,23 +1,29 @@
-ViUR is an application development framework that focuses on cloud-based information systems implemented on top of the Google AppEngine™ (GAE).
+# ViUR docs
 
-ViUR is designed to enable applications which are simple, clear, flexible, extensible, versatile, high-scalable and easy-to-use. To fit the requirements of modern agile software development workflows, ViUR is entirely written in the Python programming language.
+**docs** is the source of the ViUR on-line documentation.
 
-Applications implemented in ViUR are not limited to websites or any other kind of specialized web-application. Therefore we call ViUR an information system, because it goes beyond the limitations of a content-management-system or other kinds of specialized web-application software.
+## About
 
-ViUR helps to manage any kind of information. It comes with a set of four pre-defined prototypes which can be used to build modules for any desired tasks. Pre-defined modules can easily be adapted for particular goals. New modules are simply created or extended from other ones. Data structures can be defined, extended and changed during the development workflow. Input masks and data management interfaces are dynamically created within the administration tools.
+This repository contains the Sphinx-based on-line documentation of ViUR.
 
-ViUR currently consists of three parts:
+## Contributing
 
-The server is the core of a ViUR application.
+We take a great interest in your opinion about ViUR. We appreciate your feedback and are looking forward to hear about your ideas. Share your visions or questions with us and participate in ongoing discussions.
 
-It provides the server-parts of the web-application, a library of pre-defined data-models, modules, tools and libraries for data management, and several renders for different types of output.
+- [ViUR website](https://www.viur.is)
+- [ViUR on GitHub](https://github.com/viur-framework)
+- [ViUR on Twitter](https://twitter.com/weloveViUR)
 
-The admin is the client-based administration backend used to manage a ViUR application.
+## Credits
 
-It is cross-platform capable and focuses on power-users that want to manage their applications with the full power of a desktop client computer.
+ViUR is developed and maintained by [Mausbrand Informationssysteme GmbH](https://www.mausbrand.de/en), from Dortmund in Germany. We are a software company consisting of young, enthusiastic software developers, designers and social media experts, working on exciting projects for different kinds of customers. All of our newer projects are implemented with ViUR, from tiny web-pages to huge company intranets with hundreds of users.
 
-The vi (visual interface) is the web-based administration backend.
+Help of any kind to extend and improve or enhance this project in any kind or way is always appreciated.
 
-It is an easy-to-access management tool. Written in pure HTML5, it runs system-independently in the web-browser and can be used on any desktop or mobile device.
+## License
 
-Both administration tools support the integration of application-specific plug-ins and can be used independently, depending on what is wanted and required.
+Copyright (C) 2012-2018 by Mausbrand Informationssysteme GmbH.
+
+Mausbrand and ViUR are registered trademarks of Mausbrand Informationssysteme GmbH.
+
+You may use, modify and distribute this software under the terms and conditions of the GNU Lesser General Public License (LGPL). See the file LICENSE provided within this package for more information.
