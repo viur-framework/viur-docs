@@ -67,7 +67,7 @@ To read an entity directly from the datastore, its key must be known. To do so, 
         return
 
     # change something
-    logging.info("Current age of %s is %d" % (skel["name"], skel["age"])
+    logging.info("Current age of %s is %d" % (skel["name"], skel["age"]))
     skel["age"] = 33
 
     # write entity back again
