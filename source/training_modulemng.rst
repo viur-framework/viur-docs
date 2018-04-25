@@ -37,7 +37,7 @@ The naming of the class has also two important purposes:
 
     If you reload the Vi now, you'll already see the new module showing up.
     But it isn't usable yet as it has no skeleton to work on.
-    See Basic concepts to learn how skeletons and modules interact.
+    See :doc:`basics` to learn how skeletons and modules interact.
 
 Data modification interfaces
 ----------------------------
