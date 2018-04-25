@@ -6,7 +6,7 @@ Unlike traditional `LAMP systems`_, consistency is handled differently on the `G
 for inconsistency when using ViUR on the GAE_.
 
 .. _LAMP systems: https://en.wikipedia.org/wiki/LAMP_(software_bundle)
-.. _GAE: http://appengine.google.com
+.. _GAE: https://appengine.google.com
 
 This chapter will explain the different types of inconsistency's that may appear on the GAE and ViUR. While we had never
 noticed one in the wild, you should be aware of them, know when they can appear and whats needed in case you absolutely

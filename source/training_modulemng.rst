@@ -36,7 +36,7 @@ The naming of the class has also two important purposes:
 .. Note::
 
     If you reload the Vi now, you'll already see the new module showing up.
-    But it is'nt usable yet as it has no model to work on.
+    But it isn't usable yet as it has no skeleton to work on.
     See Basic concepts to learn how skeletons and modules interact.
 
 Data modification interfaces
@@ -68,4 +68,4 @@ Usually, the standard data modification functions from above should not be overr
 Access rights
 -------------
 
-TBD
+Modules automatically provide access rights for *view*, *add*, *edit* and *delete*, which can be configured in the standard user module via the ``access`` bone for every user.

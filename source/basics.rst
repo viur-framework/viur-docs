@@ -85,7 +85,7 @@ modules/        This is the folder where the applications modules code remains.
 
                 Usually, every module is separated into one single Python file here, but it can also be split or merged, depending on the implementation.
 
-server/         This is the ViUR server as downloaded from `<http://viur.is>`_.
+server/         This is the ViUR server as downloaded from `<https://viur.is>`_.
 
                 It serves as a library for the entire application and provides all requirements for the ViUR system.
 
@@ -103,6 +103,11 @@ vi/             Contains the Vi.
 
                 Vi is an HTML5-based administration interface to access the ViUR system's modules and its data. The Vi is some kind of backend for ViUR, but it could also be the front-end of the application - this all depends on what the ViUR system implements in its particular application.
 =============   =================================================================================
+
+.. Note::
+
+   When a project is created from our `base repository <https://github.com/viur-framework/base>`_, the same structure
+   can be found in the `deploy/ <https://github.com/viur-framework/base/tree/develop/deploy>`_ folder, which is the part that is later deployed to Google App Engine.
 
 ===================
 Skeletons and bones
@@ -271,7 +276,7 @@ To connect the ``Person`` module from above with these templates, it needs to be
       def listFilter(self, filter):
          return filter # everyone can see everything!
 
-But how to call these templates now from the frontend? Requests to a ViUR application are performed by a clear and persistent format of how the resulting URLs are made up. By requesting http://hello-viur.appspot.com/person/list on a ViUR system, for example, the contents from the database are fetched by the ``Person`` module, and rendered using the listing template from above. This template then links to the URLs of the template that displays a single person entry, with additional information.
+But how to call these templates now from the frontend? Requests to a ViUR application are performed by a clear and persistent format of how the resulting URLs are made up. By requesting https://hello-viur.appspot.com/person/list on a ViUR system, for example, the contents from the database are fetched by the ``Person`` module, and rendered using the listing template from above. This template then links to the URLs of the template that displays a single person entry, with additional information.
 
 [screenshot follows]
 
@@ -294,7 +299,7 @@ You can simply attach other renders to a module by whitelisting it.
 
    Person.json = True #grant module access to json renderer also
 
-If we granted module access also for the ``json`` renderer above, the same list can also be rendered as a well-formed JSON data structure by calling  http://hello-viur.appspot.com/json/person/list. The ``json`` as the first selector in the path selects the different renderer that should be used.
+If we granted module access also for the ``json`` renderer above, the same list can also be rendered as a well-formed JSON data structure by calling https://hello-viur.appspot.com/json/person/list. The ``json`` as the first selector in the path selects the different renderer that should be used.
 
 ViUR has a build-in access control management. By default, only users with the "root" access right or corresponding module
 access rights are allowed to view or modify any data. In the module above, this default behavior is canceled by overriding

@@ -58,6 +58,13 @@ The Vi can be access at `<http://localhost:8080/vi>`_, or under your particular 
 
    The Vi after setting up a scratch project.
 
+
+.. Note::
+
+   For a professional project setup, we recommend to use our pre-configured repository, which can be found at `<https://github.com/viur-framework/base>`_.
+
+   Simply clone it and afterwards run ``clean-base.py`` to obtain a stand-alone repository which can immediately be executed and pushed elsewhere. See the README-file of the repo for further help!
+
 ---------------------------
 Logging into the new system
 ---------------------------

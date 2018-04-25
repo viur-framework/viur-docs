@@ -77,7 +77,7 @@ server.config["viur.availableLanguages"] is filled (*after* server.setup() had b
 Still lost?
 -----------
 
-Feel free to join our IRC channel #viur on freenode `<http://webchat.freenode.net?channels=viur&uio=d4>`_ and ask your
+Feel free to join our IRC channel #viur on freenode `<https://webchat.freenode.net?channels=viur&uio=d4>`_ and ask your
 project-specific questions.
 
 

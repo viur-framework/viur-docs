@@ -2,16 +2,16 @@
 Introduction
 ############
 
-`ViUR`_ is a free software development framework for the `Google App Engine™`_.
+`ViUR`_ is a free software development framework for the `Google App Engine`_ platform.
 
-It provides a clear concept for implementing agile data management software that runs on top of the Google cloud platform. It is written in the `Python™ programming language`_ for a maximum flexibility and easy-to-manage code. Its underlying database is Googles `Cloud Datastore`_, which is a scalable document database.
+It provides a clear concept for implementing agile data management software that runs on top of the Google cloud platform. It is written in `Python`_ for a maximum flexibility and easy-to-manage code. Its underlying database is `Google Cloud Datastore`_, which is a scalable document database.
 
 The framework targets to the implementation of *information systems*, which are integrated, web-based applications or services performing data management and deployment operations of any kind. Therefore, ViUR is explicitly not claimed to be a content management system, although content management can be a part of a ViUR information system.
 
-.. _ViUR: http://www.viur.is
-.. _Google App Engine™: https://cloud.google.com/appengine/docs/python/
-.. _Python™ programming language: https://www.python.org/
-.. _Cloud Datastore: https://cloud.google.com/datastore/docs/concepts/overview
+.. _ViUR: https://www.viur.is
+.. _Google App Engine: https://cloud.google.com/appengine/docs/python/
+.. _Python: https://www.python.org/
+.. _Google Cloud Datastore: https://cloud.google.com/datastore/docs/concepts/overview
 
 ================
 Why to use ViUR?
@@ -29,21 +29,21 @@ Who should use ViUR?
 
 ViUR is made for agile software development. The data model can be entirely changed during the development process without the loss of already captured information. The system can easily be extended to more, new modules, build-in functionality can be overridden, hooked and customized.
 
-The system is not only intended to be used by developers. With the use of the `Jinja template engine`_ as output renderer for HTML, ViUR is also interesting for designers. A lot of build-in functions, a clear template implementation concept and a collection of macros for data rendering and dynamic input form creation help to connect their creative visions and ideas with a powerful software development framework.
+The system is not only intended to be used by developers. With the use of `Jinja`_ as its template engine for HTML, ViUR is also interesting for designers. A lot of build-in functions, a clear template implementation concept and a collection of macros for data rendering and dynamic input form creation help to connect their creative visions and ideas with a powerful software development framework.
 
-.. _Jinja template engine: http://jinja.pocoo.org/
+.. _Jinja: http://jinja.pocoo.org/
 
 =================
 Who created ViUR?
 =================
 
-ViUR is developed and maintained by `mausbrand Informationssysteme GmbH`_, a nice company from Dortmund, Germany.
+ViUR is developed and maintained by `Mausbrand Informationssysteme GmbH`_, a nice company from Dortmund, Germany.
 
 We are a software company consisting of young, enthusiastic software developers, designers and social media experts, working on exciting projects for different kinds of customers. All of our newer projects are implemented with ViUR, from tiny web-pages to huge company extranets with hundreds of users.
 
 Help of any kind to extend, improve and enhance this project in any kind or way is always appreciated.
 
-.. _mausbrand Informationssysteme GmbH: https://www.mausbrand.de
+.. _Mausbrand Informationssysteme GmbH: https://www.mausbrand.de/en
 
 ===============================
 Where to find more information?
@@ -51,9 +51,9 @@ Where to find more information?
 
 This manual is intended to be the official documentation and reference manual for ViUR, and should be a place to start with. But don't be afraid to talk to us and our community if you have questions or encounter problems.
 
-For individual questions or help, please visit our community landing page on `viur.is/community`_. There you can find links to our Twitter account, IRC-channel or the Google Community page.
+For individual questions or help, please visit our community landing page on `viur.is/community`_. There you can find links to our Twitter account, IRC-channel or the Google Community page. We also refer to the `ViUR server wiki <https://github.com/viur-framework/server/wiki>`_ located at `GitHub <https://github.com/viur-framework>`_ for problem-oriented help.
 
 Bugs or feature requests can be submitted to the different ViUR components and their maintainers. Links and contacts can be found on `viur.is/development`_.
 
-.. _viur.is/community: http://www.viur.is/community
-.. _viur.is/development: http://www.viur.is/development
+.. _viur.is/community: https://www.viur.is/community
+.. _viur.is/development: https://www.viur.is/development
