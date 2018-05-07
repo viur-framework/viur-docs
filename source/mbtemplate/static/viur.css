@@ -909,6 +909,7 @@ ul.borderlist li:hover {
   margin-bottom: -4px;
   font-weight: 600;
   transition: all .5s ease;
+  line-height: 1.2;
 }
 .viur .topnav-title {
   color: #fff;
@@ -1459,6 +1460,7 @@ header {
 .topnav ul.topnavlist li a span {
   font-size: 0.75em;
   transition: all .5s ease;
+  line-height: 2.3;
 }
 .topnav ul.topnavlist li:first-child a {
   height: 150px;
