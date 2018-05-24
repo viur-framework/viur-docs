@@ -86,3 +86,32 @@ function scrolleventhandler (e) {
 
 jQuery(window).scroll(scrolleventhandler);
 jQuery(window).resize(scrolleventhandler);
+
+
+
+
+
+
+
+// ######################### COOKIES !!! ################################
+function setCookie(key, value) {
+	var expires = new Date();
+	expires.setTime(expires.getTime() + (30 * 24 * 60 * 60 * 1000)) //30 Tage
+	document.cookie = key + '=' + value + ';expires=' + expires.toUTCString() + ";path=/";
+}
+
+function getCookie(key) {
+	var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+	return keyValue ? keyValue[2] : null;
+}
+
+$(document).ready(function () {
+	if (!getCookie("cookies-allowed")) {
+		$(".cookie-info").addClass("is-active")
+	}
+	$(".cookie-info .js-cookieaction").on("click", function () {
+		setCookie("cookies-allowed", "yes")
+		$(".cookie-info").removeClass("is-active")
+	})
+});
+// ##########
