@@ -38,7 +38,7 @@
 	<div class="binding">
 
 		<div class="logo">
-			<a href="http://www.viur.is/">
+			<a href="https://www.viur.is/">
 				<img class="is7" src="{{ pathto("_static/logo-viur.svg", 1) }}" title="ViUR® - Information System">
 			</a>
 			<strong class="logo-descr is3">Information System</strong>
@@ -86,8 +86,8 @@
     <div class="footer">
       {% if show_copyright %}&copy; {{ copyright }}.{% endif %}
       {% if theme_show_powered_by|lower == 'true' %}
-      {% if show_copyright %}|{% endif %} <a href="http://www.viur.is/community">Impressum</a> |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx {{ sphinx_version }}</a>
+      {% if show_copyright %}|{% endif %} {#<a href="https://www.viur.is/community">Impressum</a> |#}
+      Powered by <a href="https://sphinx-doc.org/">Sphinx {{ sphinx_version }}</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster {{ alabaster_version }}</a>
       {% endif %}
       {%- if show_source and has_source and sourcename %}
@@ -122,13 +122,14 @@
     {% endif %}
 
 
-
     <div class="popup cookie-info">
         <div class="popup-box">
             <div class="popup-header">
-                <a href="javascript:undefined" class="popup-btn js-cookieaction">Einverstanden</a>Cookie-Hinweis</div>
+                <a href="javascript:undefined" class="popup-btn js-cookieaction">Got It!</a>We use cookies!</div>
             <div class="popup-content">
-                Diese Webseite benutzt Cookies und ähnliche Technologien auf seinen Webseiten. Wenn Sie weiter durch die Webseite browsen, nachdem Ihnen die Cookie-Informationen angezeigt wurden, erklären Sie sich damit einverstanden. <a href="https://cookiesandyou.com">&raquo; Mehr erfahren.</a>
+                Our website uses cookies and similar technologies on its pages.
+                You automatically confirm in case that you continue to browse through our website.
+                <a href="https://cookiesandyou.com" target="_blank">&raquo; What are cookies?</a>
             </div>
         </div>
     </div>
