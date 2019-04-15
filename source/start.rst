@@ -8,78 +8,74 @@ This part of the documentation provides a first steps guide for quickly setting 
 Prerequisites
 =============
 
-ViUR runs on top of the Google App Engine (GAE). This means, that a ViUR application needs to be deployed to the Google Cloud Platform when it is run on the internet. For the deployment as well as a local development and testing environment, Google offers the `Google App Engine SDK for Python <https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python>`_.
+ViUR runs on top of the Google App Engine (GAE) platform for the Python Standard Environment. This means, that a ViUR application has to be deployed to a project in the Google Cloud Platform when it is run on the internet.
 
-There are two ways to get the SDK run on your machine:
+Before you start your first ViUR project, make sure that at least the first of the following prerequisites are installed on your system.
 
-1. Manually download and install the SDK natively from the above location for your particular operating system. Windows, Mac OS and Linux are supported. In case that Linux is used, the particular package manager should be consulted first, maybe it already supports packages for the Google App Engine SDK for Python.
+.. note::
+    We strongly recommend to use a POSIX-like operating system like Linux or Mac OS for developing ViUR applications.
 
-  It is also required to have a working **Python 2.7** installation on your machine. This can be obtained from `python.org <https://www.python.org>`_, but may be pre-installed already when you are on Linux or Mac OS.
+    Getting ViUR to run on Microsoft Windows properly is a pain in the ass. The only well-working solution to use a Windows system for ViUR development is when the `Windows Subsystem for Linux <https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux>`_ is used - otherwise, forget about it.
 
-2. If you are familiar with Docker, we also offer several *ViUR docker recipes* to quickly set up a dedicated, Linux-based build-environment, with all prerequisites installed. To make use of these, just visit `<https://hub.docker.com/u/viur/>`_.
 
-====================
-Create a new project
-====================
+------------
+Python & pip
+------------
 
-The ways described here only provide basic stubs for a fresh ViUR project to start from.
+Since ViUR is a framework written in pure Python, it requires a Python interpreter to be installed. ViUR currently runs with Python 2.7 only, so this must be installed on your system.
 
-Setting up a new ViUR project is easy, and takes only a few steps for getting a working result. Make sure that the :ref:`Prerequisites` described above are installed so far, and Python is in your PATH.
+.. note::
+    A Python 3.7 port of ViUR is under development and will be made available as soon as we do our first experiences with the Python 3 Standard Environment on the Google App Engine.
 
------------
-Quick start
------------
+`Pip <https://pypi.org/project/pip/>`_, the Python package installer, is also a necessary feature to develop applications with ViUR.
 
-1. Create an empty project folder of your choice in a location of your choice. Change into this location.
+----------
+gcloud SDK
+----------
 
-2. Download the latest **setup.py** `here <https://www.viur.is/package/download/setup/latest>`_.
+For the deployment as well as a local development and testing environment, Google offers the `gcloud SDK for Python <https://cloud.google.com/appengine/docs/standard/python/download>`_.
 
-3. Run ``python setup.py``. On Windows, just double-clicking the file ``setup.py`` should do the job.
+Download and install the gcloud SDK natively from the above location for your platform. Mac OS, Linux and Windows are supported. In case that Linux is used, your favorite package manager should be consulted first, maybe it already supports packages for the gcloud SDK for Python.
 
-4. The setup utility determines the project name from the project directory. This should be the same name as the unique application identifier registered for the application on GAE, if deploying is wanted. Enter a project-name or confirm the default one.
+.. note::
+    Google offers its "Python Standard Environment" that ViUR is using only for Python 2.7 for now.
 
-5. Confirm the installation when the correct folder is prompted. The setup utility then will write all necessary files and download the current server and vi.
+    They are working on a Python 3 version right now, same as we do with ViUR 3. For now, we have to be
+    patient and have to use both the Python 2 Standard Environment and ViUR 2.x framework.
 
-Then, you're done! The app can now be locally run with ``dev_appserver.py -A <your-app-id> .`` from the terminal (Linux, Mac OS) or from the *Google App Engine Launcher* (Windows, Mac OS). By default, the app runs on port 8080 (`<http://localhost:8080>`_), or with the port provided by the *Google App Engine Launcher*.
+After you successfully installed the gcloud SDK, make sure that you install the following components:
 
-Below is an example for a few commands on a Linux terminal prompt to set up a clean ViUR project from scratch:
+- app-engine-python
+- app-engine-python-extras
+- cloud-datastore-emulator
+
+To install all required gcloud components, just run
 
 .. code-block:: bash
 
-   # Setup project folder
-   mkdir hello-viur
-
-   # Change into folder
-   cd hello-viur
-
-   # Download latest setup
-   wget -qO setup.py https://www.viur.is/package/download/setup/latest
-
-   # Run ViUR setup tool
-   python setup.py
-
-   # Start Google App Engine
-   dev_appserver.py -A hello-viur .
+    gcloud components install app-engine-python app-engine-python-extras cloud-datastore-emulator
 
 
-When you see a friendly "Hello World" welcoming you in your browser, your app is running!
-The Vi can be access at `<http://localhost:8080/vi>`_, or under your particular port.
+---------------------
+Further prerequisites
+---------------------
 
-.. figure:: images/start-vi.png
-   :scale: 60%
-   :alt: The Vi after setting up a scratch project.
+For a full ViUR development environment, the following components must also be installed and made available on your system:
 
-   The Vi after setting up a scratch project.
+- `PyJS <https://github.com/viur-framework/pyjs>`_ is a Python-to-Javascript compiler that we use to compile ViUR's web-based administration interface `vi <https://github.com/viur-framework/vi>`_, which is written in Python. PyJS itself is discontinued, so that we are looking for an alternative, but for now its essentially required.
+- `{less} <http://lesscss.org/>`_ is a compiler for a *better* CSS-dialect. It is also required to ViUR's web-based administration interface  **vi** but also by our design- and UI-framework `ignite <https://github.com/viur-framework/ignite>`_
+- In most cases it is required to install `npm <https://www.npmjs.com/>`_ to get {less} and build-systems like gulp to work, which is also used by **ignite**.
 
--------------------------
-Using the base repository
--------------------------
 
-For a professional project setup, we recommend to use our pre-configured base repository, which can be found at `<https://github.com/viur-framework/base>`_. This repository can be used for a ViUR project setup that imports the required ViUR modules like server and vi as submodules into the repository, so they can easily be updated to newer versions and supplied bugfixes.
+=======================
+Starting a ViUR project
+=======================
 
-Simply clone it and afterwards run ``clean-base.py`` to obtain a stand-alone repository which can immediately be executed and pushed elsewhere.
+For a professional project setup, we recommend to use our pre-configured `base repository <https://github.com/viur-framework/base>`_. This repository can be used for a ViUR project setup that imports the required ViUR modules like *server*, *vi* and *ignite* as submodules into the repository, so they can easily be upgraded to newer versions and supplied bugfixes.
 
-These are the commands to be executed on a Linux terminal prompt:
+Simply clone the base repository and afterwards run ``clean-base.py`` to obtain a stand-alone repository which can immediately be executed or pushed wherever you like.
+
+These are the commands to be executed in a shell:
 
 .. code-block:: bash
 
@@ -112,4 +108,10 @@ Watch out for a line that looks like this:
 
 When the system is started in the cloud for the first time, an e-mail with this password is sent to all application administrators.
 
-Alternatively, you can login with a simulated Google user. Both login forms are provided by the default server and can be done using the Vi.
+Alternatively, you can login with a simulated Google user. Both login forms are provided by the default server and can be done using the *Vi*.
+
+------------
+What's next?
+------------
+
+When you came to this point, you're ready to start with the :doc:`basic concepts <basics>` and do first steps in developing your project.

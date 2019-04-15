@@ -41,7 +41,7 @@ Folder structure
 
 A typical ViUR application has a clearly defined folder structure.
 
-This is the folder structure that is created by the setup.py utility as described in the :ref:`Getting started` section.
+This is the folder structure that is created by the setup.py utility as described in the :doc:`Getting started <start>` section.
 
 ::
 
@@ -186,6 +186,7 @@ Modules are the controllers of a ViUR application, and implement the application
 
 |icon_tree|         :class:`~server.prototypes.tree.Tree` is used for implementing modules that store their data in a hierarchy, but differ between nodes and children. The most common usage is the :class:`~server.modules.file.File` module, where nodes (Folders) and leafs (Files) are distinguished.
 ==================  ===============================================================================
+
 
 ViUR comes with some build-in modules for different application cases:
 
