@@ -56,6 +56,11 @@ To install all required gcloud components, just run
     gcloud components install app-engine-python app-engine-python-extras cloud-datastore-emulator
 
 
+.. figure:: images/start-gcloud-components-list.png
+   :alt: Image showing the output of 'gcloud components list'
+
+   This is how ``gcloud components list`` should look like.
+
 ---------------------
 Further prerequisites
 ---------------------
@@ -73,38 +78,67 @@ Starting a ViUR project
 
 For a professional project setup, we recommend to use our pre-configured `base repository <https://github.com/viur-framework/base>`_. This repository can be used for a ViUR project setup that imports the required ViUR modules like *server*, *vi* and *ignite* as submodules into the repository, so they can easily be upgraded to newer versions and supplied bugfixes.
 
+---------------------------
+Cloning the base repository
+---------------------------
+
 Simply clone the base repository and afterwards run ``clean-base.py`` to obtain a stand-alone repository which can immediately be executed or pushed wherever you like.
 
 These are the commands to be executed in a shell:
 
 .. code-block:: bash
 
-   # Clone base repository
+   # Clone base repository into a project folder
    git clone https://github.com/viur-framework/base.git hello-viur
 
-   # Change into folder
+   # Change into new project folder
    cd hello-viur
 
    # Run clean-base.py
-   python clean-base.py
+   ./clean-base.py
 
-   # Commit changes done
-   git commit -a
 
-   # Run development server
+.. figure:: images/start-clean-base-run.png
+   :alt: Image showing the output of the steps done to clone the ViUR base repository
+
+   Cloning and setting up the ViUR base repository for a new project.
+
+
+-------------
+First startup
+-------------
+
+When the above steps where initially performed, you can _locally_ start your application. For this case, the gcloud SDK offers the program ``dev_appserver.py``. This program can be used to emulate a Google App Engine standard environment on the local development computer and is perfectly suitable for creating the data model and basic functionality.
+
+You can either start ``dev_appserver.py`` with its particular parameters by hand, or use the script ``local_run.sh`` which is generated from the ``clean-base.py`` run above.
+
+.. code-block:: bash
+
    ./local_run.sh
 
-See the README-file of the repo for further help!
 
----------------
-The first login
----------------
+.. figure:: images/start-dev_appserver-run.png
+   :alt: Image showing the output of the steps done when starting ``dev_appserver.py``
 
-On the first startup, ViUR creates an new admin-user named ``admin@<your-app-id>.appspot.com`` with a random password within the database. This password is printed to the server debug console, where you have to copy it out.
+   First local start of the new ViUR application.
+
+When the output on your console looks like above, fire up your favorite web-browser and open `http://localhost:8080 <http://localhost:8080/>`_. You should see a warm welcome from your ViUR project!
+
+.. figure:: images/start-firstrun-frontend.png
+   :alt: Display of the generated welcome page on http://localhost:8080
+
+   Welcome to your new project!
+
+
+----------
+Logging in
+----------
+
+On the first startup, ViUR creates an new admin-user named ``admin@<your-app-id>.appspot.com`` with a random password for you. This password is printed to the server's debug console, where you have to copy it out.
 
 Watch out for a line that looks like this:
 ::
-   ViUR created a new admin-user for you! Username: admin@myapp.appspot.com, Password: SU7juUIb1F2aZ
+   ViUR created a new admin-user for you! Username: admin@hello-viur.appspot.com, Password: SU7juUIb1F2aZ
 
 When the system is started in the cloud for the first time, an e-mail with this password is sent to all application administrators.
 
