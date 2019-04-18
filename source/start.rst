@@ -15,17 +15,17 @@ Before you start your first ViUR project, make sure that at least the first of t
 .. note::
     We strongly recommend to use a POSIX-like operating system like Linux or Mac OS for developing ViUR applications.
 
-    Getting ViUR to run on Microsoft Windows properly is a pain in the ass. The only well-working solution to use a Windows system for ViUR development is when the `Windows Subsystem for Linux <https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux>`_ is used - otherwise, forget about it.
+    Getting ViUR to run properly on Microsoft Windows is a nightmare for several reasons. The only well-working solution to use a Windows system for ViUR development is when `Windows Subsystem for Linux <https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux>`_ is used - otherwise, forget about it.
 
 
 ------------
 Python & pip
 ------------
 
-Since ViUR is a framework written in pure Python, it requires a Python interpreter to be installed. ViUR currently runs with Python 2.7 only, so this must be installed on your system.
+Since ViUR is a framework written in pure Python, it requires a Python interpreter to be installed. ViUR currently only runs with Python 2.7, so this must be installed on your system.
 
 .. note::
-    A Python 3.7 port of ViUR is under development and will be made available as soon as we do our first experiences with the Python 3 Standard Environment on the Google App Engine.
+    A Python 3.7 port of ViUR is under development and will be made available as soon as we make our first experiences with the Python 3 Standard Environment on the Google App Engine.
 
 `Pip <https://pypi.org/project/pip/>`_, the Python package installer, is also a necessary feature to develop applications with ViUR.
 
@@ -35,13 +35,13 @@ gcloud SDK
 
 For the deployment as well as a local development and testing environment, Google offers the `gcloud SDK for Python <https://cloud.google.com/appengine/docs/standard/python/download>`_.
 
-Download and install the gcloud SDK natively from the above location for your platform. Mac OS, Linux and Windows are supported. In case that Linux is used, your favorite package manager should be consulted first, maybe it already supports packages for the gcloud SDK for Python.
+Download and install the gcloud SDK natively from the above location for your platform. Mac OS, Linux and Windows are supported. In case that Linux is used, your favorite package manager should be consulted first, maybe it already supports packages for the gcloud SDK.
 
 .. note::
-    Google offers its "Python Standard Environment" that ViUR is using only for Python 2.7 for now.
+    For now, Google offers its "Python Standard Environment" that ViUR is using only for Python 2.7.
 
     They are working on a Python 3 version right now, same as we do with ViUR 3. For now, we have to be
-    patient and have to use both the Python 2 Standard Environment and ViUR 2.x framework.
+    patient and need to use both the Python 2 Standard Environment and ViUR 2.x framework.
 
 After you successfully installed the gcloud SDK, make sure that you install the following components:
 
@@ -68,7 +68,7 @@ Further prerequisites
 For a full ViUR development environment, the following components must also be installed and made available on your system:
 
 - `PyJS <https://github.com/viur-framework/pyjs>`_ is a Python-to-Javascript compiler that we use to compile ViUR's web-based administration interface `vi <https://github.com/viur-framework/vi>`_, which is written in Python. PyJS itself is discontinued, so that we are looking for an alternative, but for now its essentially required.
-- `{less} <http://lesscss.org/>`_ is a compiler for a *better* CSS-dialect. It is also required to ViUR's web-based administration interface  **vi** but also by our design- and UI-framework `ignite <https://github.com/viur-framework/ignite>`_
+- `{less} <http://lesscss.org/>`_ is a compiler for a *better* CSS-dialect. It is also required to build ViUR's web-based administration interface **vi**, but also by our design- and UI-framework `ignite <https://github.com/viur-framework/ignite>`_
 - In most cases it is required to install `npm <https://www.npmjs.com/>`_ to get {less} and build-systems like gulp to work, which is also used by **ignite**.
 
 
