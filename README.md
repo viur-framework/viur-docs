@@ -8,7 +8,7 @@ This repository contains the Sphinx-based on-line documentation of ViUR.
 
 ## Contributing
 
-We take a great interest in your opinion about ViUR. We appreciate your feedback and are looking forward to hear about your ideas. Share your visions or questions with us and participate in ongoing discussions.
+We take great interest in your opinion about ViUR. We appreciate your feedback and are looking forward to hear about your ideas. Share your vision or questions with us and participate in ongoing discussions.
 
 - [ViUR website](https://www.viur.is)
 - [#ViUR on freenode IRC](https://webchat.freenode.net/?channels=viur)
