@@ -3,10 +3,10 @@
 Toplevel functions
 ==================
 
-.. autofunction:: server.setup
+.. autofunction:: viur.core.setup
 
-.. autofunction:: server.setDefaultLanguage
+.. autofunction:: viur.core.setDefaultLanguage
 
-.. autofunction:: server.setDefaultDomainLanguage
+.. autofunction:: viur.core.setDefaultDomainLanguage
 
-.. autofunction:: server.translate
+.. autofunction:: viur.core.translate

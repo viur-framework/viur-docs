@@ -25,8 +25,6 @@ Utility functions.
 
 .. autofunction:: viur.core.utils.escapeString
 
-.. autofunction:: viur.core.utils.safeStringComparison
-
 .. autofunction:: viur.core.utils.normalizeKey
 
 

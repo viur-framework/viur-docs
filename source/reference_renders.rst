@@ -5,11 +5,11 @@ renderers
 ----
 html
 ----
-.. autoclass:: server.render.html.default.Render
+.. autoclass:: viur.core.render.html.default.Render
    :members:
 
 ----
 json
 ----
-.. autoclass:: server.render.json.default.DefaultRender
+.. autoclass:: viur.core.render.json.default.DefaultRender
    :members:

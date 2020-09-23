@@ -8,22 +8,22 @@ High-level database API.
    :members:
    :special-members:
 
-.. autoclass:: server.skeleton.Skeleton
+.. autoclass:: viur.core.skeleton.Skeleton
    :show-inheritance:
    :members:
    :special-members:
 
-.. autoclass:: server.skeleton.RelSkel
+.. autoclass:: viur.core.skeleton.RelSkel
    :show-inheritance:
    :members:
    :special-members:
 
-.. autoclass:: server.skeleton.RefSkel
+.. autoclass:: viur.core.skeleton.RefSkel
    :show-inheritance:
    :members:
    :special-members:
 
-.. autoclass:: server.skeleton.SkelList
+.. autoclass:: viur.core.skeleton.SkelList
    :show-inheritance:
    :members:
    :special-members:

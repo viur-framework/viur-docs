@@ -4,40 +4,40 @@ errors
 
 Map Python exceptions to HTTP error codes.
 
-.. autoexception:: server.errors.HTTPException
+.. autoexception:: viur.core.errors.HTTPException
 
-.. autoexception:: server.errors.BadRequest
+.. autoexception:: viur.core.errors.BadRequest
 
-.. autoexception:: server.errors.Redirect
+.. autoexception:: viur.core.errors.Redirect
 
-.. autoexception:: server.errors.Unauthorized
+.. autoexception:: viur.core.errors.Unauthorized
 
-.. autoexception:: server.errors.PaymentRequired
+.. autoexception:: viur.core.errors.PaymentRequired
 
-.. autoexception:: server.errors.Forbidden
+.. autoexception:: viur.core.errors.Forbidden
 
-.. autoexception:: server.errors.NotFound
+.. autoexception:: viur.core.errors.NotFound
 
-.. autoexception:: server.errors.MethodNotAllowed
+.. autoexception:: viur.core.errors.MethodNotAllowed
 
-.. autoexception:: server.errors.NotAcceptable
+.. autoexception:: viur.core.errors.NotAcceptable
 
-.. autoexception:: server.errors.RequestTimeout
+.. autoexception:: viur.core.errors.RequestTimeout
 
-.. autoexception:: server.errors.Gone
+.. autoexception:: viur.core.errors.Gone
 
-.. autoexception:: server.errors.PreconditionFailed
+.. autoexception:: viur.core.errors.PreconditionFailed
 
-.. autoexception:: server.errors.RequestTooLarge
+.. autoexception:: viur.core.errors.RequestTooLarge
 
-.. autoexception:: server.errors.Censored
+.. autoexception:: viur.core.errors.Censored
 
-.. autoexception:: server.errors.InternalServerError
+.. autoexception:: viur.core.errors.InternalServerError
 
-.. autoexception:: server.errors.NotImplemented
+.. autoexception:: viur.core.errors.NotImplemented
 
-.. autoexception:: server.errors.BadGateway
+.. autoexception:: viur.core.errors.BadGateway
 
-.. autoexception:: server.errors.ServiceUnavailable
+.. autoexception:: viur.core.errors.ServiceUnavailable
 
-.. autoclass:: server.errors.ReadFromClientError
+.. autoclass:: viur.core.errors.ReadFromClientError
