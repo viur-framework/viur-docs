@@ -2,7 +2,7 @@
 Sessions
 --------
 
-ViUR has a built-in session management system provided by :class:`server.session`.
+ViUR has a built-in session management system provided by :class:`viur.core.session`.
 
 This allows storing information between different http-requests.
 Sessions are automatically created as needed. As the first information is stored inside the session
@@ -29,7 +29,7 @@ confidential data inside sessions.
 .. Warning::
         - For security-reasons, the session is reset if a user logs in or out.
           All data (except the language chosen) is erased. You can set "viur.session.persistentFieldsOnLogin" and
-          "viur.session.persistentFieldsOnLogout" in server.config to explicitly white-list properties that should
+          "viur.session.persistentFieldsOnLogout" in viur.core.config to explicitly white-list properties that should
           survive login/logout actions.
         - Also for security-reasons, the session-module uses two independent cookies, one for unencrypted http
           and one for a secure SSL channel. If the session is created by a request arriving via unencrypted http,

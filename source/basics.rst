@@ -113,7 +113,7 @@ vi/             Contains the Vi.
 Skeletons and bones
 ===================
 
-Skeletons are the data models of a ViUR application. They describe, how and in which ways information in the database is stored and loaded. Skeletons are derived from the class :class:`~server.skeleton.Skeleton`.
+Skeletons are the data models of a ViUR application. They describe, how and in which ways information in the database is stored and loaded. Skeletons are derived from the class :class:`~viur.core.skeleton.Skeleton`.
 
 The skeletons are made of bones. A bone is the instance of a bone class and references to a data field in the resulting data document. It performs data validity checks, serialization to and deserialization from the database and reading data from the clients.
 
@@ -129,8 +129,8 @@ The skeleton shown in the graphic above is defined in a file ``person.py`` which
    :caption: skeletons/person.py
 
    #-*- coding: utf-8 -*-
-   from server.skeleton import Skeleton
-   from server.bones import *
+   from viur.core.skeleton import Skeleton
+   from viur.core.bones import *
 
    class personSkel(Skeleton):
       name = stringBone(descr="Name")
@@ -138,18 +138,18 @@ The skeleton shown in the graphic above is defined in a file ``person.py`` which
 
 That's it. When this Skeleton is connected to a module later on, ViUR's admin tools like the Vi automatically provide an auto-generated input mask on it.
 
-A Skeleton does automatically provide the bone ``key`` also, which is an instance of the class :class:`~server.bones.bone.baseBone`. This bone holds the value of the unique entity key, that is required to uniquely identify an entity within the database. The pre-defined bones ``creationdate`` and ``changedate`` of each skeleton store the date and time when the entity was created or changed. In terms of ViUR, an entity is a document or dataset in the datastore, that stores information.
+A Skeleton does automatically provide the bone ``key`` also, which is an instance of the class :class:`~viur.core.bones.bone.baseBone`. This bone holds the value of the unique entity key, that is required to uniquely identify an entity within the database. The pre-defined bones ``creationdate`` and ``changedate`` of each skeleton store the date and time when the entity was created or changed. In terms of ViUR, an entity is a document or dataset in the datastore, that stores information.
 
 By default, ViUR provides the following base classes of bones that can be used immediately:
 
-- :class:`~server.bones.booleanBone.booleanBone` for ``bool`` values,
-- :class:`~server.bones.dateBone.dateBone` for :class:`~datetime.date`, :class:`~datetime.time` and :class:`~datetime.datetime` values,
-- :class:`~server.bones.numericBone.numericBone` for ``float`` and ``int`` values,
-- :class:`~server.bones.relationalBone.relationalBone` to store a relation to other datastore objects with a full integration into ViUR,
-- :class:`~server.bones.selectOneBone.selectOneBone` for fields that allow for a single-selection of key-value pairs,
-- :class:`~server.bones.selectMultiBone.selectMultiBone` for fields that allow for a multi-selection of key-value pairs,
-- :class:`~server.bones.stringBone.stringBone` for strings or list of strings,
-- :class:`~server.bones.textBone.textBone` for HTML-formatted content.
+- :class:`~viur.core.bones.booleanBone.booleanBone` for ``bool`` values,
+- :class:`~viur.core.bones.dateBone.dateBone` for :class:`~datetime.date`, :class:`~datetime.time` and :class:`~datetime.datetime` values,
+- :class:`~viur.core.bones.numericBone.numericBone` for ``float`` and ``int`` values,
+- :class:`~viur.core.bones.relationalBone.relationalBone` to store a relation to other datastore objects with a full integration into ViUR,
+- :class:`~viur.core.bones.selectOneBone.selectOneBone` for fields that allow for a single-selection of key-value pairs,
+- :class:`~viur.core.bones.selectMultiBone.selectMultiBone` for fields that allow for a multi-selection of key-value pairs,
+- :class:`~viur.core.bones.stringBone.stringBone` for strings or list of strings,
+- :class:`~viur.core.bones.textBone.textBone` for HTML-formatted content.
 
 This is only a list of the most commonly used bones. There are much more specialized, pre-defined bones that can be used.
 Please refer the :ref:`bones API reference <reference_bones>` for all provided classes and options.
@@ -158,7 +158,7 @@ Please refer the :ref:`bones API reference <reference_bones>` for all provided c
 Prototypes and modules
 ======================
 
-Modules are the controllers of a ViUR application, and implement the application logic. To implement modules, ViUR provides four basic prototypes. These are :class:`~server.prototypes.list.List`, :class:`~server.prototypes.singleton.Singleton`, :class:`~server.prototypes.hierarchy.Hierarchy` and :class:`~server.prototypes.tree.Tree`.
+Modules are the controllers of a ViUR application, and implement the application logic. To implement modules, ViUR provides four basic prototypes. These are :class:`~viur.core.prototypes.list.List`, :class:`~viur.core.prototypes.singleton.Singleton`, :class:`~viur.core.prototypes.hierarchy.Hierarchy` and :class:`~viur.core.prototypes.tree.Tree`.
 
 .. |icon_list| image:: images/list.svg
    :width: 45px
@@ -178,22 +178,22 @@ Modules are the controllers of a ViUR application, and implement the application
 
 .. rst-class:: icon-table
 ==================  ===============================================================================
-|icon_list|         :class:`~server.prototypes.list.List` is the most commonly used prototype. It implement a flat collection of datasets of the same kind, which can be granulated using filters to particular selections. This prototype is used in most cases, and can be seen like a database table in a relational database management system.
+|icon_list|         :class:`~viur.core.prototypes.list.List` is the most commonly used prototype. It implement a flat collection of datasets of the same kind, which can be granulated using filters to particular selections. This prototype is used in most cases, and can be seen like a database table in a relational database management system.
 
-|icon_singleton|    :class:`~server.prototypes.singleton.Singleton` is a prototype for implementing modules that hold only one single dataset entry. It can be used for modules that implement application-global settings or a per-user configuration.
+|icon_singleton|    :class:`~viur.core.prototypes.singleton.Singleton` is a prototype for implementing modules that hold only one single dataset entry. It can be used for modules that implement application-global settings or a per-user configuration.
 
-|icon_hierarchy|    :class:`~server.prototypes.hierarchy.Hierarchy` is a prototype for a module that stores its data in a hierarchical structure, where every dataset can be a child of another dataset or can have its own children.
+|icon_hierarchy|    :class:`~viur.core.prototypes.hierarchy.Hierarchy` is a prototype for a module that stores its data in a hierarchical structure, where every dataset can be a child of another dataset or can have its own children.
 
-|icon_tree|         :class:`~server.prototypes.tree.Tree` is used for implementing modules that store their data in a hierarchy, but differ between nodes and children. The most common usage is the :class:`~server.modules.file.File` module, where nodes (Folders) and leafs (Files) are distinguished.
+|icon_tree|         :class:`~viur.core.prototypes.tree.Tree` is used for implementing modules that store their data in a hierarchy, but differ between nodes and children. The most common usage is the :class:`~viur.core.modules.file.File` module, where nodes (Folders) and leafs (Files) are distinguished.
 ==================  ===============================================================================
 
 
 ViUR comes with some build-in modules for different application cases:
 
-- :class:`~server.modules.file.File` implements a file management module,
-- :class:`~server.modules.user.User` implements a user login, authentication and management module,
-- :class:`~server.modules.cart.Cart` and :class:`~server.modules.order.Order` implement modules for submitting and managing orders in a web-shop,
-- :class:`~server.modules.page.Page` implements a simple content management module.
+- :class:`~viur.core.modules.file.File` implements a file management module,
+- :class:`~viur.core.modules.user.User` implements a user login, authentication and management module,
+- :class:`~viur.core.modules.cart.Cart` and :class:`~viur.core.modules.order.Order` implement modules for submitting and managing orders in a web-shop,
+- :class:`~viur.core.modules.page.Page` implements a simple content management module.
 
 By subclassing these modules, custom modifications and extensions can be implemented for any use-case. In most cases, applications make use of custom modules which base on one of the prototypes as described above.
 
@@ -203,7 +203,7 @@ To connect the Skeleton ``personSkel`` defined above with a module implementing 
    :caption: modules/person.py
 
    #-*- coding: utf-8 -*-
-   from server.prototypes import List
+   from viur.core.prototypes import List
 
    class Person(List):
       pass
@@ -268,7 +268,7 @@ To connect the ``Person`` module from above with these templates, it needs to be
    :caption: modules/person.py
 
    #-*- coding: utf-8 -*-
-   from server.prototypes import List
+   from viur.core.prototypes import List
 
    class Person(List):
       viewTemplate = "person_view" # Name of the template to view one entry
@@ -281,7 +281,7 @@ But how to call these templates now from the frontend? Requests to a ViUR applic
 
 [screenshot follows]
 
-So what happens here? By calling ``/person/list`` on the server, ViUR first selects the module ``person`` (all in lower-case order) from its imported modules and then calls the function :meth:`~server.prototypes.list.List.list`, which is a build-in function of the :class:`~server.prototypes.list.List` module prototype. Because no explicit renderer was specified, the HTML-renderer ``jinja2`` is automatically selected, and renders the template specified by the ``listTemplate`` attribute assigned within the module. Same as with the viewing  function for a single entry: ViUR first selects the ``person`` module and then calls the build-in function :meth:`~server.prototypes.list.List.view`. The :meth:`~server.prototypes.list.List.view` function has one required parameter, which is the unique entity key of the entry requested.
+So what happens here? By calling ``/person/list`` on the server, ViUR first selects the module ``person`` (all in lower-case order) from its imported modules and then calls the function :meth:`~viur.core.prototypes.list.List.list`, which is a build-in function of the :class:`~viur.core.prototypes.list.List` module prototype. Because no explicit renderer was specified, the HTML-renderer ``jinja2`` is automatically selected, and renders the template specified by the ``listTemplate`` attribute assigned within the module. Same as with the viewing  function for a single entry: ViUR first selects the ``person`` module and then calls the build-in function :meth:`~viur.core.prototypes.list.List.view`. The :meth:`~viur.core.prototypes.list.List.view` function has one required parameter, which is the unique entity key of the entry requested.
 
 You can simply attach other renders to a module by whitelisting it.
 
@@ -289,7 +289,7 @@ You can simply attach other renders to a module by whitelisting it.
    :caption: modules/person.py
 
    #-*- coding: utf-8 -*-
-   from server.prototypes import List
+   from viur.core.prototypes import List
 
    class Person(List):
       viewTemplate = "person_view" # Name of the template to view one entry
@@ -304,8 +304,8 @@ If we granted module access also for the ``json`` renderer above, the same list 
 
 ViUR has a build-in access control management. By default, only users with the "root" access right or corresponding module
 access rights are allowed to view or modify any data. In the module above, this default behavior is canceled by overriding
-the function :meth:`~server.prototypes.list.List.listFilter`.
-It returns a database filter for :meth:`~server.prototypes.list.List.list` function.
+the function :meth:`~viur.core.prototypes.list.List.listFilter`.
+It returns a database filter for :meth:`~viur.core.prototypes.list.List.list` function.
 If None is returned, access is denied completely. Otherwhise ViUR will only list entries matching that filter.
 As we just return the incoming filter object, information of this module can be seen by everyone.
 Any other operations, like creating, editing or deleting entries, is still only granted to users with corresponding access rights.

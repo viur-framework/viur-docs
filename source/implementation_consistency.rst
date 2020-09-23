@@ -40,7 +40,7 @@ seen as a ''red`` one.
 In fact, it's possible that a db query by color returns results with entries of a different color,
 if that entries' color has recently been changed.
 As the datastore usually applies these changes in less than a second, this is very unlikely to happen,
-but it's possible. You can configure ViURs db-caching by setting :py:data:`server.config.conf['viur.db.caching']`.
+but it's possible. You can configure ViURs db-caching by setting :py:data:`viur.core.config.conf['viur.db.caching']`.
 A value of '2' (the default) means cache as much as possible, where it's possible for this inconsistency to appear
 under rare circumstances. '1' means less aggressive cache, where queries aren't served from Memcache, so that this
 inconsistency cannot happen. Setting this value to '0' means no caching at all (not recommend).

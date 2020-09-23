@@ -3,7 +3,7 @@ securitykey
 ===========
 One-time and CSRF tokens.
 
-.. automodule:: server.securitykey
+.. automodule:: viur.core.securitykey
     :members:
 
 
@@ -13,21 +13,21 @@ utils
 =====
 Utility functions.
 
-.. autofunction:: server.utils.generateRandomString
+.. autofunction:: viur.core.utils.generateRandomString
 
-.. autofunction:: server.utils.sendEMail
+.. autofunction:: viur.core.utils.sendEMail
 
-.. autofunction:: server.utils.sendEMailToAdmins
+.. autofunction:: viur.core.utils.sendEMailToAdmins
 
-.. autofunction:: server.utils.getCurrentUser
+.. autofunction:: viur.core.utils.getCurrentUser
 
-.. autofunction:: server.utils.markFileForDeletion
+.. autofunction:: viur.core.utils.markFileForDeletion
 
-.. autofunction:: server.utils.escapeString
+.. autofunction:: viur.core.utils.escapeString
 
-.. autofunction:: server.utils.safeStringComparison
+.. autofunction:: viur.core.utils.safeStringComparison
 
-.. autofunction:: server.utils.normalizeKey
+.. autofunction:: viur.core.utils.normalizeKey
 
 
 =======
@@ -35,6 +35,6 @@ indexes
 =======
 An efficient index manager.
 
-.. autoclass:: server.indexes.IndexMannager
+.. autoclass:: viur.core.indexes.IndexMannager
     :members: __init__, keyFromQuery, cursorForQuery, getPages, refreshIndex
 

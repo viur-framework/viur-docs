@@ -5,30 +5,30 @@ prototypes
 -----
 Basic
 -----
-.. autoclass:: server.prototypes.basic.BasicApplication
+.. autoclass:: viur.core.prototypes.basic.BasicApplication
    :members:
 
 ---------
 Hierarchy
 ---------
-.. autoclass:: server.prototypes.hierarchy.Hierarchy
+.. autoclass:: viur.core.prototypes.hierarchy.Hierarchy
    :members:
 
 ----
 List
 ----
-.. autoclass:: server.prototypes.list.List
+.. autoclass:: viur.core.prototypes.list.List
    :members:
 
 ---------
 Singleton
 ---------
-.. autoclass:: server.prototypes.singleton.Singleton
+.. autoclass:: viur.core.prototypes.singleton.Singleton
    :members:
 
 ----
 Tree
 ----
-.. autoclass:: server.prototypes.tree.Tree
+.. autoclass:: viur.core.prototypes.tree.Tree
    :members:
 

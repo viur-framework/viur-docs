@@ -2,7 +2,7 @@
 Data management
 ---------------
 
-As described previously, data models in ViUR are represented by inherited classes of :class:`~server.skeleton.Skeleton`, which are extended to bones. The bones provide a higher abstraction layer of the data values stored in the database. This part of the training guide should introduce to the Skeletons API and how to use these data models without the modules logic. This is sometimes necessary and later integrates into the ways on how data entities are handled inside the modules.
+As described previously, data models in ViUR are represented by inherited classes of :class:`~viur.core.skeleton.Skeleton`, which are extended to bones. The bones provide a higher abstraction layer of the data values stored in the database. This part of the training guide should introduce to the Skeletons API and how to use these data models without the modules logic. This is sometimes necessary and later integrates into the ways on how data entities are handled inside the modules.
 
 ViUR uses the Google Datastore as the underlying database. Google Datastore is a document-oriented, scalable, transactional "NoSQL"-database. Entities are stored schema-less, and are only specified by a data kind name and a unique key, which can also be calculated with an individual encoding. This key is also the unique property used throughout the entire ViUR system to identify and reference individual data objects uniquely.
 
@@ -54,9 +54,9 @@ To add a data entity with the above skeleton, it first needs to be instantiated.
     myKey = skel["key"]
     logging.info("Entity stored as %s" % str(myKey))
 
-For storing an entity to the database, the function :meth:`~server.skeleton.Skeleton.toDB` is used. If a skeleton was not previously filled with data from the datastore using :meth:`~server.skeleton.Skeleton.fromDB`, a new key is automatically assigned.
+For storing an entity to the database, the function :meth:`~viur.core.skeleton.Skeleton.toDB` is used. If a skeleton was not previously filled with data from the datastore using :meth:`~viur.core.skeleton.Skeleton.fromDB`, a new key is automatically assigned.
 
-To read an entity directly from the datastore, its key must be known. To do so, the function :meth:`~server.skeleton.Skeleton.fromDB` is used. The following code snippet loads the previously stored entity again, changes the age, and stores it back to the datastore.
+To read an entity directly from the datastore, its key must be known. To do so, the function :meth:`~viur.core.skeleton.Skeleton.fromDB` is used. The following code snippet loads the previously stored entity again, changes the age, and stores it back to the datastore.
 
 .. code-block:: python
 
@@ -73,7 +73,7 @@ To read an entity directly from the datastore, its key must be known. To do so, 
     # write entity back again
     skel.toDB()
 
-That's it. To delete an entity, just :meth:`~server.skeleton.Skeleton.delete` needs to be called on a previously fetched skeleton, and it'll be removed permanently.
+That's it. To delete an entity, just :meth:`~viur.core.skeleton.Skeleton.delete` needs to be called on a previously fetched skeleton, and it'll be removed permanently.
 
 .. code-block:: python
 
@@ -82,9 +82,9 @@ That's it. To delete an entity, just :meth:`~server.skeleton.Skeleton.delete` ne
 
 The functions used so far:
 
-- :meth:`server.skeleton.Skeleton.toDB` saves an entity to the datastore,
-- :meth:`server.skeleton.Skeleton.fromDB` reads an entity from the datastore,
-- :meth:`server.skeleton.Skeleton.delete` deletes the entity from the datastore.
+- :meth:`viur.core.skeleton.Skeleton.toDB` saves an entity to the datastore,
+- :meth:`viur.core.skeleton.Skeleton.fromDB` reads an entity from the datastore,
+- :meth:`viur.core.skeleton.Skeleton.delete` deletes the entity from the datastore.
 
 
 Queries and cursors
@@ -101,7 +101,7 @@ To make bones usable within a query, the ``indexed`` attribute of the particular
       name = stringBone(descr="Name", required=True, indexed=True)
       age = numericBone(descr="Age", indexed=True)
 
-A query can be created from a skeleton using the :meth:`~server.skeleton.Skeleton.all` function. This default query is a selection of all entities of the given skeleton. To granulate the result of this default query, the function :meth:`~server.db.Query.filter` is used. It provides ways to also filter not on equality, but also on greater or lower conditions.
+A query can be created from a skeleton using the :meth:`~viur.core.skeleton.Skeleton.all` function. This default query is a selection of all entities of the given skeleton. To granulate the result of this default query, the function :meth:`~viur.core.db.Query.filter` is used. It provides ways to also filter not on equality, but also on greater or lower conditions.
 
 .. code-block:: python
 
@@ -131,7 +131,7 @@ Doing so in the following snippet:
     for skel in query.fetch():
         logging.info("%s is %d years old" % (skel["name"].value, skel["age"].value))
 
-When executed, this yields in the following index definition in the ``index.yaml`` file. The function :meth:`~server.db.Query.order`, that was used above, allows to add an ordering on one ore multiple attributes to a query.
+When executed, this yields in the following index definition in the ``index.yaml`` file. The function :meth:`~viur.core.db.Query.order`, that was used above, allows to add an ordering on one ore multiple attributes to a query.
 
 ::
 
@@ -148,7 +148,7 @@ Cursors
 
 In web applications, queries underlie some restrictions, which are technically not a problem, but may cause timeout problems on HTTP requests. Therefore, the use of cursors is required, and queries sometimes need to be split in deferred tasks or requested asynchronously to decrease request latency. ViUR limits its maximum request limit for dataset fetches to a maximum of 99 entities. 30 entities is the default, if no other limitation was explicitly given. This means, that not more than entities than at least 99 can be fetched per query. The query can be continued later on using a cursor.
 
-To obtain a cursor, the :meth:`~server.db.Query.getCursor` function returns a proper cursor object. This can be set to the same query (means: having the same filtering and ordering) using the function :meth:`~server.db.Query.cursor`.
+To obtain a cursor, the :meth:`~viur.core.db.Query.getCursor` function returns a proper cursor object. This can be set to the same query (means: having the same filtering and ordering) using the function :meth:`~viur.core.db.Query.cursor`.
 
 The following piece of code is an example for a function that works exactly on this mechanism. It is a deferred version of the querying example from above. This function runs, once initiated, on the server-side and fetches all entities of the persons available in the database.
 
@@ -169,20 +169,20 @@ The following piece of code is an example for a function that works exactly on t
 
 Important functions used for querying:
 
-- :meth:`server.skeleton.Skeleton.all` returns a query to all entities of the skeleton's data kind,
-- :meth:`server.db.Query.filter` sets a filtering to one attribute to a query,
-- :meth:`server.db.Query.order` sets an ordering to one or multiple attributes within a query,
-- :meth:`server.db.Query.cursor` sets a cursor on a query,
-- :meth:`server.db.Query.mergeExternalFilter` can be used as a safer alternative to apply multiple filters with an ordering from a dict with just one function call,
-- :meth:`server.db.Query.getCursor` returns the next cursor of a query.
+- :meth:`viur.core.skeleton.Skeleton.all` returns a query to all entities of the skeleton's data kind,
+- :meth:`viur.core.db.Query.filter` sets a filtering to one attribute to a query,
+- :meth:`viur.core.db.Query.order` sets an ordering to one or multiple attributes within a query,
+- :meth:`viur.core.db.Query.cursor` sets a cursor on a query,
+- :meth:`viur.core.db.Query.mergeExternalFilter` can be used as a safer alternative to apply multiple filters with an ordering from a dict with just one function call,
+- :meth:`viur.core.db.Query.getCursor` returns the next cursor of a query.
 
 
 Relations
 ---------
 
-In ViUR, the :class:`~server.bones.relationalBone.relationalBone` is the usual way to create relations between data entities.
+In ViUR, the :class:`~viur.core.bones.relationalBone.relationalBone` is the usual way to create relations between data entities.
 
-The :class:`~server.bones.relationalBone.relationalBone` is used to construct 1:1 or 1:N relations between entities directly, with an automatic module integration included into the admin tools. It is also possible to store additional data with each relation directly within the relation, so no extra allocation entity is required to store this information.
+The :class:`~viur.core.bones.relationalBone.relationalBone` is used to construct 1:1 or 1:N relations between entities directly, with an automatic module integration included into the admin tools. It is also possible to store additional data with each relation directly within the relation, so no extra allocation entity is required to store this information.
 
 .. figure:: images/training-dm-relations.png
    :scale: 80%
@@ -200,7 +200,7 @@ Let's connect the persons to companies. The figure above shows a classic 1:N rel
 
 To administrate companies also with ViUR, a new module-stub needs to be created.
 
-Then, the entity kind is connected to the person using a :class:`~server.bones.relationalBone.relationalBone`.
+Then, the entity kind is connected to the person using a :class:`~viur.core.bones.relationalBone.relationalBone`.
 
 .. code-block:: python
    :caption: skeletons/person.py

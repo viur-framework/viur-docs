@@ -3,7 +3,7 @@ skeleton
 ========
 High-level database API.
 
-.. autoclass:: server.skeleton.BaseSkeleton
+.. autoclass:: viur.core.skeleton.BaseSkeleton
    :show-inheritance:
    :members:
    :special-members:

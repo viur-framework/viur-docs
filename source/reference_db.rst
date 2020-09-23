@@ -4,26 +4,26 @@ db
 ==
 Low-level database API and data query layer.
 
-.. autofunction:: server.db.Delete
+.. autofunction:: viur.core.db.Delete
 
-.. autofunction:: server.db.DeleteAsync
+.. autofunction:: viur.core.db.DeleteAsync
 
-.. autoclass:: server.db.Entity
+.. autoclass:: viur.core.db.Entity
    :show-inheritance:
    :members:
    :special-members:
 
-.. autofunction:: server.db.Get
+.. autofunction:: viur.core.db.Get
 
-.. autofunction:: server.db.GetAsync
+.. autofunction:: viur.core.db.GetAsync
 
-.. autofunction:: server.db.GetOrInsert
+.. autofunction:: viur.core.db.GetOrInsert
 
-.. autofunction:: server.db.Put
+.. autofunction:: viur.core.db.Put
 
-.. autofunction:: server.db.PutAsync
+.. autofunction:: viur.core.db.PutAsync
 
-.. autoclass:: server.db.Query
+.. autoclass:: viur.core.db.Query
    :show-inheritance:
    :members:
    :special-members:
